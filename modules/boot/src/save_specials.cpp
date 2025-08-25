@@ -31,34 +31,6 @@ fopAc_ac_c* find_actor(predicate_t const& predicate) {
     return actorData;
 }
 
-fopAc_ac_c* find_actor_idx(predicate_t const& predicate, u32 idx) {
-    if (predicate == nullptr) {
-        return nullptr;
-    }
-
-    u32 n = 0;
-
-    node_class* node = g_fopAcTg_Queue.mpHead;
-    fopAc_ac_c* actorData = NULL;
-    for (int i = 0; i < g_fopAcTg_Queue.mSize; i++) {
-        if (node != NULL) {
-            create_tag_class* tag = (create_tag_class*)node;
-            fopAc_ac_c* tmpData = (fopAc_ac_c*)tag->mpTagData;
-            if (predicate(*tmpData)) {
-                if (n >= idx) {
-                    actorData = tmpData;
-                    break;
-                }
-                else {
-                    n++;
-                }
-            }
-            node = node->mpNextNode;
-        }
-    }
-    return actorData;
-}
-
 #if defined(WII_NTSCU_10) || defined(WII_PAL)
 #define ROCK_ID 763
 #else
@@ -137,10 +109,10 @@ KEEP_FUNC void SaveMngSpecial_SpawnPGS() {
 
     // Find hugo in the actor list
     fopAc_ac_c* actorData1 =
-        find_actor([](auto& act) { return act.mBase.mProcName == BUBBLE_ACTOR_ID; });
+        find_actor([](auto& act) { return act.mBase.mProcName == BUBBLE_ACTOR_ID && act.current.pos.x == -1425; });
 
     fopAc_ac_c* actorData2 =
-        find_actor_idx([](auto& act) { return act.mBase.mProcName == BUBBLE_ACTOR_ID; }, 1);
+        find_actor([](auto& act) { return act.mBase.mProcName == BUBBLE_ACTOR_ID && act.current.pos.x == -1225; });
         
     if (actorData1 != NULL) {
         actorData1->current.pos = position1;
@@ -225,7 +197,7 @@ KEEP_FUNC void SaveMngSpecial_Darkhammer() {
 
 KEEP_FUNC void SaveMngSpecial_Morpheel() {
     dComIfGp_getPlayer()->mEquipItem = HOOKSHOT;                        // clawshot
-    dComIfGp_getPlayer()->onNoResetFlg0(daPy_py_c::EQUIP_HEAVY_BOOTS);  // ib
+    dComIfGp_getPlayer()->onNoResetFlg0(daPy_py_c::FLG0_EQUIP_HVY_BOOTS);  // ib
     gSaveManager.setSaveAngle(10754);
     gSaveManager.setSavePosition(-1193.0f, -23999.0f, -770.0f);
     gSaveManager.setLinkInfo();
