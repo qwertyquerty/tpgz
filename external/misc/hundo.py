@@ -106,6 +106,7 @@ def main(args=None):
         "iza_2",
         "hv_archery",
         "cits_1",
+        "city_gate_clip",
         "aeralfos_skip",
         "cits_2",
         "cits_poe_cycle",
@@ -271,6 +272,12 @@ def main(args=None):
             'target': (5309.32373, 160.1, -3581.83423)
         },
         'counter': 30
+    })
+
+    update_entry('city_gate_clip', data = {
+        'requirements': Requirements.POS | Requirements.CAM,
+        'pos': (16516.6094, 0, -12722.480),
+        'angle': 16384
     })
 
     file = open("hundo.bin", "wb")

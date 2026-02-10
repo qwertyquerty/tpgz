@@ -41,7 +41,7 @@ file_names = [
     "mdh", 
     "camp",
     "ag", 
-    "poe_gate_skip", 
+    "poe_gate_clip", 
     "deathsword", 
     "stallord", 
     "faron_boost", 
@@ -49,6 +49,7 @@ file_names = [
     "dot_skip", 
     "silver_rupee", 
     "city1", 
+    "city_gate_clip",
     "aeralfos", 
     "city2",
     "fan_tower",
@@ -123,12 +124,10 @@ ad_p[24]["pos"] = (-1193.0, -23999.00, -770.0)
 ad_p[24]["angle"] = 10754
 ad_p[24]["counter"] = 20
 
-# poe gate skip
-ad_p[28]["requirements"] = REQ_POS | REQ_CAM
-ad_p[28]["pos"] = (-749.9980, 50.0000, -3265.0000)
-ad_p[28]["angle"] = 16384
-ad_p[28]["cam"]["pos"] = (-549.9980, 200.0000, -3265.0000)
-ad_p[28]["cam"]["target"] = (-749.9980, 50.0000, -3265.0000)
+# poe gate clip
+ad_p[28]["requirements"] = REQ_POS
+ad_p[28]["pos"] = (10.0035, -19.5500, -600.5942)
+ad_p[28]["angle"] = 32768
 ad_p[28]["counter"] = 10
 
 # dot skip
@@ -138,6 +137,11 @@ ad_p[33]["cam"]["pos"] = 1396.36316, 9.51973343, -719.644531
 ad_p[33]["angle"] = 33673
 ad_p[33]["pos"] = 1361.68408, -143.56076, -1089.4801
 
+# city gate clip
+ad_p[36]["requirements"] = REQ_POS
+ad_p[36]["pos"] = (16516.6094, 0, -12722.480)
+ad_p[36]["angle"] = 16384
+ad_p[36]["counter"] = 10
 
 file = open("ad.bin", "wb")
 

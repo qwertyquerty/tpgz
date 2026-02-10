@@ -72,6 +72,7 @@ KEEP_FUNC HundoSavesMenu::HundoSavesMenu(Cursor& cursor)
           {"iza 2", HND_IZA2_INDEX, "Iza River Ride minigame"},
           {"hugo archery", HND_ARCHERY_INDEX, "Archery in Hidden Village"},
           {"city 1", HND_CITY_1_INDEX, "The 1st City in the Sky segment"},
+          {"city gate clip", HND_CGC_INDEX, "Clipping through the city gate before Aeralfos"},
           {"aeralfos skip", HND_AERALFOS_INDEX, "the city in the sky miniboss"},
           {"city 2", HND_CITY_2_INDEX, "The 2nd City in the Sky segment"},
           {"early poe cycle", HND_POE_CYCLE_INDEX, "City early poe cycle segment"},

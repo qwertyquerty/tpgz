@@ -51,6 +51,7 @@ file_names = [
     "plumm_oob",
     "elh",
     "lakebed_1",
+    "wormhole",
     "deku_toad",
     "lakebed_bk_skip",
     "morpheel",
@@ -68,8 +69,7 @@ file_names = [
     "fence_clip",
     "camp",
     "ag",
-    "poe_gate_skip",
-    "pgs_ebmb",
+    "poe_gate_clip",
     "ag_early_bk",
     "ag_tss",
     "death_sword_skip",
@@ -84,6 +84,7 @@ file_names = [
     "cits_1",
     "arg_cs_skip",
     "city_east_wing",
+    "city_gate_clip",
     "aeralfos_skip",
     "cits_2",
     "city_bk_clip",
@@ -351,23 +352,11 @@ update_entry("rope_skip", {
     'angle': 33276,
 })
 
-# poe gate skip
-update_entry('poe_gate_skip', data = {
+# poe gate clip
+update_entry('poe_gate_clip', data = {
     'requirements': Requirements.POS | Requirements.CAM,
-    'pos': (0, -19.55, -600),
+    'pos': (10.0035, -19.5500, -600.5942),
     'angle': 32768
-})
-
-# poe gate skip ending blow moon boots
-update_entry('pgs_ebmb', data = {
-    'requirements': Requirements.POS | Requirements.CAM,
-    'pos': (-749.9980, 50.0000, -3265.0000),
-    'angle': 16384,
-    'cam': {
-        'pos': (-549.9980, 200.0000, -3265.0000), 
-        'target': (-749.9980, 50.0000, -3265.0000)
-    },
-    'counter': 10,
 })
 
 # triple stalfos skip
@@ -442,6 +431,12 @@ update_entry("cits_1", {
 update_entry('city_east_wing', data = {
     'requirements': Requirements.POS,
     'pos': (10650.8516, 0, -12425),
+    'angle': 16384
+})
+
+update_entry('city_gate_clip', data = {
+    'requirements': Requirements.POS | Requirements.CAM,
+    'pos': (16516.6094, 0, -12722.480),
     'angle': 16384
 })
 

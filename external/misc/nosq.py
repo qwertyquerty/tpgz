@@ -62,6 +62,7 @@ def main(args=None):
         "escort",
         "pillar_clip",
         "lakebed",
+        "wormhole",
         #"deku_toad",
         "lakebed_bk_skip",
         "morpheel",
@@ -71,11 +72,12 @@ def main(args=None):
         "spr",
         #"camp",
         "ag",
-        "poe_gate_skip",
+        "poe_gate_clip",
         "death_sword",
         "stallord",
         #"cits_early",
         "cits_1",
+        "city_gate_clip",
         "aeralfos_skip",
         "cits_2",
         #"fan_tower",
@@ -212,13 +214,11 @@ def main(args=None):
         '10754': 20
     })
 
-    # poe gate skip
-    update_entry('poe_gate_skip', data = {
+    # poe gate clip
+    update_entry('poe_gate_clip', data = {
         'requirements': Requirements.POS | Requirements.CAM,
-        'pos': (-749.9980, 50.0000, -3265.0000),
-        'angle': 16384,
-        'cam': {'pos': (-549.9980, 200.0000, -3265.0000), 'target': (-749.9980, 50.0000, -3265.0000)},
-        'counter': 10,
+        'pos': (10.0035, -19.5500, -600.5942),
+        'angle': 32768
     })
 
     # city 1
@@ -231,6 +231,13 @@ def main(args=None):
             'target': (1313.54285, -234.203003, 5545.16846)
         },
         'counter': 10
+    })
+
+
+    update_entry('city_gate_clip', data = {
+        'requirements': Requirements.POS | Requirements.CAM,
+        'pos': (16516.6094, 0, -12722.480),
+        'angle': 16384
     })
 
     file = open("nosq.bin", "wb")

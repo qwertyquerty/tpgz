@@ -100,33 +100,6 @@ KEEP_FUNC void SaveMngSpecial_SpawnHugo() {
 #define BUBBLE_ACTOR_ID 491
 #endif
 
-KEEP_FUNC void SaveMngSpecial_SpawnPGS() {
-    dComIfGs_setLife(2); // half heart
-    gSaveManager.setSaveAngle(16384);
-    gSaveManager.setSavePosition(-749.9980, 50.0, -3265.0000);
-    gSaveManager.setLinkInfo();
-
-    cXyz position1(-277.2082, 500.0000, -3598.5154);
-    cXyz position2(-277.2082, 500.0000, -3698.5154);
-
-    // Find bubble in the actor list
-    fopAc_ac_c* actorData1 =
-        find_actor([](auto& act) { return act.mBase.mProcName == BUBBLE_ACTOR_ID && act.current.pos.x == -1425; });
-
-    fopAc_ac_c* actorData2 =
-        find_actor([](auto& act) { return act.mBase.mProcName == BUBBLE_ACTOR_ID && act.current.pos.x == -1225; });
-        
-    if (actorData1 != NULL) {
-        actorData1->current.pos = position1;
-        actorData1->shape_angle.y = 0;
-    }
-
-    if (actorData2 != NULL) {
-        actorData2->current.pos = position2;
-        actorData2->shape_angle.y = 0;
-    }
-}
-
 KEEP_FUNC void SaveMngSpecial_PurpleMist() {
     gSaveManager.injectDefault_during();
     dComIfGs_setTransformStatus(STATUS_HUMAN);

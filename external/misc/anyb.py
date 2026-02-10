@@ -44,13 +44,14 @@ file_names = [
     "mdh_bridge",
     "camp",
     "ag",
-    "poe_gate_skip",
+    "poe_gate_clip",
     "death_sword_skip",
     "stallord",
     "stallord",
     "silver_rupee",
     "cits_early",
     "cits_1",
+    "city_gate_clip",
     "aeralfos_skip",
     "fan_tower",
     "argorok",
@@ -180,13 +181,18 @@ update_entry('onebomb', data = {
     'counter': 20,
 })
 
-# poe gate skip
-update_entry('poe_gate_skip', data = {
+# poe gate clip
+update_entry('poe_gate_clip', data = {
     'requirements': Requirements.POS | Requirements.CAM,
-    'pos': (-749.9980, 50.0000, -3265.0000),
-    'angle': 16384,
-    'cam': {'pos': (-549.9980, 200.0000, -3265.0000), 'target': (-749.9980, 50.0000, -3265.0000)},
-    'counter': 10,
+    'pos': (10.0035, -19.5500, -600.5942),
+    'angle': 32768
+})
+
+
+update_entry('city_gate_clip', data = {
+    'requirements': Requirements.POS | Requirements.CAM,
+    'pos': (16516.6094, 0, -12722.480),
+    'angle': 16384
 })
 
 file = open("any_bite.bin", "wb")
