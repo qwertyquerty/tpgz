@@ -81,6 +81,7 @@ add_compile_options(-fdiagnostics-color=always -fvisibility=hidden)
 include(cmake/tp_c.cmake)
 include(cmake/gcn_c.cmake)
 include(cmake/${PLATFORM}_${REGION}.cmake)
+include(cmake/save_metadata.cmake)
 
 # Load the REL Loader code and parse it
 file(READ "res/bin/${PLATFORM}_${REGION}.bin" TPGZ_LOADER_BIN HEX)
@@ -109,7 +110,7 @@ foreach(rel_tgt ${TPGZ_RELS})
 endforeach()
 
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${TPGZ_CFG_BLD_ISO}
-    DEPENDS tpgz modules ${TPGZ_PATCHER_EXE} ${CMAKE_CURRENT_SOURCE_DIR}/res ${CMAKE_CURRENT_SOURCE_DIR}/isos/${TPGZ_ISO_FILE}.iso  ${CMAKE_CURRENT_BINARY_DIR}/patch.asm ${CMAKE_CURRENT_BINARY_DIR}/RomHack.toml ${TPGZ_REL_FILES}
+    DEPENDS tpgz modules ${TPGZ_PATCHER_EXE} ${CMAKE_CURRENT_SOURCE_DIR}/res ${CMAKE_CURRENT_SOURCE_DIR}/isos/${TPGZ_ISO_FILE}.iso  ${CMAKE_CURRENT_BINARY_DIR}/patch.asm ${CMAKE_CURRENT_BINARY_DIR}/RomHack.toml ${TPGZ_REL_FILES} ${TPGZ_SAVE_META_FILES}
     COMMAND ${TPGZ_PATCHER_EXE} build)
 
 string(REPLACE ".iso" ".patch" TPGZ_CFG_BLD_PATCH_OLD ${TPGZ_CFG_BLD_ISO})
@@ -118,7 +119,7 @@ string(TOLOWER ${REGION} tpgz_region_lower)
 string(REPLACE "_" "-" tpgz_region_lower ${tpgz_region_lower})
 set(TPGZ_CFG_BLD_PATCH tpgz-${tpgz_platform_lower}-${tpgz_region_lower}-${TPGZ_BUILD_VERSION}.patch)
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${TPGZ_CFG_BLD_PATCH}
-    DEPENDS tpgz modules ${TPGZ_PATCHER_EXE} ${CMAKE_CURRENT_SOURCE_DIR}/res ${CMAKE_CURRENT_BINARY_DIR}/patch.asm ${CMAKE_CURRENT_BINARY_DIR}/RomHack.toml ${TPGZ_REL_FILES}
+    DEPENDS tpgz modules ${TPGZ_PATCHER_EXE} ${CMAKE_CURRENT_SOURCE_DIR}/res ${CMAKE_CURRENT_BINARY_DIR}/patch.asm ${CMAKE_CURRENT_BINARY_DIR}/RomHack.toml ${TPGZ_REL_FILES} ${TPGZ_SAVE_META_FILES}
     COMMAND ${TPGZ_PATCHER_EXE} build --patch
     COMMAND ${CMAKE_COMMAND} -E rename ${TPGZ_CFG_BLD_PATCH_OLD} ${TPGZ_CFG_BLD_PATCH})
 
