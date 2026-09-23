@@ -1,7 +1,7 @@
 #include "menus/menu_rupee_flags/include/rupee_flags_menu.h"
 #include "gz_flags.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/utils.h"
+#include "d/d_com_inf_game.h"
+#include "tpgz_utils.h"
 #include "rels/include/defines.h"
 #include "menus/utils/menu_mgr.h"
 
@@ -30,8 +30,8 @@ void RupeeFlagsMenu::draw() {
     }
 
     // update flags
-    rupeeFlagsData->l_fundraising1 = dComIfGs_isEventBit(0x2e20);
-    rupeeFlagsData->l_fundraising2 = dComIfGs_isEventBit(0x0f10);
+    rupeeFlagsData->l_fundraising1 = dComIfGs_isEventBit__FUs(0x2e20);
+    rupeeFlagsData->l_fundraising2 = dComIfGs_isEventBit__FUs(0x0f10);
 
     // update donation amount
     u8 donation_high_bits = dComIfGs_getEventReg(0xf7ff);
@@ -46,7 +46,7 @@ void RupeeFlagsMenu::draw() {
     rupeeFlagsData->l_fundraisingAmount = fund_high_bits << 8 | fund_low_bits;
 
     for (int i = BLUE_RUPEE; i <= SILVER_RUPEE; i++) {
-        if (dComIfGs_isItemFirstBit(i)) {
+        if (dComIfGs_isItemFirstBit__FUc(i)) {
             rupeeFlagsData->l_rupeeFlag = true;
             break;
         }

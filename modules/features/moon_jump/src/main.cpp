@@ -1,8 +1,8 @@
 #include <main.h>
 #include "commands.h"
 #include "settings.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/JSystem/JUtility/JUTGamePad.h"
+#include "d/d_com_inf_game.h"
+#include "JSystem/JUtility/JUTGamePad.h"
 
 KEEP_FUNC void GZCmd_moonJump() {
     if (dComIfGp_getPlayer()) {

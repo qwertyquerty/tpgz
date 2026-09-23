@@ -9,13 +9,13 @@
 #include <cstdint>
 #include <cstring>
 
-#include "libtp_c/include/dolphin/os/OSCache.h"
-#include "libtp_c/include/m_Do/m_Do_ext.h"
-#include "libtp_c/include/JSystem/JKernel/JKRHeap.h"
-#include "libtp_c/include/defines.h"
+#include "dolphin/os/OSCache.h"
+#include "m_Do/m_Do_ext.h"
+#include "JSystem/JKernel/JKRHeap.h"
+#include "rels/include/defines.h"
 
 #ifdef WII_PLATFORM
-#include "libtp_c/include/dynamic_link.h"
+#include "DynamicLink.h"
 #endif
 
 void* getHeapPtr(int32_t id) {
@@ -34,7 +34,7 @@ void* getHeapPtr(int32_t id) {
 #ifndef WII_PLATFORM
         &m_Do_ext::HostIOHeap,
 #else
-        &DynamicModuleControlBase::m_heap,
+        &DynamicModuleControlBase::m_heap__24DynamicModuleControlBase,
 #endif  // WII_PLATFORM
 
     };
@@ -55,7 +55,7 @@ void* allocateMemory(std::size_t size, void* heap, int32_t alignment) {
         return nullptr;
     }
 
-    void* ptr = __nw_JKRHeap(size, heap, alignment);
+    void* ptr = __nw__FUlP7JKRHeapi(size, heap, alignment);
     ptr = memset(ptr, 0, size);
     DCFlushRange(ptr, size);
     return ptr;
@@ -104,17 +104,17 @@ void* operator new(unsigned int size, std::align_val_t alignment) {
 }
 
 void operator delete(void* ptr) {
-    return __dl_JKRHeap(ptr);
+    return __dl__FPv(ptr);
 }
 
 void operator delete[](void* ptr) {
-    return __dl_JKRHeap(ptr);
+    return __dl__FPv(ptr);
 }
 
 void operator delete(void* ptr, [[maybe_unused]] std::size_t size) {
-    return __dl_JKRHeap(ptr);
+    return __dl__FPv(ptr);
 }
 
 void operator delete[](void* ptr, [[maybe_unused]] std::size_t size) {
-    return __dl_JKRHeap(ptr);
+    return __dl__FPv(ptr);
 }

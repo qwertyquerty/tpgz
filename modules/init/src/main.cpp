@@ -20,7 +20,7 @@
 #include "events/draw_listener.h"
 #include "events/pre_loop_listener.h"
 #include "events/post_loop_listener.h"
-#include "libtp_c/include/dolphin/os/OSCache.h"
+#include "dolphin/os/OSCache.h"
 
 void GZ_PosSettings_initDefaults();
 void GZ_patchLinkColor();

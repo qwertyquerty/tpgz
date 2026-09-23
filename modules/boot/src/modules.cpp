@@ -1,5 +1,5 @@
 #include "modules.h"
-#include "libtp_c/include/defines.h"
+#include "rels/include/defines.h"
 
 #include "commands.h"
 #include "global_data.h"

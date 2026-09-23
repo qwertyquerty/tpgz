@@ -1,6 +1,6 @@
 #include <cstdio>
 #include "fs.h"
-#include "libtp_c/include/dolphin/os/OSCache.h"
+#include "dolphin/os/OSCache.h"
 #include "settings.h"
 #include "gz_flags.h"
 #include "practice.h"
@@ -10,11 +10,11 @@
 #include "utils/loading.h"
 #include "fifo_queue.h"
 #include "utils/card.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/f_op/f_op_scene_req.h"
-#include "libtp_c/include/f_op/f_op_draw_tag.h"
+#include "d/d_com_inf_game.h"
+#include "f_op/f_op_scene_req.h"
+#include "f_op/f_op_draw_tag.h"
 #include "menus/utils/menu_mgr.h"
-#include "libtp_c/include/m_Do/m_Do_printf.h"
+#include "m_Do/m_Do_printf.h"
 
 static char l_filename[80];
 SaveManager gSaveManager;

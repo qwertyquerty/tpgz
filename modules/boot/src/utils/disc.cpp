@@ -1,6 +1,6 @@
 #include "utils/disc.h"
 #include <cstring>
-#include "libtp_c/include/msl_c/math.h"
+#include "tpgz_math.h"
 #include "rels/include/cxx.h"
 
 #ifdef __cplusplus

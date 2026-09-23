@@ -1,13 +1,13 @@
 #include "cheats.h"
 #include "commands.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/f_op/f_op_actor_mng.h"
-#include "libtp_c/include/d/d_procname.h"
-#include "libtp_c/include/d/a/d_a_e_zs.h"
-#include "libtp_c/include/d/a/d_a_e_s1.h"
-#include "libtp_c/include/d/d_item.h"
+#include "d/d_com_inf_game.h"
+#include "f_op/f_op_actor_mng.h"
+#include "tpgz_procname.h"
+#include "d/actor/d_a_e_zs.h"
+#include "d/actor/d_a_e_s1.h"
+#include "d/d_item.h"
 #include "rels/include/patch.h"
-#include "libtp_c/include/defines.h"
+#include "rels/include/defines.h"
 #include "gz_flags.h"
 #include "rels/include/defines.h"
 #include "menus/utils/menu_mgr.h"
@@ -19,7 +19,7 @@
 #endif
 #ifdef WII_PLATFORM
 #define INVINCIBLE_ENEMIES_OFFSET (0x244)
-#define cc_at_check cc_at_check_fopAc_ac_c____dCcU_AtInfo___
+#define cc_at_check cc_at_check__FP10fopAc_ac_cP11dCcU_AtInfo
 #endif
 
 extern "C" {

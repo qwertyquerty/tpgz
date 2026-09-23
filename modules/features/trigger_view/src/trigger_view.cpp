@@ -1,13 +1,13 @@
 #include "features/trigger_view/include/trigger_view.h"
 #include "collision_view.h"
 #include "trigger_view.h"
-#include "libtp_c/include/msl_c/math.h"
+#include "tpgz_math.h"
 #include "settings.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/m_Do/m_Do_printf.h"
-#include "libtp_c/include/d/d_procname.h"
-#include "libtp_c/include/f_op/f_op_actor_mng.h"
-#include "libtp_c/include/JSystem/JMath.h"
+#include "d/d_com_inf_game.h"
+#include "m_Do/m_Do_printf.h"
+#include "tpgz_procname.h"
+#include "f_op/f_op_actor_mng.h"
+#include "JSystem/JMath/JMath.h"
 #include "rels/include/defines.h"
 #include "global_data.h"
 
@@ -280,7 +280,7 @@ void drawCurrentRoomPaths() {
         return;
     }
 
-    dStage_dPath_c* roomPaths = dStage_roomControl_c__mStatus[roomNo].mPath2Info;
+    dStage_dPath_c* roomPaths = mStatus__20dStage_roomControl_c[roomNo].mPath2Info;
     if (roomPaths) {
         drawPaths(roomPaths);
     }

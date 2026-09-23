@@ -44,9 +44,11 @@ message(STATUS "Configuring for ${PLATFORM}_${REGION}...")
 # These two lists are used as a map to get the right ISO file name for each version.
 set(TPGZ_ISO_VERSIONS GCN_NTSCU GCN_NTSCJ GCN_PAL WII_NTSCU_10 WII_NTSCU_12 WII_NTSCJ WII_PAL)
 set(TPGZ_ISO_FILES    GZ2E01    GZ2J01    GZ2P01  RZDE01       RZDE01_2     RZDJ01    RZDP01)
+set(TPGZ_DECOMP_VERSIONS 0 2 1 3 4 6 5)
 
 list(FIND TPGZ_ISO_VERSIONS ${PLATFORM}_${REGION} TPGZ_ISO_VERSION)
 list(GET TPGZ_ISO_FILES ${TPGZ_ISO_VERSION} TPGZ_ISO_FILE)
+list(GET TPGZ_DECOMP_VERSIONS ${TPGZ_ISO_VERSION} TPGZ_DECOMP_VERSION)
 
 list(APPEND CMAKE_MODULE_PATH
   ${CMAKE_SOURCE_DIR}/cmake
@@ -75,10 +77,11 @@ file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 
 # Set compiler stuff
 include_directories(external)
-add_definitions(-D${PLATFORM}_${REGION} -D${PLATFORM}_PLATFORM -DGZ_VERSION=${TPGZ_BUILD_VERSION} -D_PROJECT_NAME="${CMAKE_PROJECT_NAME}" -D_VERSION="${TPGZ_BUILD_VERSION}" -D_VARIANT="public" -D_BUILDID="${TPGZ_BUILD_VERSION}" ${DEBUG} ${RUN_PR_TEST})
+include_directories(tp/include tp/libs/dolphin/include tp/libs/JSystem/include tp/libs/PowerPC_EABI_Support/include tp/libs/revolution/include tp/libs/TRK_MINNOW_DOLPHIN/include)
+include_directories(common/rels/include)
+add_definitions(-D${PLATFORM}_${REGION} -D${PLATFORM}_PLATFORM -DVERSION=${TPGZ_DECOMP_VERSION} -DGZ_VERSION=${TPGZ_BUILD_VERSION} -D_PROJECT_NAME="${CMAKE_PROJECT_NAME}" -D_VERSION="${TPGZ_BUILD_VERSION}" -D_VARIANT="public" -D_BUILDID="${TPGZ_BUILD_VERSION}" ${DEBUG} ${RUN_PR_TEST})
 add_compile_options(-fdiagnostics-color=always -fvisibility=hidden)
 
-include(cmake/tp_c.cmake)
 include(cmake/gcn_c.cmake)
 include(cmake/${PLATFORM}_${REGION}.cmake)
 include(cmake/save_metadata.cmake)
@@ -93,7 +96,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/RomHack.toml.in ${CMAKE_CURRENT_BINAR
 add_subdirectory(modules)
 
 add_custom_target(tpgz ALL)
-add_dependencies(tpgz tp_c gcn_c modules)
+add_dependencies(tpgz gcn_c modules)
 set_property(TARGET tpgz PROPERTY COMPILE_FLAGS "-g -c -Os -std=gnu++20 -Wall ${DEVKITPRO_MACHDEP}")
 
 get_target_property(TPGZ_MODULES modules TPGZ_MODULES)

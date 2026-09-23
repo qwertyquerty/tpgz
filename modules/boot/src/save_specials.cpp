@@ -1,14 +1,14 @@
 #include "save_specials.h"
 #include "gz_flags.h"
-#include "libtp_c/include/utils.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/f_op/f_op_actor_mng.h"
-#include "libtp_c/include/f_op/f_op_actor_iter.h"
-#include "libtp_c/include/rel/d/a/b/d_a_b_ds.h"
-#include "libtp_c/include/d/a/d_a_e_zs.h"
-#include "libtp_c/include/rel/d/a/obj/d_a_obj_lv4sand.h"
-#include "libtp_c/include/d/d_procname.h"
-#include "libtp_c/include/m_Do/m_Do_printf.h"
+#include "tpgz_utils.h"
+#include "d/d_com_inf_game.h"
+#include "f_op/f_op_actor_mng.h"
+#include "f_op/f_op_actor_iter.h"
+#include "d/actor/d_a_b_ds.h"
+#include "d/actor/d_a_e_zs.h"
+#include "d/actor/d_a_obj_lv4sand.h"
+#include "tpgz_procname.h"
+#include "m_Do/m_Do_printf.h"
 #include "rels/include/defines.h"
 
 typedef bool (*predicate_t)(fopAc_ac_c&);
@@ -238,7 +238,7 @@ KEEP_FUNC void SaveMngSpecial_Stallord2() {
     daB_DS_c* stallord = (daB_DS_c*)fopAcM_SearchByName(PROC_B_DS);
 
     // create the phase 2 version of stallord
-    fopAcM_create(PROC_B_DS, fopAcM_GetParam(stallord) | 2, &stallord->current.pos,
+    fopAcM_create__FsUlPC4cXyziPC5csXyzPC4cXyzSc(PROC_B_DS, fopAcM_GetParam(stallord) | 2, &stallord->current.pos,
                 fopAcM_GetRoomNo(stallord), nullptr, nullptr, -1);
     fopAcM_delete(stallord);  // delete phase 1 stallord
 
@@ -638,7 +638,7 @@ KEEP_FUNC void SaveMngSpecial_MidnaDivePot() {
     cXyz position1 (-95882.8f, -24400.0f, 32388.6f);
     csXyz someangle(0, 21487, angleZ);
 
-    fopAcM_create(SMALL_POT_ID, params, &position1, roomNo, &someangle, nullptr, -1);
+    fopAcM_create__FsUlPC4cXyziPC5csXyzPC4cXyzSc(SMALL_POT_ID, params, &position1, roomNo, &someangle, nullptr, -1);
 }
 
 KEEP_FUNC void SaveMngSpecial_KargOoBWolf() {

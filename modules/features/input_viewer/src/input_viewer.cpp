@@ -1,14 +1,14 @@
 ﻿#include "input_viewer.h"
 #include <cstdio>
-#include "libtp_c/include/dolphin/mtx/vec.h"
+#include "tpgz_vec.h"
 #include "controller.h"
 #include "font.h"
-#include "libtp_c/include/JSystem/JUtility/JUTGamePad.h"
-#include "libtp_c/include/msl_c/math.h"
+#include "JSystem/JUtility/JUTGamePad.h"
+#include "tpgz_math.h"
 #include "pos_settings.h"
 #include "settings.h"
 #include "utils/draw.h"
-#include "libtp_c/include/m_Do/m_Re_controller_pad.h"
+#include "m_Re/m_Re_controller_pad.h"
 #include "tools.h"
 #include "rels/include/defines.h"
 
@@ -173,24 +173,24 @@ void InputViewer::drawViewer(Vec2 pos, float scale, bool is_shadow, bool wide_sc
     drawStickOutline(is_shadow ? 0x00000060 : 0xFFD138FF,
                      {pos.x + 62.5f * scale, pos.y + 30.f * scale}, 35.0f * scale, x_ratio);
     drawEllipse(is_shadow ? 0x00000060 : 0xFFFFFFFF,
-                {pos.x + (17.5f + mPadMStick.mPosX * 10) * scale,
-                 pos.y + (30.f - mPadMStick.mPosY * 10) * scale},
+                {pos.x + (17.5f + mPadMStick__10JUTGamePad.mPosX * 10) * scale,
+                 pos.y + (30.f - mPadMStick__10JUTGamePad.mPosY * 10) * scale},
                 {20.0f * scale, 20.0f * scale});
     drawEllipse(is_shadow ? 0x00000060 : 0xFFD138FF,
-                {pos.x + (62.5f + mPadSStick.mPosX * 10) * scale,
-                 pos.y + (30.f - mPadSStick.mPosY * 10) * scale},
+                {pos.x + (62.5f + mPadSStick__10JUTGamePad.mPosX * 10) * scale,
+                 pos.y + (30.f - mPadSStick__10JUTGamePad.mPosY * 10) * scale},
                 {20.0f * scale, 20.0f * scale});
 
     // Analog triggers
     Draw::drawRectOutline(is_shadow ? 0x00000060 : 0xFFFFFFFF, {pos.x, pos.y},
                           {35.f * scale, 7.f * scale}, OUTLINE_WIDTH);
     Draw::drawRect(is_shadow ? 0x00000060 : GZ_getButtonPressed(GZPad::L) ? 0x00FF00FF : 0xFFFFFFFF,
-                   {pos.x, pos.y}, {35.f * mPadButton.mAnalogLf * scale, 7.f * scale});
+                   {pos.x, pos.y}, {35.f * mPadButton__10JUTGamePad.mAnalogLf * scale, 7.f * scale});
     Draw::drawRectOutline(is_shadow ? 0x00000060 : 0xFFFFFFFF, {pos.x + 45.f * scale, pos.y},
                           {35.f * scale, 7.f * scale}, OUTLINE_WIDTH);
     Draw::drawRect(is_shadow ? 0x00000060 : GZ_getButtonPressed(GZPad::R) ? 0x00FF00FF : 0xFFFFFFFF,
-                   {pos.x + (45.f + 35.f * (1 - mPadButton.mAnalogRf)) * scale, pos.y},
-                   {35.f * mPadButton.mAnalogRf * scale, 7.f * scale});
+                   {pos.x + (45.f + 35.f * (1 - mPadButton__10JUTGamePad.mAnalogRf)) * scale, pos.y},
+                   {35.f * mPadButton__10JUTGamePad.mAnalogRf * scale, 7.f * scale});
 
     // stick inputs
     char control_x[5];  // control stick x
@@ -282,7 +282,12 @@ void InputViewer::drawViewer(Vec2 pos, float scale, bool is_shadow, bool wide_sc
 }
 
 #ifdef WII_PLATFORM
-extern bool isWidescreen;
+#if defined(WII_NTSCJ)
+#define isWidescreen (*reinterpret_cast<bool*>(0x8051DFC8))
+#else
+#define isWidescreen mWide__13mDoGph_gInf_c
+extern bool mWide__13mDoGph_gInf_c;
+#endif
 #define IS_WIDESCREEN isWidescreen
 #else
 #define IS_WIDESCREEN (false)

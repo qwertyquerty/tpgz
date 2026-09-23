@@ -1,16 +1,19 @@
 #include "menus/menu_credits/include/credits_menu.h"
 #include <cstdio>
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/d/meter/d_meter_HIO.h"
+#include "d/d_com_inf_game.h"
+#include "d/d_meter_HIO.h"
 #include "gz_flags.h"
 #include "rels/include/defines.h"
 #include "menus/utils/menu_mgr.h"
 #include "utils/draw.h"
 
 #ifdef WII_PLATFORM
-extern bool isWidescreen;
+#if defined(WII_NTSCJ)
+#define isWidescreen (*reinterpret_cast<bool*>(0x8051DFC8))
 #else
-#define isWidescreen (false)
+#define isWidescreen mWide__13mDoGph_gInf_c
+extern bool mWide__13mDoGph_gInf_c;
+#endif
 #endif
 
 KEEP_FUNC CreditsMenu::CreditsMenu(Cursor& cursor) : Menu(cursor) {}

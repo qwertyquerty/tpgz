@@ -1,7 +1,7 @@
 #pragma once
 #include <stdint.h>
-#include "libtp_c/include/JSystem/JUtility/JUTGamePad.h"
-#include "libtp_c/include/m_Do/m_Re_controller_pad.h"
+#include "JSystem/JUtility/JUTGamePad.h"
+#include "m_Re/m_Re_controller_pad.h"
 #include "utils/containers/deque.h"
 
 #ifdef GCN_PLATFORM

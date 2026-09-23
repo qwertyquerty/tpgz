@@ -6,13 +6,13 @@
 #include "fs.h"
 #include "save_manager.h"
 #include "menus/menu_any_saves/include/any_saves_menu.h"
-#include "libtp_c/include/JSystem/JUtility/JUTGamePad.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/SSystem/SComponent/c_counter.h"
-#include "libtp_c/include/f_op/f_op_scene_req.h"
-#include "libtp_c/include/f_op/f_op_actor_mng.h"
-#include "libtp_c/include/utils.h"
-#include "libtp_c/include/m_Do/m_Do_printf.h"
+#include "JSystem/JUtility/JUTGamePad.h"
+#include "d/d_com_inf_game.h"
+#include "SSystem/SComponent/c_counter.h"
+#include "f_op/f_op_scene_req.h"
+#include "f_op/f_op_actor_mng.h"
+#include "tpgz_utils.h"
+#include "m_Do/m_Do_printf.h"
 #include "settings.h"
 #include "modules.h"
 
@@ -62,7 +62,7 @@ static bool got_it = false;
 static char buf[21];
 
 void actorFastCreateAtLink(short id, uint32_t parameters, int8_t subtype) {
-    fopAcM_create(id, parameters, &dComIfGp_getPlayer()->current.pos,
+    fopAcM_create__FsUlPC4cXyziPC5csXyzPC4cXyzSc(id, parameters, &dComIfGp_getPlayer()->current.pos,
                   dComIfGp_getPlayer()->current.roomNo, &dComIfGp_getPlayer()->current.angle,
                   nullptr, subtype);
 }
@@ -113,7 +113,7 @@ void warpToPosition() {
 
 KEEP_FUNC void execute() {
     // reset counters on load
-    if (fopScnRq.isLoading == 1) {
+    if (l_fopScnRq_IsUsingOfOverlap.isLoading == 1) {
         counter_difference = 0;
         after_cs_val = 0;
         got_it = false;

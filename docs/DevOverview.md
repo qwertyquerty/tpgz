@@ -32,7 +32,7 @@ The repository structure is separated like so:
 - `/docs/`: Contains useful documentation files.
 - `/external/`: Contains libraries that the project links against, as well as scripts useful during development.
 - `/external/gcn_c/`: Contains DolphinOS bindings that can be used to interface with the game's code.
-- `/external/libtp_c/`: Contains bindings that are specific for Twilight Princess that can be used to interface with the game's code.
+- `/tp/`: Twilight Princess decomp submodule. Its headers provide the game declarations used by TPGZ; CMake selects the matching game revision through `VERSION`.
 - `/external/misc/`: Contains scripts useful during development (for example, generating save files metadata, or converting an image/font into our custom file format).
 - `/isos/`: **User created**. Contains the dump of each version of the game provided by the user. They must comply with the folling mapping depending on the version of the game:
   - `GCN_NTSCU` -> `GZ2E01.iso`

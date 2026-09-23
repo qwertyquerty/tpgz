@@ -17,6 +17,14 @@ list(APPEND TPGZ_EXTERNAL_REL_SRC ${TPGZ_EXTERNAL_REL_ASM})
 include_directories(${CMAKE_SOURCE_DIR}/external/)
 include_directories(${CMAKE_SOURCE_DIR}/common/)
 
+set(TPGZ_SYMBOL_MAP ${CMAKE_CURRENT_BINARY_DIR}/${PLATFORM}_${REGION}.lst)
+set(TPGZ_BASE_SYMBOL_MAP ${CMAKE_SOURCE_DIR}/res/map/${PLATFORM}_${REGION}.lst)
+set(TPGZ_EXTENSION_SYMBOL_MAP ${CMAKE_SOURCE_DIR}/res/map/extensions/${PLATFORM}_${REGION}.lst)
+add_custom_command(OUTPUT ${TPGZ_SYMBOL_MAP}
+    DEPENDS ${TPGZ_BASE_SYMBOL_MAP} ${TPGZ_EXTENSION_SYMBOL_MAP} ${CMAKE_SOURCE_DIR}/bin/merge_lst.py
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/bin/merge_lst.py
+        ${TPGZ_SYMBOL_MAP} ${TPGZ_BASE_SYMBOL_MAP} ${TPGZ_EXTENSION_SYMBOL_MAP})
+
 # Definition of the functions which sets up REL modules
 function(tpgz_add_main_module module_name module_srcs)
     if(ARGC GREATER "2")
@@ -31,7 +39,7 @@ function(tpgz_add_main_module module_name module_srcs)
     add_executable(${module_name} EXCLUDE_FROM_ALL)
     target_sources(${module_name}
         PUBLIC ${module_srcs} ${TPGZ_EXTERNAL_REL_SRC})
-    target_link_libraries(${module_name} tp_c gcn_c)
+    target_link_libraries(${module_name} gcn_c)
     set_property(TARGET ${module_name} APPEND PROPERTY LINK_OPTIONS -Wl,-Map,${module_name}.map -Wl,--gc-sections,--gc-keep-exported -lstdc++)
     set_property(TARGET ${module_name} APPEND PROPERTY LINK_OPTIONS ${CMAKE_SOURCE_DIR}/common/rels/src/cxx.ld)
 
@@ -44,11 +52,11 @@ function(tpgz_add_main_module module_name module_srcs)
 
     file(GLOB relative_module_name LIST_DIRECTORIES true RELATIVE ${TPGZ_MODULE_SRC_DIR} CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR})
     add_custom_command(OUTPUT ${TPGZ_MODULE_OUT_DIR}/${module_name}.rel
-        DEPENDS ${module_name} ${CMAKE_SOURCE_DIR}/res/map/${PLATFORM}_${REGION}.lst
-        COMMAND ${TPGZ_ELF2REL_EXE} $<TARGET_FILE:${module_name}> -s ${CMAKE_SOURCE_DIR}/res/map/${PLATFORM}_${REGION}.lst --rel-id ${TPGZ_MODULE_ID_COUNTER} -o ${TPGZ_MODULE_OUT_DIR}/${module_name}.rel)
+        DEPENDS ${module_name} ${TPGZ_SYMBOL_MAP}
+        COMMAND ${TPGZ_ELF2REL_EXE} $<TARGET_FILE:${module_name}> -s ${TPGZ_SYMBOL_MAP} --rel-id ${TPGZ_MODULE_ID_COUNTER} -o ${TPGZ_MODULE_OUT_DIR}/${module_name}.rel)
     add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${module_name}.lst
-        DEPENDS ${module_name} ${CMAKE_SOURCE_DIR}/res/map/${PLATFORM}_${REGION}.lst
-        COMMAND ${Python3_EXECUTABLE} ${TPGZ_RELMAPPER_EXE} -o ${CMAKE_CURRENT_BINARY_DIR}/${module_name}.lst -i ${CMAKE_SOURCE_DIR}/res/map/${PLATFORM}_${REGION}.lst -s ${TPGZ_MODULE_ID_COUNTER} $<TARGET_FILE:${module_name}>)
+        DEPENDS ${module_name} ${TPGZ_SYMBOL_MAP}
+        COMMAND ${Python3_EXECUTABLE} ${TPGZ_RELMAPPER_EXE} -o ${CMAKE_CURRENT_BINARY_DIR}/${module_name}.lst -i ${TPGZ_SYMBOL_MAP} -s ${TPGZ_MODULE_ID_COUNTER} $<TARGET_FILE:${module_name}>)
     add_custom_target(${module_name}_rel
         DEPENDS ${TPGZ_MODULE_OUT_DIR}/${module_name}.rel ${CMAKE_CURRENT_BINARY_DIR}/${module_name}.lst)
     set_property(TARGET ${module_name}_rel PROPERTY TPGZ_MODULE_FILE ${TPGZ_MODULE_OUT_DIR}/${module_name}.rel)

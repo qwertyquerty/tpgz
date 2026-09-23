@@ -6,7 +6,7 @@
 #include "settings.h"
 #include "fifo_queue.h"
 #include "utils/containers/deque.h"
-#include "libtp_c/include/m_Do/m_Re_controller_pad.h"
+#include "m_Re/m_Re_controller_pad.h"
 
 #ifdef WII_PLATFORM
 #define FRAME_ADVANCE_BTN GZPad::TWO
@@ -64,7 +64,16 @@ void GZ_frameAdvance();
 void GZ_execute(int phase);
 void GZ_drawFrameTex(Texture* pauseTex, Texture* playTex);
 
-extern volatile uint8_t sPauseTimer;
+#if defined(WII_NTSCU_12)
+#define sPauseTimer lbl_80520E35
+extern volatile uint8_t lbl_80520E35;
+#elif defined(WII_NTSCJ)
+#define sPauseTimer lbl_8051ECA5
+extern volatile uint8_t lbl_8051ECA5;
+#else
+#define sPauseTimer nextPauseTimer__9dScnPly_c
+extern volatile uint8_t nextPauseTimer__9dScnPly_c;
+#endif
 
 bool GZ_freezeActors_active();
 bool GZ_hideActors_active();

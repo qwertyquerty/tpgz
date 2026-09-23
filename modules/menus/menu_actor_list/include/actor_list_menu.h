@@ -1,5 +1,5 @@
 #include "menus/menu.h"
-#include "libtp_c/include/f_op/f_op_actor_mng.h"
+#include "f_op/f_op_actor_mng.h"
 
 struct ActorListData {
     uint16_t l_index;

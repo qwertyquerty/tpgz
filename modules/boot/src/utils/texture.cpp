@@ -1,10 +1,10 @@
 #include "utils/texture.h"
 #include <cstring>
-#include "libtp_c/include/msl_c/math.h"
+#include "tpgz_math.h"
 #include "utils/disc.h"
 #include "gcn_c/include/dvd.h"
 #include "rels/include/cxx.h"
-#include "libtp_c/include/m_Do/m_Do_printf.h"
+#include "m_Do/m_Do_printf.h"
 
 enum TexFmt {
     RGB8 = 0,

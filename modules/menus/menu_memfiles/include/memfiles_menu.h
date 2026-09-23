@@ -1,6 +1,6 @@
 #include "menus/menu.h"
-#include "libtp_c/include/dolphin/mtx/vec.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
+#include "tpgz_vec.h"
+#include "d/d_com_inf_game.h"
 
 #define MEMFILE_SLOT_INDEX 0
 #define MEMFILE_SAVE_INDEX 1

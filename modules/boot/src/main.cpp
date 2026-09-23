@@ -4,7 +4,7 @@
 #include "font.h"
 #include "global_data.h"
 #include "gz_flags.h"
-#include "libtp_c/include/m_Do/m_Do_printf.h"
+#include "m_Do/m_Do_printf.h"
 #include "menus/menu.h"
 #include "settings.h"
 #include "menus/utils/menu_mgr.h"
@@ -18,9 +18,9 @@
 #include "utils/loading.h"
 #include "utils/memory.h"
 #include "utils/texture.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/f_op/f_op_scene_req.h"
-#include "libtp_c/include/m_Do/m_Re_controller_pad.h"
+#include "d/d_com_inf_game.h"
+#include "f_op/f_op_scene_req.h"
+#include "m_Re/m_Re_controller_pad.h"
 #include "rels/include/cxx.h"
 #include "utils/rels.h"
 #include "rels/include/defines.h"
@@ -29,9 +29,12 @@
 #include "events/post_loop_listener.h"
 
 #ifdef WII_PLATFORM
-extern bool isWidescreen;
+#if defined(WII_NTSCJ)
+#define isWidescreen (*reinterpret_cast<bool*>(0x8051DFC8))
 #else
-#define isWidescreen (false)
+#define isWidescreen mWide__13mDoGph_gInf_c
+extern bool mWide__13mDoGph_gInf_c;
+#endif
 #endif
 _FIFOQueue Queue;
 bool l_loadCard = true;
@@ -117,7 +120,7 @@ KEEP_FUNC void GZ_drawPacketNumOverflow() {
  * @brief Handles when to show/hide the menus.
  */
 KEEP_FUNC void GZ_handleMenu() {
-    if (BUTTONS == SHOW_MENU_BUTTONS && fopScnRq.isLoading != 1 && !g_moveLinkEnabled) {
+    if (BUTTONS == SHOW_MENU_BUTTONS && l_fopScnRq_IsUsingOfOverlap.isLoading != 1 && !g_moveLinkEnabled) {
         if (!g_menuMgr->isOpen()) {
             if (!g_menuMgr->isEmpty()) {
                 g_menuMgr->open();
@@ -129,7 +132,7 @@ KEEP_FUNC void GZ_handleMenu() {
         g_fifoVisible = false;
     }
 
-    if (fopScnRq.isLoading) {
+    if (l_fopScnRq_IsUsingOfOverlap.isLoading) {
         g_menuMgr->hide();
         g_moveLinkEnabled = false;
         g_actorViewEnabled = false;
@@ -153,7 +156,7 @@ KEEP_FUNC void GZ_handleCardLoad() {
 
 KEEP_FUNC void GZ_handleSavingTmp() {
     // save temp flags and tears after every loading zone
-    if (last_frame_was_loading && !fopScnRq.isLoading) {
+    if (last_frame_was_loading && !l_fopScnRq_IsUsingOfOverlap.isLoading) {
         memcpy(gSaveManager.mAreaReloadOpts.temp_flags, &g_dComIfG_gameInfo.info.mMemory,
                sizeof(g_dComIfG_gameInfo.info.mMemory));
 

@@ -31,9 +31,12 @@
 #endif
 
 #ifdef WII_PLATFORM
-extern bool isWidescreen;
+#if defined(WII_NTSCJ)
+#define isWidescreen (*reinterpret_cast<bool*>(0x8051DFC8))
 #else
-#define isWidescreen (false)
+#define isWidescreen mWide__13mDoGph_gInf_c
+extern bool mWide__13mDoGph_gInf_c;
+#endif
 #endif
 
 WatchesMenu::WatchesMenu(Cursor& cursor, WatchesData& data)

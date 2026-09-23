@@ -2,14 +2,14 @@
 #include <cstdio>
 #include "font.h"
 #include "global_data.h"
-#include "libtp_c/include/msl_c/math.h"
+#include "tpgz_math.h"
 #include "settings.h"
-#include "libtp_c/include/JSystem/JUtility/JUTGamePad.h"
-#include "libtp_c/include/f_op/f_op_draw_tag.h"
-#include "libtp_c/include/m_Do/m_Re_controller_pad.h"
+#include "JSystem/JUtility/JUTGamePad.h"
+#include "f_op/f_op_draw_tag.h"
+#include "m_Re/m_Re_controller_pad.h"
 #include "rels/include/defines.h"
-#include "libtp_c/include/d/meter/d_meter_HIO.h"
-#include "libtp_c/include/d/d_procname.h"
+#include "d/d_meter_HIO.h"
+#include "tpgz_procname.h"
 
 #define ROTATION_SPEED (30)
 #define ROTATION_FAST_SPEED (80)
@@ -24,9 +24,9 @@
 #define CONTROL_X (mPadStatus.stick_x)
 #define VERTICAL_DISPLACEMENT (mPadStatus.substick_y)
 #define HORIZONTAL_DISPLACEMENT -(mPadStatus.substick_x)
-#define SPEED_PREDICATE_1 (mPadButton.mButton & CButton::Z)
-#define SPEED_PREDICATE_2 (mPadButton.mButton & CButton::R)
-#define LOCK_CAMERA (mPadButton.mButton & CButton::L)
+#define SPEED_PREDICATE_1 (mPadButton__10JUTGamePad.mButton & CButton::Z)
+#define SPEED_PREDICATE_2 (mPadButton__10JUTGamePad.mButton & CButton::R)
+#define LOCK_CAMERA (mPadButton__10JUTGamePad.mButton & CButton::L)
 #endif
 
 #ifdef WII_PLATFORM

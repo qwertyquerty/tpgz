@@ -4,10 +4,10 @@
 #include "slash_checker.h"
 #include "controller.h"
 #include "fifo_queue.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/SSystem/SComponent/c_counter.h"
-#include "libtp_c/include/f_op/f_op_scene_req.h"
-#include "libtp_c/include/m_Do/m_Re_controller_pad.h"
+#include "d/d_com_inf_game.h"
+#include "SSystem/SComponent/c_counter.h"
+#include "f_op/f_op_scene_req.h"
+#include "m_Re/m_Re_controller_pad.h"
 
 #define ITEM_BUTTON_HELD_CHECK (!GZ_getButtonHold(GZPad::A) || !GZ_getButtonHold(GZPad::MINUS))
 #define ITEM_BUTTON_DOWN_CHECK (GZ_getButtonPressed(GZPad::A) || GZ_getButtonPressed(GZPad::MINUS))
@@ -23,7 +23,7 @@ KEEP_FUNC void SlashChecker::execute() {
     }
 
     // reset counters on load
-    if (fopScnRq.isLoading) {
+    if (l_fopScnRq_IsUsingOfOverlap.isLoading) {
         sFrameCount = 0;
         sTimerStarted = false;
         didFirstSwing = false;

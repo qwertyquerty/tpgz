@@ -2,9 +2,9 @@
 #include <cstdio>
 #include "memfiles.h"
 #include "utils/card.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/f_op/f_op_draw_tag.h"
-#include "libtp_c/include/f_op/f_op_scene_req.h"
+#include "d/d_com_inf_game.h"
+#include "f_op/f_op_draw_tag.h"
+#include "f_op/f_op_scene_req.h"
 #include "gz_flags.h"
 #include "rels/include/defines.h"
 #include "menus/utils/menu_mgr.h"

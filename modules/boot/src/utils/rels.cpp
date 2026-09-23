@@ -3,13 +3,13 @@
 #include "rels/include/cxx.h"
 #include "rels/include/memory.h"
 #include "gcn_c/include/dvd.h"
-#include "libtp_c/include/dolphin/os/OSCache.h"
+#include "dolphin/os/OSCache.h"
 
 extern "C" {
 #ifndef WII_PLATFORM
 #define resize1_JKRHeap resize__7JKRHeapFPvUlP7JKRHeap
 #else
-#define resize1_JKRHeap JKRHeap__resize_void____unsigned_long__JKRHeap___
+#define resize1_JKRHeap resize__7JKRHeapFPvUlP7JKRHeap
 #endif
 void resize1_JKRHeap(void* ptr, uint32_t size, void* heap);
 }

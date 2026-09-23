@@ -1,10 +1,10 @@
 #include "menus/menu_actor_spawn/include/actor_spawn_menu.h"
 #include <cstdio>
 #include "settings.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/f_op/f_op_actor_mng.h"
-#include "libtp_c/include/f_pc/f_pc_stdcreate_req.h"
-#include "libtp_c/include/m_Do/m_Do_printf.h"
+#include "d/d_com_inf_game.h"
+#include "f_op/f_op_actor_mng.h"
+#include "f_pc/f_pc_stdcreate_req.h"
+#include "m_Do/m_Do_printf.h"
 #include "gz_flags.h"
 #include "pos_settings.h"
 #include "rels/include/defines.h"
@@ -38,9 +38,12 @@
 procBinData l_procData;
 
 #ifdef WII_PLATFORM
-extern bool isWidescreen;
+#if defined(WII_NTSCJ)
+#define isWidescreen (*reinterpret_cast<bool*>(0x8051DFC8))
 #else
-#define isWidescreen (false)
+#define isWidescreen mWide__13mDoGph_gInf_c
+extern bool mWide__13mDoGph_gInf_c;
+#endif
 #endif
 
 KEEP_FUNC ActorSpawnMenu::ActorSpawnMenu(ActorSpawnData& data)

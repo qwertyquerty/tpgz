@@ -1,10 +1,10 @@
 #include "menus/menu_flag_records/include/flag_records_menu.h"
 #include <cstdio>
-#include "libtp_c/include/m_Do/m_Do_printf.h"
+#include "m_Do/m_Do_printf.h"
 #include "settings.h"
 #include "utils/draw.h"
 #include "utils/texture.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
+#include "d/d_com_inf_game.h"
 #include "gz_flags.h"
 #include "rels/include/defines.h"
 #include "menus/utils/menu_mgr.h"

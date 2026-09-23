@@ -1,9 +1,9 @@
 #include "features/projection_view/include/projection_view.h"
-#include "libtp_c/include/d/a/d_a_alink.h"
+#include "d/actor/d_a_alink.h"
 #include "collision_view.h"
 #include "projection_view.h"
 #include "rels/include/defines.h"
-#include "libtp_c/include/d/d_procname.h"
+#include "tpgz_procname.h"
 #include "global_data.h"
 #include "settings.h"
 
@@ -61,7 +61,7 @@ void drawJumpAttackPositionProjection(fopAc_ac_c* actor) {
     }
 }
 
-#include "libtp_c/include/m_Do/m_Do_printf.h"
+#include "m_Do/m_Do_printf.h"
 
 KEEP_FUNC void execute() {
     if (GZStng_getData(STNG_SCENE_LJA_PROJECTION, false)) {

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "utils/containers/deque.h"
-#include "libtp_c/include/dolphin/mtx/vec.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
+#include "tpgz_vec.h"
+#include "d/d_com_inf_game.h"
 
 #ifdef GCN_NTSCU
 #define sTmpBuf 0x803ecf40

@@ -1,7 +1,7 @@
 #include "menus/menu_golden_bugs/include/golden_bugs_menu.h"
 #include <cstdio>
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/utils.h"
+#include "d/d_com_inf_game.h"
+#include "tpgz_utils.h"
 #include "gz_flags.h"
 #include "rels/include/defines.h"
 #include "menus/utils/menu_mgr.h"
@@ -406,11 +406,11 @@ void GoldenBugMenu::setBugs() {
 }
 
 u8 GoldenBugMenu::getBugIdx(u8 bug, u16 flag) {
-    if (dComIfGs_isEventBit(flag)) {
+    if (dComIfGs_isEventBit__FUs(flag)) {
         return 2;
     }
 
-    if (dComIfGs_isItemFirstBit(bug)) {
+    if (dComIfGs_isItemFirstBit__FUc(bug)) {
         return 1;
     }
 

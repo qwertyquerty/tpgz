@@ -12,11 +12,11 @@
 #include "save_manager.h"
 #include "memfiles.h"
 #include "utils/draw.h"
-#include "libtp_c/include/JSystem/JUtility/JUTGamePad.h"
-#include "libtp_c/include/m_Do/m_Re_controller_pad.h"
-#include "libtp_c/include/f_op/f_op_scene_req.h"
+#include "JSystem/JUtility/JUTGamePad.h"
+#include "m_Re/m_Re_controller_pad.h"
+#include "f_op/f_op_scene_req.h"
 #include "rels/include/defines.h"
-#include "libtp_c/include/m_Do/m_Do_printf.h"
+#include "m_Do/m_Do_printf.h"
 
 bool g_framePaused = false;
 
@@ -86,9 +86,12 @@ KEEP_FUNC void GZ_frameAdvance() {
 }
 
 #ifdef WII_PLATFORM
-extern bool isWidescreen;
+#if defined(WII_NTSCJ)
+#define isWidescreen (*reinterpret_cast<bool*>(0x8051DFC8))
 #else
-#define isWidescreen (false)
+#define isWidescreen mWide__13mDoGph_gInf_c
+extern bool mWide__13mDoGph_gInf_c;
+#endif
 #endif
 void GZ_drawFrameTex(Texture* pauseTex, Texture* playTex) {
     if (g_framePaused) {
@@ -122,12 +125,12 @@ void GZ_execute(int phase) {
     // separate variable to make sure the after-callback is only run after a load has happened
     static bool load_started = false;
     static bool load_finished_will_teleport = false;
-    if (fopScnRq.isLoading && !load_started) {
+    if (l_fopScnRq_IsUsingOfOverlap.isLoading && !load_started) {
         load_started = true;
     }
 
     // Check for post load callback and run it once link is valid
-    if (load_started && !fopScnRq.isLoading && dComIfGp_getPlayer()) {
+    if (load_started && !l_fopScnRq_IsUsingOfOverlap.isLoading && dComIfGp_getPlayer()) {
         if (gSaveManager.mPracticeFileOpts.inject_options_after_load) {
             gSaveManager.mPracticeFileOpts.inject_options_after_load();
             gSaveManager.mPracticeFileOpts.inject_options_after_load = nullptr;
@@ -139,7 +142,7 @@ void GZ_execute(int phase) {
     }
 
     // maybe a bit convoluted but if Link needs to be teleported x frames after the post load
-    if (load_finished_will_teleport && !fopScnRq.isLoading && dComIfGp_getPlayer()) {
+    if (load_finished_will_teleport && !l_fopScnRq_IsUsingOfOverlap.isLoading && dComIfGp_getPlayer()) {
         if (gSaveManager.mPracticeFileOpts.inject_options_after_counter > 0) {
             gSaveManager.mPracticeFileOpts.inject_options_after_counter--;
         } else {

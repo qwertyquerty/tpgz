@@ -5,9 +5,9 @@
 #include "controller.h"
 #include "fifo_queue.h"
 #include "pos_settings.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/SSystem/SComponent/c_counter.h"
-#include "libtp_c/include/m_Do/m_Re_controller_pad.h"
+#include "d/d_com_inf_game.h"
+#include "SSystem/SComponent/c_counter.h"
+#include "m_Re/m_Re_controller_pad.h"
 #include "rels/include/defines.h"
 
 u32 getSpeedTextColor(u8 i_bps) {

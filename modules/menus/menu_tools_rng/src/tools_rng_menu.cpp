@@ -3,7 +3,7 @@
 #include "utils/hook.h"
 #include "rels/include/defines.h"
 #include "menus/utils/menu_mgr.h"
-#include "libtp_c/include/msl_c/math.h"
+#include "tpgz_math.h"
 
 #define MAX_RNG_PRESETS 10
 

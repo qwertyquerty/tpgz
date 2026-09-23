@@ -1,6 +1,6 @@
 #pragma once
 
-#include "libtp_c/include/dolphin/types.h"
+#include "dolphin/types.h"
 
 enum TriggerViewIndex {
     VIEW_ATTN_DISTS,

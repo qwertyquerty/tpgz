@@ -2,7 +2,7 @@
 #include <cstdio>
 #include "utils/draw.h"
 #include "fifo_queue.h"
-#include "libtp_c/include/SSystem/SComponent/c_counter.h"
+#include "SSystem/SComponent/c_counter.h"
 #include "gz_flags.h"
 #include "rels/include/defines.h"
 #include "menus/utils/menu_mgr.h"
@@ -33,9 +33,12 @@ KEEP_FUNC PosSettingsMenu::PosSettingsMenu(Cursor& cursor, PosSettingsData& data
 PosSettingsMenu::~PosSettingsMenu() {}
 
 #ifdef WII_PLATFORM
-extern bool isWidescreen;
+#if defined(WII_NTSCJ)
+#define isWidescreen (*reinterpret_cast<bool*>(0x8051DFC8))
 #else
-#define isWidescreen (false)
+#define isWidescreen mWide__13mDoGph_gInf_c
+extern bool mWide__13mDoGph_gInf_c;
+#endif
 #endif
 
 void drawCursor(Vec2 pos) {

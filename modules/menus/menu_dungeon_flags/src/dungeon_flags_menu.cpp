@@ -1,10 +1,10 @@
 #include "menus/menu_dungeon_flags/include/dungeon_flags_menu.h"
 #include <cstdio>
-#include "libtp_c/include/d/com/d_com_inf_game.h"
+#include "d/d_com_inf_game.h"
 #include "gz_flags.h"
 #include "rels/include/defines.h"
 #include "menus/utils/menu_mgr.h"
-#include "libtp_c/include/utils.h"
+#include "tpgz_utils.h"
 
 #define MAX_DUNGEON_OPTIONS 9
 
@@ -44,7 +44,7 @@ void setSaveDungeonItem(int32_t stage, int32_t flag) {
     }
 }
 
-#include "libtp_c/include/m_Do/m_Do_printf.h" // OSReport
+#include "m_Do/m_Do_printf.h" // OSReport
 
 bool getDungeonMemSwitch(int32_t stage, int32_t flag) {
     return dSv_memBit_c__isSwitch(&dComIfGs_getSavedata().mSave[stage].mBit, flag);

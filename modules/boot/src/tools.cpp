@@ -1,6 +1,6 @@
 #include "tools.h"
-#include "libtp_c/include/d/a/d_a_alink.h"
-#include "libtp_c/include/defines.h"
+#include "d/actor/d_a_alink.h"
+#include "rels/include/defines.h"
 
 #include "commands.h"
 #include "global_data.h"

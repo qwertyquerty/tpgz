@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-#include "libtp_c/include/dolphin/gx/gx.h"
+#include "dolphin/gx.h"
 
 enum TexCode {
     TEX_OK = 1,                  /*<@brief Texture loaded successfully */

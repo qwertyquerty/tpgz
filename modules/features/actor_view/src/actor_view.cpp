@@ -1,11 +1,11 @@
 #include "features/actor_view/include/actor_view.h"
 #include "menus/utils/menu_mgr.h"
-#include "libtp_c/include/f_op/f_op_actor_mng.h"
-#include "libtp_c/include/f_op/f_op_draw_tag.h"
+#include "f_op/f_op_actor_mng.h"
+#include "f_op/f_op_draw_tag.h"
 #include "menus/menu_actor_list/include/actor_list_menu.h"
 #include "collision_view.h"
 #include "global_data.h"
-#include "libtp_c/include/m_Do/m_Do_printf.h"
+#include "m_Do/m_Do_printf.h"
 
 namespace ActorViewer {
 void drawGizmo(fopAc_ac_c* actor) {

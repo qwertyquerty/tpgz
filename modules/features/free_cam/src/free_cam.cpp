@@ -1,11 +1,11 @@
 #include "features/free_cam/include/free_cam.h"
 #include "global_data.h"
-#include "libtp_c/include/JSystem/JUtility/JUTGamePad.h"
-#include "libtp_c/include/msl_c/math.h"
+#include "JSystem/JUtility/JUTGamePad.h"
+#include "tpgz_math.h"
 #include "menus/menu.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/f_op/f_op_draw_tag.h"
-#include "libtp_c/include/m_Do/m_Re_controller_pad.h"
+#include "d/d_com_inf_game.h"
+#include "f_op/f_op_draw_tag.h"
+#include "m_Re/m_Re_controller_pad.h"
 #include "rels/include/defines.h"
 
 #define ROTATION_SPEED (0.002)
@@ -17,7 +17,7 @@
 #define CONTROL_X (mPadStatus.stick_x)
 #define TRIG_ADJUST(trig) (mPadStatus.trig >= 10 ? mPadStatus.trig : 0)  // adjust sensitivity
 #define VERTICAL_DISPLACEMENT (TRIG_ADJUST(trigger_left) - TRIG_ADJUST(trigger_right))
-#define SPEED_PREDICATE (mPadButton.mButton & CButton::Z)
+#define SPEED_PREDICATE (mPadButton__10JUTGamePad.mButton & CButton::Z)
 #define PITCH_CONTROL (mPadStatus.substick_y)
 #define YAW_CONTROL (mPadStatus.substick_x)
 #endif

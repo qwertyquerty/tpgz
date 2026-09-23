@@ -1,7 +1,7 @@
 #pragma once
 
 #include "settings.h"
-#include "libtp_c/include/dolphin/mtx/vec.h"
+#include "tpgz_vec.h"
 
 #define SPRITES_AMNT 12
 

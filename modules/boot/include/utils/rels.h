@@ -1,6 +1,6 @@
 #ifndef TPGZ_BOOT_UTILS_RELS_H
 #define TPGZ_BOOT_UTILS_RELS_H
-#include "libtp_c/include/dolphin/os/OS.h"
+#include "dolphin/OS.h"
 
 namespace tpgz::dyn {
 class GZModule {

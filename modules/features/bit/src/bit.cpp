@@ -1,12 +1,12 @@
 #ifdef WII_PLATFORM
 #include "bit.h"
 #include <cstdio>
-#include "libtp_c/include/msl_c/math.h"
-#include "libtp_c/include/JSystem/JUtility/JUTGamePad.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/f_op/f_op_draw_tag.h"
-#include "libtp_c/include/f_op/f_op_scene_req.h"
-#include "libtp_c/include/m_Do/m_Do_audio.h"
+#include "tpgz_math.h"
+#include "JSystem/JUtility/JUTGamePad.h"
+#include "d/d_com_inf_game.h"
+#include "f_op/f_op_draw_tag.h"
+#include "f_op/f_op_scene_req.h"
+#include "m_Do/m_Do_audio.h"
 #include "fifo_queue.h"
 #include "commands.h"
 #include "controller.h"
@@ -75,13 +75,13 @@ KEEP_FUNC void BiTIndicator::execute() {
             dt = dt_1 + (VOID_HEIGHT - x_dt_1) / term_vel + 0.5;
         }
 
-        // if (homeMenuSts.is_visible == 0 && !fopScnRq.isLoading) {
+        // if (l_dvdError$0.is_visible == 0 && !l_fopScnRq_IsUsingOfOverlap.isLoading) {
         //     sprintf(buf, "frames before void: %d", (int)dt);
         //     log.PrintLog(buf, DEBUG);
         // }
 
         if (daAlink_c__checkStageName("F_SP104") && GZ_getButtonPressed(GZPad::HOME) &&
-            homeMenuSts.is_visible == 0 && !fopScnRq.isLoading) {
+            l_dvdError$0.is_visible == 0 && !l_fopScnRq_IsUsingOfOverlap.isLoading) {
             if ((int)dt == TARGET_FRAME) {
                 snprintf(buf, sizeof(buf), "Got it");
             }

@@ -2,11 +2,11 @@
 #include "controller.h"
 #include "fifo_queue.h"
 #include <cstdio>
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/f_op/f_op_actor_mng.h"
-#include "libtp_c/include/m_Do/m_Do_printf.h"
-#include "libtp_c/include/d/d_procname.h"
-#include "libtp_c/include/SSystem/SComponent/c_counter.h"
+#include "d/d_com_inf_game.h"
+#include "f_op/f_op_actor_mng.h"
+#include "m_Do/m_Do_printf.h"
+#include "tpgz_procname.h"
+#include "SSystem/SComponent/c_counter.h"
 
 u16 previous_action;        // Tracks the previous action
 char msg_buffer[20];        // Buffer for the message to be printed

@@ -3,10 +3,10 @@
  * These functions were stripped from retail tp, so we have to manually add them
  */
 
-#include "libtp_c/include/dolphin/gx/gx.h"
-#include "libtp_c/include/dolphin/os/OS.h"
-#include "libtp_c/include/m_Do/m_Do_printf.h"
-#include "libtp_c/include/msl_c/math.h"
+#include "dolphin/gx.h"
+#include "dolphin/OS.h"
+#include "m_Do/m_Do_printf.h"
+#include "tpgz_math.h"
 
 extern "C" {
 

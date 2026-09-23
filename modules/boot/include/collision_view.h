@@ -1,11 +1,11 @@
 #pragma once
 
-#include "libtp_c/include/dolphin/gx/gx.h"
-#include "libtp_c/include/dolphin/os/OSCache.h"
-#include "libtp_c/include/JSystem/J3DGraphBase/J3DPacket.h"
-#include "libtp_c/include/SSystem/SComponent/c_xyz.h"
-#include "libtp_c/include/SSystem/SComponent/c_sxyz.h"
-#include "libtp_c/include/m_Do/m_Do_mtx.h"
+#include "dolphin/gx.h"
+#include "dolphin/os/OSCache.h"
+#include "JSystem/J3DGraphBase/J3DPacket.h"
+#include "SSystem/SComponent/c_xyz.h"
+#include "SSystem/SComponent/c_sxyz.h"
+#include "m_Do/m_Do_mtx.h"
 
 enum CollisionIndex {
     VIEW_AT_CC,

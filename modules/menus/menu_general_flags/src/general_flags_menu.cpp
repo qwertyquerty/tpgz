@@ -1,7 +1,7 @@
 #include "menus/menu_general_flags/include/general_flags_menu.h"
 #include "gz_flags.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/utils.h"
+#include "d/d_com_inf_game.h"
+#include "tpgz_utils.h"
 #include "rels/include/defines.h"
 #include "menus/utils/menu_mgr.h"
 
@@ -46,16 +46,16 @@ void GeneralFlagsMenu::draw() {
     generalFlagsData->l_bossFlag = bossFlags > 0;
     generalFlagsData->l_coroTD = dComIfGs_isTmpBit(0x0002);
     generalFlagsData->l_ruslTD = dComIfGs_isTmpBit(0x0006);
-    generalFlagsData->l_midnaCharge = dComIfGs_isEventBit(0x0501);
-    generalFlagsData->l_transformWarp = dComIfGs_isEventBit(0x0D04);
-    generalFlagsData->l_midnaZ = dComIfGs_isEventBit(0x0C10);
-    generalFlagsData->l_eponaStolen = dComIfGs_isEventBit(0x0580);
-    generalFlagsData->l_eponaTamed = dComIfGs_isEventBit(0x0601);
-    generalFlagsData->l_maloMartCT = dComIfGs_isEventBit(0x2210);
-    generalFlagsData->l_mapWarping = dComIfGs_isEventBit(0x0604);
-    generalFlagsData->l_midnaHealed = dComIfGs_isEventBit(0x1E08);
+    generalFlagsData->l_midnaCharge = dComIfGs_isEventBit__FUs(0x0501);
+    generalFlagsData->l_transformWarp = dComIfGs_isEventBit__FUs(0x0D04);
+    generalFlagsData->l_midnaZ = dComIfGs_isEventBit__FUs(0x0C10);
+    generalFlagsData->l_eponaStolen = dComIfGs_isEventBit__FUs(0x0580);
+    generalFlagsData->l_eponaTamed = dComIfGs_isEventBit__FUs(0x0601);
+    generalFlagsData->l_maloMartCT = dComIfGs_isEventBit__FUs(0x2210);
+    generalFlagsData->l_mapWarping = dComIfGs_isEventBit__FUs(0x0604);
+    generalFlagsData->l_midnaHealed = dComIfGs_isEventBit__FUs(0x1E08);
     generalFlagsData->l_midnaRide = dComIfGs_isTransformLV(3);
-    generalFlagsData->l_wolfSense = dComIfGs_isEventBit(0x4308);
+    generalFlagsData->l_wolfSense = dComIfGs_isEventBit__FUs(0x4308);
     
 
     if (GZ_getButtonTrig(BACK_BUTTON)) {

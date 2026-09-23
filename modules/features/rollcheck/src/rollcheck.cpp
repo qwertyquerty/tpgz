@@ -2,10 +2,10 @@
 #include <cstdio>
 #include "controller.h"
 #include "fifo_queue.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/d/menu/d_menu_window.h"
-#include "libtp_c/include/SSystem/SComponent/c_counter.h"
-#include "libtp_c/include/m_Do/m_Do_printf.h"
+#include "d/d_com_inf_game.h"
+#include "d/d_menu_window.h"
+#include "SSystem/SComponent/c_counter.h"
+#include "m_Do/m_Do_printf.h"
 
 u8 current_frame_delta;     // The current active (unpaused) frame delta since the roll started.
 u8 roll_end_frame;          // The frame the roll ends on. Dynamically updated based on the previous action

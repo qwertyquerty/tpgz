@@ -2,7 +2,7 @@
 #pragma once
 
 #include <stdint.h>
-#include "libtp_c/include/dolphin/os/OSCache.h"
+#include "dolphin/os/OSCache.h"
 #include "rels/include/cxx.h"
 
 void writeBranch(void* ptr, void* destination);

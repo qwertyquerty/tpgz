@@ -6,12 +6,12 @@
 #include "global_data.h"
 #include "fs.h"
 #include "boot.h"
-#include "libtp_c/include/JSystem/JUtility/JUTGamePad.h"
-#include "libtp_c/include/utils.h"
+#include "JSystem/JUtility/JUTGamePad.h"
+#include "tpgz_utils.h"
 #include "practice.h"
 #include "settings.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/f_op/f_op_draw_tag.h"
+#include "d/d_com_inf_game.h"
+#include "f_op/f_op_draw_tag.h"
 #include "timer.h"
 #include "utils/loading.h"
 #include "gz_flags.h"
@@ -148,7 +148,7 @@ KEEP_FUNC void GZCmd_processInputs() {
             c->command();
             setGamepadButtons(0x0);
             setGamepadTrig(0x0);
-            mPadButton.mRepeat = 0x0;
+            mPadButton__10JUTGamePad.mRepeat = 0x0;
             mPadStatus.button = 0x0;
         }
     }

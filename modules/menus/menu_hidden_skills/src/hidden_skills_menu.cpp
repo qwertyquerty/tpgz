@@ -1,7 +1,7 @@
 #include "menus/menu_hidden_skills/include/hidden_skills_menu.h"
 #include <cstdio>
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/utils.h"
+#include "d/d_com_inf_game.h"
+#include "tpgz_utils.h"
 #include "gz_flags.h"
 #include "rels/include/defines.h"
 #include "menus/utils/menu_mgr.h"
@@ -29,13 +29,13 @@ void HiddenSkillsMenu::draw() {
     }
 
     // update hidden skill flags
-    hiddenSkillsData->l_ebFlag = dComIfGs_isEventBit(0x2904);
-    hiddenSkillsData->l_sbFlag = dComIfGs_isEventBit(0x2908);
-    hiddenSkillsData->l_bsFlag = dComIfGs_isEventBit(0x2902);
-    hiddenSkillsData->l_hsFlag = dComIfGs_isEventBit(0x2901);
-    hiddenSkillsData->l_mdFlag = dComIfGs_isEventBit(0x2A80);
-    hiddenSkillsData->l_jsFlag = dComIfGs_isEventBit(0x2A40);
-    hiddenSkillsData->l_gsFlag = dComIfGs_isEventBit(0x2A20);
+    hiddenSkillsData->l_ebFlag = dComIfGs_isEventBit__FUs(0x2904);
+    hiddenSkillsData->l_sbFlag = dComIfGs_isEventBit__FUs(0x2908);
+    hiddenSkillsData->l_bsFlag = dComIfGs_isEventBit__FUs(0x2902);
+    hiddenSkillsData->l_hsFlag = dComIfGs_isEventBit__FUs(0x2901);
+    hiddenSkillsData->l_mdFlag = dComIfGs_isEventBit__FUs(0x2A80);
+    hiddenSkillsData->l_jsFlag = dComIfGs_isEventBit__FUs(0x2A40);
+    hiddenSkillsData->l_gsFlag = dComIfGs_isEventBit__FUs(0x2A20);
 
     if (GZ_getButtonTrig(SELECTION_BUTTON)) {
         switch (cursor.y) {

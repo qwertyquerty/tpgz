@@ -1,12 +1,12 @@
 #include "collision_view.h"
 #include "global_data.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/dolphin/gx/gx.h"
-#include "libtp_c/include/JSystem/J3DGraphBase/J3DSys.h"
-#include "libtp_c/include/m_Do/m_Do_printf.h"
-#include "libtp_c/include/d/bg/d_bg_s_captpoly.h"
-#include "libtp_c/include/msl_c/math.h"
-#include "libtp_c/include/f_op/f_op_draw_tag.h"
+#include "d/d_com_inf_game.h"
+#include "dolphin/gx.h"
+#include "JSystem/J3DGraphBase/J3DSys.h"
+#include "m_Do/m_Do_printf.h"
+#include "d/d_bg_s_capt_poly.h"
+#include "tpgz_math.h"
+#include "f_op/f_op_draw_tag.h"
 
 #include <cstdio>
 //#include <math.h>

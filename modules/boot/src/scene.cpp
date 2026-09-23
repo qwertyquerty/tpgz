@@ -1,7 +1,7 @@
 #include "scene.h"
 #include "settings.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/d/meter/d_meter_HIO.h"
+#include "d/d_com_inf_game.h"
+#include "d/d_meter_HIO.h"
 
 KEEP_FUNC void GZ_freezeTime() {
     if (GZStng_getData(STNG_SCENE_FREEZE_TIME, false)) {
@@ -51,12 +51,12 @@ KEEP_FUNC void GZ_unfreezeActors() {
 bool l_initActorHide;
 KEEP_FUNC void GZ_hideActors() {
     l_initActorHide = true;
-    fopAc_ac_c__stopStatus |= 0x100;
+    stopStatus__10fopAc_ac_c |= 0x100;
 }
 
 KEEP_FUNC void GZ_showActors() {
     if (l_initActorHide) {
-        fopAc_ac_c__stopStatus &= ~0x100;
+        stopStatus__10fopAc_ac_c &= ~0x100;
         l_initActorHide = false;
     }
 }

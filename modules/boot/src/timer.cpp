@@ -4,8 +4,8 @@
 #include "pos_settings.h"
 #include "settings.h"
 #include "tools.h"
-#include "libtp_c/include/SSystem/SComponent/c_counter.h"
-#include "libtp_c/include/f_op/f_op_scene_req.h"
+#include "SSystem/SComponent/c_counter.h"
+#include "f_op/f_op_scene_req.h"
 #include "rels/include/defines.h"
 
 KEEP_FUNC void Timer::drawTimer() {
@@ -76,7 +76,7 @@ KEEP_FUNC void Timer::drawIGT() {
             init_start_time = true;
         }
 
-        if (fopScnRq.isLoading) {
+        if (l_fopScnRq_IsUsingOfOverlap.isLoading) {
             if (!init_load_starttime) {
                 load_start_time = OSGetTime();
                 init_load_starttime = true;
@@ -130,7 +130,7 @@ KEEP_FUNC void Timer::drawLoadTimer() {
         return;
     }
 
-    if (fopScnRq.isLoading) {
+    if (l_fopScnRq_IsUsingOfOverlap.isLoading) {
         if (!init_load_starttime) {
             load_start_time = OSGetTime();
             init_load_starttime = true;

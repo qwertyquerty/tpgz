@@ -2,9 +2,9 @@
 #include "corotdcheck.h"
 #include "controller.h"
 #include "fifo_queue.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/SSystem/SComponent/c_counter.h"
-#include "libtp_c/include/f_op/f_op_scene_req.h"
+#include "d/d_com_inf_game.h"
+#include "SSystem/SComponent/c_counter.h"
+#include "f_op/f_op_scene_req.h"
 
 #ifdef GCN_PLATFORM
 #define ITEM_BUTTON_HELD_CHECK (!GZ_getButtonHold(GZPad::Y) || !GZ_getButtonHold(GZPad::X))
@@ -28,7 +28,7 @@ KEEP_FUNC void CoroTDChecker::execute() {
     static uint32_t sFrameCount = 0;
 
     // reset counters on load
-    if (fopScnRq.isLoading) {
+    if (l_fopScnRq_IsUsingOfOverlap.isLoading) {
         sFrameCount = 0;
         sGoalHit = false;
         sTimerStarted = false;

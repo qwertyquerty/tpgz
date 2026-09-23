@@ -1,8 +1,8 @@
 #pragma once
 
 #include <cstdint>
-#include "libtp_c/include/dolphin/mtx/vec.h"
-#include "libtp_c/include/SSystem/SComponent/c_xyz.h"
+#include "tpgz_vec.h"
+#include "SSystem/SComponent/c_xyz.h"
 
 struct PositionData {
     cXyz link;

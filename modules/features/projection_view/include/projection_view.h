@@ -1,6 +1,6 @@
 #pragma once
 
-#include "libtp_c/include/SSystem/SComponent/c_xyz.h"
+#include "SSystem/SComponent/c_xyz.h"
 
 enum ProjectionViewIndex {
     VIEW_LJA_PROJECTION,

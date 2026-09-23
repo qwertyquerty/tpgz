@@ -2,8 +2,8 @@
 #include <cstdio>
 #include "pos_settings.h"
 #include "settings.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/m_Do/m_Do_audio.h"
+#include "d/d_com_inf_game.h"
+#include "m_Do/m_Do_audio.h"
 #include "tools.h"
 #include "rels/include/defines.h"
 #include "commands.h"
@@ -137,7 +137,7 @@ KEEP_FUNC void GZ_displayStageInfo() {
     char cur_layer[10];
 
     snprintf(cur_stage, sizeof(cur_stage), "Stage: %s", g_dComIfG_gameInfo.play.mStartStage.mStage);
-    snprintf(cur_room, sizeof(cur_room), "Room: %d", dStage_roomControl_c__mStayNo);
+    snprintf(cur_room, sizeof(cur_room), "Room: %d", mStayNo__20dStage_roomControl_c);
     snprintf(cur_point, sizeof(cur_point), "Point: %d", g_dComIfG_gameInfo.play.mStartStage.mPoint);
     snprintf(cur_layer, sizeof(cur_layer), "Layer: %d", dComIfG_play_c__getLayerNo(0));
 

@@ -7,14 +7,19 @@
 #include "utils/draw.h"
 #include "settings.h"
 #include "global_data.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/f_op/f_op_actor_iter.h"
-#include "libtp_c/include/d/a/d_a_alink.h"
+#include "d/d_com_inf_game.h"
+#include "f_op/f_op_actor_iter.h"
+#include "d/actor/d_a_alink.h"
 
-extern daMidna_c m_midnaActor;
+extern daMidna_c m_midnaActor__9daPy_py_c;
 
 #ifdef WII_PLATFORM
-extern bool isWidescreen;
+#if defined(WII_NTSCJ)
+#define isWidescreen (*reinterpret_cast<bool*>(0x8051DFC8))
+#else
+#define isWidescreen mWide__13mDoGph_gInf_c
+extern bool mWide__13mDoGph_gInf_c;
+#endif
 #define IS_WIDESCREEN isWidescreen
 #else
 #define IS_WIDESCREEN (false)

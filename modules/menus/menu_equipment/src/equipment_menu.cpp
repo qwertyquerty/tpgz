@@ -1,7 +1,7 @@
 #include "menus/menu_equipment/include/equipment_menu.h"
 #include <cstdio>
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/utils.h"
+#include "d/d_com_inf_game.h"
+#include "tpgz_utils.h"
 #include "gz_flags.h"
 #include "rels/include/defines.h"
 #include "menus/utils/menu_mgr.h"
@@ -54,41 +54,41 @@ void EquipmentMenu::resetIndex() {
 }
 
 void EquipmentMenu::getEquipment() {
-    if (dComIfGs_isItemFirstBit(SWORD)) {
+    if (dComIfGs_isItemFirstBit__FUc(SWORD)) {
         equipmentData->l_ordonSword_idx = 2;
-    } else if (dComIfGs_isItemFirstBit(WOOD_STICK)) {
+    } else if (dComIfGs_isItemFirstBit__FUc(WOOD_STICK)) {
         equipmentData->l_ordonSword_idx = 1;
     }
 
-    if (dComIfGs_isItemFirstBit(LIGHT_SWORD)) {
+    if (dComIfGs_isItemFirstBit__FUc(LIGHT_SWORD)) {
         equipmentData->l_masterSword_idx = 2;
-    } else if (dComIfGs_isItemFirstBit(MASTER_SWORD)) {
+    } else if (dComIfGs_isItemFirstBit__FUc(MASTER_SWORD)) {
         equipmentData->l_masterSword_idx = 1;
     }
 
-    if (dComIfGs_isItemFirstBit(SHIELD)) {
+    if (dComIfGs_isItemFirstBit__FUc(SHIELD)) {
         equipmentData->l_woodShield_idx = 2;
-    } else if (dComIfGs_isItemFirstBit(WOOD_SHIELD)) {
+    } else if (dComIfGs_isItemFirstBit__FUc(WOOD_SHIELD)) {
         equipmentData->l_woodShield_idx = 1;
     }
 
-    if (dComIfGs_isItemFirstBit(HYLIA_SHIELD)) {
+    if (dComIfGs_isItemFirstBit__FUc(HYLIA_SHIELD)) {
         equipmentData->l_hyShield_idx = 1;
     }
 
-    if (dComIfGs_isItemFirstBit(WEAR_KOKIRI)) {
+    if (dComIfGs_isItemFirstBit__FUc(WEAR_KOKIRI)) {
         equipmentData->l_tunic_idx = 1;
     }
 
-    if (dComIfGs_isItemFirstBit(WEAR_ZORA)) {
+    if (dComIfGs_isItemFirstBit__FUc(WEAR_ZORA)) {
         equipmentData->l_zoraArmor_idx = 1;
     }
 
-    if (dComIfGs_isItemFirstBit(ARMOR)) {
+    if (dComIfGs_isItemFirstBit__FUc(ARMOR)) {
         equipmentData->l_magicArmor_idx = 1;
     }
 
-    if (dComIfGs_isItemFirstBit(BOMB_BAG_LV2)) {
+    if (dComIfGs_isItemFirstBit__FUc(BOMB_BAG_LV2)) {
         equipmentData->l_bombCap_idx = 1;
     }
 

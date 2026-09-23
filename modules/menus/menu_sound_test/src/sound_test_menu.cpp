@@ -1,10 +1,10 @@
 #include "menus/menu_sound_test/include/sound_test_menu.h"
 #include <cstdio>
 #include "settings.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/f_op/f_op_actor_mng.h"
-#include "libtp_c/include/m_Do/m_Do_printf.h"
-#include "libtp_c/include/m_Do/m_Do_audio.h"
+#include "d/d_com_inf_game.h"
+#include "f_op/f_op_actor_mng.h"
+#include "m_Do/m_Do_printf.h"
+#include "m_Do/m_Do_audio.h"
 #include "rels/include/defines.h"
 #include "menus/utils/menu_mgr.h"
 
