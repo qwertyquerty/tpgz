@@ -53,7 +53,7 @@ extern Texture l_framePlayTex;
 #define MAX_WAIT_FRAMES 120
 #define GP_IDLE_POLLS 100000
 #define MAX_AUDIO_DRAIN_SUBFRAMES 240
-#define MAX_OUTSIDE_MODULES 8
+#define MAX_OUTSIDE_MODULES 32
 #define JKRTHREAD_MESSAGE_QUEUE_OFFSET 0x30
 #define DVD_THREAD_COMMAND_LIST_OFFSET 0x24
 #define Z2_SCENE_WAVES_OFFSET 0x0D
@@ -436,10 +436,19 @@ static void captureState() {
     RangeList preserved, skipped, segments;
     ModuleLink outsideModules[MAX_OUTSIDE_MODULES];
     u32 outsideModuleCount;
-    if (!collectPreserved(preserved) || !collectSkipped(skipped, preserved) || !collectSegments(segments, skipped) ||
-        !collectOutsideModules(outsideModules, &outsideModuleCount, preserved))
-    {
-        pushMessage("save state failed: out of memory");
+    const char* failedList = !collectPreserved(preserved)             ? "preserved" :
+                             !collectSkipped(skipped, preserved)       ? "skipped" :
+                             !collectSegments(segments, skipped)       ? "segments" :
+                                                                         NULL;
+    if (failedList != NULL) {
+        char buf[64];
+        snprintf(buf, sizeof(buf), "save state failed: %s list, %d KB free", failedList,
+                 g_tpgzMem2Heap != NULL ? (int)(g_tpgzMem2Heap->getFreeSize() / 1024) : -1);
+        pushMessage(buf);
+        return;
+    }
+    if (!collectOutsideModules(outsideModules, &outsideModuleCount, preserved)) {
+        pushMessage("save state failed: too many unrestored modules");
         return;
     }
 
