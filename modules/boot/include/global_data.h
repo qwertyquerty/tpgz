@@ -7,5 +7,6 @@ extern bool g_moveLinkEnabled;
 extern fopAc_ac_c* g_currentActor;
 extern bool g_actorViewEnabled;
 extern bool g_transformIndicatorEnabled;
+extern bool g_skipGameFrame;
 
 #endif

@@ -35,6 +35,7 @@ bool gorge_wolf_active();
 bool gorge_human_active();
 bool rollcheck_active();
 bool moon_jump_active();
+bool saveStates_active();
 bool freeze_actor_active();
 bool hide_actor_active();
 bool freeze_camera_active();

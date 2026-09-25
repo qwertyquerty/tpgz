@@ -21,6 +21,10 @@ KEEP_FUNC void GZ_handleModules() {
         }
     }
 
+    if (g_skipGameFrame) {
+        return;
+    }
+
     for (tpgz::containers::deque<Module*>::iterator modIt = g_modules.begin(); modIt != g_modules.end(); ++modIt) {
         Module* mod = *modIt;
         if (mod->active() && !mod->rel.isLoaded()) {
@@ -115,6 +119,10 @@ KEEP_FUNC bool gorge_human_active() {
 
 KEEP_FUNC bool rollcheck_active() {
     return GZStng_getData(STNG_TOOLS_ROLL, false);
+}
+
+KEEP_FUNC bool saveStates_active() {
+    return GZStng_getData(STNG_TOOLS_SAVE_STATES, false);
 }
 
 KEEP_FUNC bool moon_jump_active() {

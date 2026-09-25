@@ -1,0 +1,7 @@
+file(GLOB_RECURSE srcs CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+file(GLOB_RECURSE asms CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.s")
+list(APPEND srcs ${asms})
+get_filename_component(rel_name ${CMAKE_CURRENT_SOURCE_DIR} NAME)
+tpgz_add_module(${rel_name} "${srcs}" "${CMAKE_CURRENT_SOURCE_DIR}/include")
+target_include_directories(${rel_name} PRIVATE ${TPGZ_GENERATED_DIR})
+add_dependencies(${rel_name} tpgz_savestate_ranges)

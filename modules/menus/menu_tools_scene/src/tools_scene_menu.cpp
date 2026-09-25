@@ -24,6 +24,7 @@ const char l_descTemplates[TOOLS_SCENE_COUNT][100] = {
     "use %s to pause, %s to frame advance",
     FREE_CAM_TEXT " to activate, " FREE_CAM_MOVEMENT_TEXT " to move, " FREE_CAM_VIEW_TEXT " to view, Z to speed",
     "show Heap size info",
+    "use " SAVE_STATE_TEXT " to save state, " LOAD_STATE_TEXT " to load state",
 };
 
 static Line lines[TOOLS_SCENE_COUNT] = {
@@ -36,7 +37,10 @@ static Line lines[TOOLS_SCENE_COUNT] = {
                                " to view, Z to speed",
                  true, ACTIVE_FUNC(STNG_TOOLS_FREE_CAM)},
                 {"heap debug info", HEAP_DEBUG_INDEX, "show Heap size info", true,
-                 ACTIVE_FUNC(STNG_TOOLS_HEAP_DEBUG)}
+                 ACTIVE_FUNC(STNG_TOOLS_HEAP_DEBUG)},
+                {"save states", SAVE_STATES_INDEX,
+                 "use " SAVE_STATE_TEXT " to save state, " LOAD_STATE_TEXT " to load state", true,
+                 ACTIVE_FUNC(STNG_TOOLS_SAVE_STATES)}
 };
 
 KEEP_FUNC ToolsSceneMenu::ToolsSceneMenu(Cursor& cursor)
@@ -49,6 +53,7 @@ GZSettingID l_mapping[] = {
     STNG_TOOLS_FRAME_ADVANCE,    
     STNG_TOOLS_FREE_CAM,
     STNG_TOOLS_HEAP_DEBUG,
+    STNG_TOOLS_SAVE_STATES,
 };
 
 #define set_active(id, status)                                                                     \

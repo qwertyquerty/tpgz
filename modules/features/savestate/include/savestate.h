@@ -1,0 +1,22 @@
+#ifndef TPGZ_MODULES_FEATURES_SAVESTATE_INCLUDE_SAVESTATE_H
+#define TPGZ_MODULES_FEATURES_SAVESTATE_INCLUDE_SAVESTATE_H
+#include "controller.h"
+
+#define SAVE_STATE_DPAD_BUTTONS (CButton::DPAD_LEFT | CButton::DPAD_RIGHT | CButton::DPAD_DOWN | CButton::DPAD_UP)
+
+#ifdef GCN_PLATFORM
+#define SAVE_STATE_MODIFIER_BUTTONS (CButton::L | CButton::R)
+#endif
+
+#ifdef WII_PLATFORM
+#define SAVE_STATE_MODIFIER_BUTTONS (CButton::Z | CButton::C)
+#endif
+
+#define SAVE_STATE_BUTTONS (SAVE_STATE_MODIFIER_BUTTONS | CButton::DPAD_LEFT)
+#define LOAD_STATE_BUTTONS (SAVE_STATE_MODIFIER_BUTTONS | CButton::DPAD_RIGHT)
+
+void GZ_initSaveStates();
+void GZ_exitSaveStates();
+void GZ_handleSaveStates();
+
+#endif

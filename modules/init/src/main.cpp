@@ -80,6 +80,7 @@ void main() {
     g_modules.push_back(new Module(gorge_human_active, "/tpgz/rels/features/gorge.rel"));
     g_modules.push_back(new Module(rollcheck_active, "/tpgz/rels/features/rollcheck.rel"));
     g_modules.push_back(new Module(moon_jump_active, "/tpgz/rels/features/moon_jump.rel"));
+    g_modules.push_back(new Module(saveStates_active, "/tpgz/rels/features/savestate.rel"));
 
     // Init the pre-loop listener
     g_PreLoopListener = new PreLoopListener();

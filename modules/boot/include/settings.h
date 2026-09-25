@@ -121,6 +121,7 @@ enum GZSettingID {
     STNG_SWAP_EQUIPS,
     STNG_TOOLS_FAST_EEL_REGRAB,
     STNG_TOOLS_SLASH,
+    STNG_TOOLS_SAVE_STATES,
 };
 
 struct GZSettingEntry {
