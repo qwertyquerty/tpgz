@@ -1,40 +1,43 @@
+#include "defines.h"
 #include "menus/menu_tools_checkers/include/tools_checkers_menu.h"
 #include "menus/utils/menu_mgr.h"
 
 #define MAX_GORGE_VOID_OPTIONS 3
 
+static Line lines[CHECKERS_COUNT] = {
+    #ifdef WII_PLATFORM
+                {"bit", BIT_INDEX, "use " BACK_IN_TIME_TEXT " to warp to ordon bridge", true,
+                 ACTIVE_FUNC(STNG_TOOLS_BIT)},
+                {"slash", SLASH_INDEX, "frame counter for slash out of item wheel", true,
+                ACTIVE_FUNC(STNG_TOOLS_SLASH)},
+    #endif
+                {"coro td", COROTD_INDEX, "show frame info when doing coro td", true,
+                 ACTIVE_FUNC(STNG_TOOLS_COROTD)},
+                {"ebmb", EBMB_INDEX, "show frame information when doing ending blow moon boots", 
+                 true, ACTIVE_FUNC(STNG_TOOLS_EBMB)},
+                {"elevator escape", ELEVATOR_ESCAPE_INDEX, "show frame info when doing elevator escape",
+                 true, ACTIVE_FUNC(STNG_TOOLS_ELEVATOR_ESCAPE)},
+                {"ladder freezard cancel", LFC_INDEX, "ladder freezard cancel checker",
+                 true, ACTIVE_FUNC(STNG_TOOLS_LFC)},
+                {"a/b mash rate", MASH_CHECKER_INDEX, "display A/B button mashing speeds", true,
+                 ACTIVE_FUNC(STNG_TOOLS_MASH_CHECKER)},
+                {"rolling", ROLL_INDEX, "frame counter for chaining rolls", true,
+                 ACTIVE_FUNC(STNG_TOOLS_ROLL)},
+                {"universal map delay", UMD_INDEX, "practice snowpeak universal map delay timing", true,
+                 ACTIVE_FUNC(STNG_TOOLS_UMD)},
+                {"fast eel regrab", FAST_EEL_REGRAB_INDEX, "show frame info when fast morpheel regrab (claw before boots)", true, ACTIVE_FUNC(STNG_TOOLS_FAST_EEL_REGRAB)},
+                {
+                    "gorge void", 
+                    GORGE_INDEX, 
+                    "use " GORGE_VOID_TEXT " to warp to kakariko gorge",
+                    false, 
+                    NULL, 
+                    MAX_GORGE_VOID_OPTIONS
+                },
+};
+
 KEEP_FUNC CheckersMenu::CheckersMenu(Cursor& cursor)
-    : Menu(cursor), lines{
-#ifdef WII_PLATFORM
-            {"bit", BIT_INDEX, "use " BACK_IN_TIME_TEXT " to warp to ordon bridge", true,
-             ACTIVE_FUNC(STNG_TOOLS_BIT)},
-            {"slash", SLASH_INDEX, "frame counter for slash out of item wheel", true,
-            ACTIVE_FUNC(STNG_TOOLS_SLASH)},
-#endif
-            {"coro td", COROTD_INDEX, "show frame info when doing coro td", true,
-             ACTIVE_FUNC(STNG_TOOLS_COROTD)},
-            {"ebmb", EBMB_INDEX, "show frame information when doing ending blow moon boots", 
-             true, ACTIVE_FUNC(STNG_TOOLS_EBMB)},
-            {"elevator escape", ELEVATOR_ESCAPE_INDEX, "show frame info when doing elevator escape",
-             true, ACTIVE_FUNC(STNG_TOOLS_ELEVATOR_ESCAPE)},
-            {"ladder freezard cancel", LFC_INDEX, "ladder freezard cancel checker",
-             true, ACTIVE_FUNC(STNG_TOOLS_LFC)},
-            {"a/b mash rate", MASH_CHECKER_INDEX, "display A/B button mashing speeds", true,
-             ACTIVE_FUNC(STNG_TOOLS_MASH_CHECKER)},
-            {"rolling", ROLL_INDEX, "frame counter for chaining rolls", true,
-             ACTIVE_FUNC(STNG_TOOLS_ROLL)},
-            {"universal map delay", UMD_INDEX, "practice snowpeak universal map delay timing", true,
-             ACTIVE_FUNC(STNG_TOOLS_UMD)},
-            {"fast eel regrab", FAST_EEL_REGRAB_INDEX, "show frame info when fast morpheel regrab (claw before boots)", true, ACTIVE_FUNC(STNG_TOOLS_FAST_EEL_REGRAB)},
-            {
-                "gorge void", 
-                GORGE_INDEX, 
-                "use " GORGE_VOID_TEXT " to warp to kakariko gorge",
-                false, 
-                nullptr, 
-                MAX_GORGE_VOID_OPTIONS
-            },
-            } {}
+    : Menu(cursor) {}
 
 CheckersMenu::~CheckersMenu() {}
 
@@ -46,7 +49,7 @@ void CheckersMenu::draw() {
         return;
     }
 
-    GZSettingEntry* stng = nullptr;
+    GZSettingEntry* stng = NULL;
 
     if (GZ_getButtonTrig(SELECTION_BUTTON)) {
         switch (cursor.y) {
@@ -55,7 +58,7 @@ void CheckersMenu::draw() {
             case BIT_INDEX:
                 stng = GZStng_get(STNG_TOOLS_BIT);
                 if (!stng) {
-                    stng = new GZSettingEntry{STNG_TOOLS_BIT, sizeof(bool), new bool{false}};
+                    stng = new GZSettingEntry(STNG_TOOLS_BIT, sizeof(bool), new bool(false));
                     g_settings.push_back(stng);
                 }
                 *static_cast<bool*>(stng->data) = !*static_cast<bool*>(stng->data);
@@ -63,7 +66,7 @@ void CheckersMenu::draw() {
             case SLASH_INDEX:
                 stng = GZStng_get(STNG_TOOLS_SLASH);
                 if (!stng) {
-                    stng = new GZSettingEntry{STNG_TOOLS_SLASH, sizeof(bool), new bool{false}};
+                    stng = new GZSettingEntry(STNG_TOOLS_SLASH, sizeof(bool), new bool(false));
                     g_settings.push_back(stng);
                 }
                 *static_cast<bool*>(stng->data) = !*static_cast<bool*>(stng->data);
@@ -73,7 +76,7 @@ void CheckersMenu::draw() {
             case COROTD_INDEX:
                 stng = GZStng_get(STNG_TOOLS_COROTD);
                 if (!stng) {
-                    stng = new GZSettingEntry{STNG_TOOLS_COROTD, sizeof(bool), new bool{false}};
+                    stng = new GZSettingEntry(STNG_TOOLS_COROTD, sizeof(bool), new bool(false));
                     g_settings.push_back(stng);
                 }
                 *static_cast<bool*>(stng->data) = !*static_cast<bool*>(stng->data);
@@ -81,7 +84,7 @@ void CheckersMenu::draw() {
             case EBMB_INDEX:
                 stng = GZStng_get(STNG_TOOLS_EBMB);
                 if (!stng) {
-                    stng = new GZSettingEntry{STNG_TOOLS_EBMB, sizeof(bool), new bool{false}};
+                    stng = new GZSettingEntry(STNG_TOOLS_EBMB, sizeof(bool), new bool(false));
                     g_settings.push_back(stng);
                 }
                 *static_cast<bool*>(stng->data) = !*static_cast<bool*>(stng->data);
@@ -89,7 +92,7 @@ void CheckersMenu::draw() {
             case ELEVATOR_ESCAPE_INDEX:
                 stng = GZStng_get(STNG_TOOLS_ELEVATOR_ESCAPE);
                 if (!stng) {
-                    stng = new GZSettingEntry{STNG_TOOLS_ELEVATOR_ESCAPE, sizeof(bool), new bool{false}};
+                    stng = new GZSettingEntry(STNG_TOOLS_ELEVATOR_ESCAPE, sizeof(bool), new bool(false));
                     g_settings.push_back(stng);
                 }
                 *static_cast<bool*>(stng->data) = !*static_cast<bool*>(stng->data);
@@ -97,7 +100,7 @@ void CheckersMenu::draw() {
             case LFC_INDEX:
                 stng = GZStng_get(STNG_TOOLS_LFC);
                 if (!stng) {
-                    stng = new GZSettingEntry{STNG_TOOLS_LFC, sizeof(bool), new bool{false}};
+                    stng = new GZSettingEntry(STNG_TOOLS_LFC, sizeof(bool), new bool(false));
                     g_settings.push_back(stng);
                 }
                 *static_cast<bool*>(stng->data) = !*static_cast<bool*>(stng->data);
@@ -105,7 +108,7 @@ void CheckersMenu::draw() {
             case MASH_CHECKER_INDEX:
                 stng = GZStng_get(STNG_TOOLS_MASH_CHECKER);
                 if (!stng) {
-                    stng = new GZSettingEntry{STNG_TOOLS_MASH_CHECKER, sizeof(bool), new bool{false}};
+                    stng = new GZSettingEntry(STNG_TOOLS_MASH_CHECKER, sizeof(bool), new bool(false));
                     g_settings.push_back(stng);
                 }
                 *static_cast<bool*>(stng->data) = !*static_cast<bool*>(stng->data);
@@ -113,7 +116,7 @@ void CheckersMenu::draw() {
             case ROLL_INDEX:
                 stng = GZStng_get(STNG_TOOLS_ROLL);
                 if (!stng) {
-                    stng = new GZSettingEntry{STNG_TOOLS_ROLL, sizeof(bool), new bool{false}};
+                    stng = new GZSettingEntry(STNG_TOOLS_ROLL, sizeof(bool), new bool(false));
                     g_settings.push_back(stng);
                 }
                 *static_cast<bool*>(stng->data) = !*static_cast<bool*>(stng->data);
@@ -121,7 +124,7 @@ void CheckersMenu::draw() {
             case UMD_INDEX:
                 stng = GZStng_get(STNG_TOOLS_UMD);
                 if (!stng) {
-                    stng = new GZSettingEntry{STNG_TOOLS_UMD, sizeof(bool), new bool{false}};
+                    stng = new GZSettingEntry(STNG_TOOLS_UMD, sizeof(bool), new bool(false));
                     g_settings.push_back(stng);
                 }
                 *static_cast<bool*>(stng->data) = !*static_cast<bool*>(stng->data);
@@ -129,7 +132,7 @@ void CheckersMenu::draw() {
             case FAST_EEL_REGRAB_INDEX:
                 stng = GZStng_get(STNG_TOOLS_FAST_EEL_REGRAB);
                 if (!stng) {
-                    stng = new GZSettingEntry{STNG_TOOLS_FAST_EEL_REGRAB, sizeof(bool), new bool{false}};
+                    stng = new GZSettingEntry(STNG_TOOLS_FAST_EEL_REGRAB, sizeof(bool), new bool(false));
                     g_settings.push_back(stng);
                 }
                 *static_cast<bool*>(stng->data) = !*static_cast<bool*>(stng->data);
@@ -139,8 +142,8 @@ void CheckersMenu::draw() {
 
     ListMember gorge_opt[MAX_GORGE_VOID_OPTIONS] = {"off", "wolf", "human"};
 
-    stng = nullptr;
-    auto prev_x = cursor.x;
+    stng = NULL;
+    int prev_x = cursor.x;
     // handle list rendering
     switch (cursor.y) {
         case GORGE_INDEX:
@@ -152,7 +155,7 @@ void CheckersMenu::draw() {
             if (cursor.y == GORGE_INDEX) {
                 if (cursor.x != prev_x) {
                     if (!stng) {
-                        stng = new GZSettingEntry{STNG_TOOLS_GORGE, sizeof(uint32_t), new uint32_t(cursor.x)};
+                        stng = new GZSettingEntry(STNG_TOOLS_GORGE, sizeof(uint32_t), new uint32_t(cursor.x));
                         g_settings.push_back(stng);
                     } else {
                         *static_cast<uint32_t*>(stng->data) = cursor.x;

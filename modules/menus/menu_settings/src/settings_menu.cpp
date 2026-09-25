@@ -10,29 +10,31 @@
 #define MAX_RELOAD_OPTIONS 2
 #define MAX_CURSOR_COLOR_OPTIONS 8
 
+static Line lines[SETTINGS_COUNT] = {
+    {"advanced mode", ADVANCED_MODE_INDEX, "Display more information in certain tools",
+     true, GZ_checkAdvancedMode},
+    {"area reload behavior:", AREA_RELOAD_BEHAVIOR_INDEX,
+     "Load area: reload last area | Load file = reload last file", false,
+     NULL, MAX_RELOAD_OPTIONS},
+    {"cursor color:", CURSOR_COLOR_INDEX, "Change cursor color", false, NULL,
+     MAX_CURSOR_COLOR_OPTIONS},
+    {"font:", FONT_INDEX, "Change font", false, NULL, FONT_OPTIONS_COUNT},
+    {"drop shadows", DROP_SHADOWS_INDEX, "Adds shadows to all font letters",
+     true, GZ_checkDropShadows},
+    {"swap equips", SWAP_EQUIPS_INDEX,
+     "Swap equips when loading practice files", true, GZ_checkSwapEquips},
+    {"save card", SAVE_CARD_INDEX, "Save settings to memory card"},
+    {"load card", LOAD_CARD_INDEX, "Load settings from memory card"},
+    {"delete card", DELETE_CARD_INDEX, "Delete settings from memory card"},
+    {"command combos", COMBO_INDEX, "view command combinations menu", false},
+    {"menu positions", POS_SETTINGS_MENU_INDEX,
+     "Change menu object positions (A to toggle selection, DPad to move)",
+     false},
+     {"credits", CREDITS_INDEX, "view credits", false},
+};
+
 KEEP_FUNC SettingsMenu::SettingsMenu(Cursor& cursor)
-    : Menu(cursor), lines{
-                        {"advanced mode", ADVANCED_MODE_INDEX, "Display more information in certain tools",
-                         true, GZ_checkAdvancedMode},
-                        {"area reload behavior:", AREA_RELOAD_BEHAVIOR_INDEX,
-                         "Load area: reload last area | Load file = reload last file", false,
-                         nullptr, MAX_RELOAD_OPTIONS},
-                        {"cursor color:", CURSOR_COLOR_INDEX, "Change cursor color", false, nullptr,
-                         MAX_CURSOR_COLOR_OPTIONS},
-                        {"font:", FONT_INDEX, "Change font", false, nullptr, FONT_OPTIONS_COUNT},
-                        {"drop shadows", DROP_SHADOWS_INDEX, "Adds shadows to all font letters",
-                         true, GZ_checkDropShadows},
-                        {"swap equips", SWAP_EQUIPS_INDEX,
-                         "Swap equips when loading practice files", true, GZ_checkSwapEquips},
-                        {"save card", SAVE_CARD_INDEX, "Save settings to memory card"},
-                        {"load card", LOAD_CARD_INDEX, "Load settings from memory card"},
-                        {"delete card", DELETE_CARD_INDEX, "Delete settings from memory card"},
-                        {"command combos", COMBO_INDEX, "view command combinations menu", false},
-                        {"menu positions", POS_SETTINGS_MENU_INDEX,
-                         "Change menu object positions (A to toggle selection, DPad to move)",
-                         false},
-                         {"credits", CREDITS_INDEX, "view credits", false},
-                    } {}
+    : Menu(cursor) {}
 
 SettingsMenu::~SettingsMenu() {}
 
@@ -44,14 +46,14 @@ void SettingsMenu::draw() {
         return;
     }
 
-    GZSettingEntry* stng = nullptr;
+    GZSettingEntry* stng = NULL;
     // static Storage storage;
     if (GZ_getButtonTrig(SELECTION_BUTTON)) {
         switch (cursor.y) {
         case ADVANCED_MODE_INDEX:
             stng = GZStng_get(STNG_ADVANCED_MODE);
             if (!stng) {
-                stng = new GZSettingEntry{STNG_ADVANCED_MODE, sizeof(bool), new bool{false}};
+                stng = new GZSettingEntry(STNG_ADVANCED_MODE, sizeof(bool), new bool(false));
                 g_settings.push_back(stng);
             }
             *static_cast<bool*>(stng->data) = !*static_cast<bool*>(stng->data);
@@ -59,7 +61,7 @@ void SettingsMenu::draw() {
         case DROP_SHADOWS_INDEX:
             stng = GZStng_get(STNG_DROP_SHADOWS);
             if (!stng) {
-                stng = new GZSettingEntry{STNG_DROP_SHADOWS, sizeof(bool), new bool{false}};
+                stng = new GZSettingEntry(STNG_DROP_SHADOWS, sizeof(bool), new bool(false));
                 g_settings.push_back(stng);
             }
             *static_cast<bool*>(stng->data) = !*static_cast<bool*>(stng->data);
@@ -79,7 +81,7 @@ void SettingsMenu::draw() {
             storage.sector_size = SECTOR_SIZE;
             snprintf(storage.file_name_buffer, sizeof(storage.file_name_buffer), storage.file_name);
 #ifndef WII_PLATFORM
-            storage.result = CARDProbeEx(0, nullptr, &storage.sector_size);
+            storage.result = CARDProbeEx(0, NULL, &storage.sector_size);
             if (storage.result == Ready) {
                 GZ_storeMemCard(storage);
             }
@@ -109,7 +111,7 @@ void SettingsMenu::draw() {
             storage.sector_size = SECTOR_SIZE;
             snprintf(storage.file_name_buffer, sizeof(storage.file_name_buffer), storage.file_name);
 #ifndef WII_PLATFORM
-            storage.result = CARDProbeEx(0, nullptr, &storage.sector_size);
+            storage.result = CARDProbeEx(0, NULL, &storage.sector_size);
             if (storage.result == Ready) {
                 GZ_deleteMemCard(storage);
             }
@@ -121,7 +123,7 @@ void SettingsMenu::draw() {
         case SWAP_EQUIPS_INDEX:
             stng = GZStng_get(STNG_SWAP_EQUIPS);
             if (!stng) {
-                stng = new GZSettingEntry{STNG_SWAP_EQUIPS, sizeof(bool), new bool{false}};
+                stng = new GZSettingEntry(STNG_SWAP_EQUIPS, sizeof(bool), new bool(false));
                 g_settings.push_back(stng);
             }
             *static_cast<bool*>(stng->data) = !*static_cast<bool*>(stng->data);
@@ -133,8 +135,8 @@ void SettingsMenu::draw() {
 
     ListMember cursorCol_opt[MAX_CURSOR_COLOR_OPTIONS] = {"green",  "blue",   "red", "orange", "yellow", "purple", "pink", "cyan"};
 
-    stng = nullptr;
-    auto prev_x = cursor.x;
+    stng = NULL;
+    int prev_x = cursor.x;
     // handle list rendering
     switch (cursor.y) {
     case AREA_RELOAD_BEHAVIOR_INDEX:
@@ -146,7 +148,7 @@ void SettingsMenu::draw() {
         if (cursor.y == AREA_RELOAD_BEHAVIOR_INDEX) {
             if (cursor.x != prev_x) {
                 if (!stng) {
-                    stng = new GZSettingEntry{STNG_AREA_RELOAD_BEHAVIOUR, sizeof(uint32_t), new uint32_t(cursor.x)};
+                    stng = new GZSettingEntry(STNG_AREA_RELOAD_BEHAVIOUR, sizeof(uint32_t), new uint32_t(cursor.x));
                     g_settings.push_back(stng);
                 } else {
                     *static_cast<uint32_t*>(stng->data) = cursor.x;
@@ -163,7 +165,7 @@ void SettingsMenu::draw() {
         if (cursor.y == CURSOR_COLOR_INDEX) {
             if (cursor.x != prev_x) {
                 if (!stng) {
-                    stng = new GZSettingEntry{STNG_CURSOR_COLOR, sizeof(uint32_t), new uint32_t(cursor.x)};
+                    stng = new GZSettingEntry(STNG_CURSOR_COLOR, sizeof(uint32_t), new uint32_t(cursor.x));
                     g_settings.push_back(stng);
                 } else {
                     *static_cast<uint32_t*>(stng->data) = cursor.x;
@@ -181,7 +183,7 @@ void SettingsMenu::draw() {
         if (cursor.y == FONT_INDEX) {
             if (prev_x != cursor.x) {
                 if (!stng) {
-                    stng = new GZSettingEntry{STNG_FONT, sizeof(uint32_t), new uint32_t(cursor.x)};
+                    stng = new GZSettingEntry(STNG_FONT, sizeof(uint32_t), new uint32_t(cursor.x));
                     g_settings.push_back(stng);
                 } else {
                     *static_cast<uint32_t*>(stng->data) = cursor.x;

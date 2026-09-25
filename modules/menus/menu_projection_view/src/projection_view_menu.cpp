@@ -5,13 +5,15 @@
 #include "collision_view.h"
 #include "settings.h"
 
+static Line lines[PROJECTION_VIEW_MAX] = {
+    {"lja", VIEW_LJA_PROJECTION, "display projected path taken of an LJA", true,
+    ACTIVE_FUNC(STNG_SCENE_LJA_PROJECTION)},
+    {"midna charge", VIEW_MIDNA_CHARGE_PROJECTION, "display projected path taken by a super jump", true,
+    ACTIVE_FUNC(STNG_SCENE_MIDNA_CHARGE_PROJECTION)},
+};
+
 KEEP_FUNC ProjectionViewMenu::ProjectionViewMenu(Cursor& cursor)
-    : Menu(cursor), lines{
-                         {"lja", VIEW_LJA_PROJECTION, "display projected path taken of an LJA", true,
-                         ACTIVE_FUNC(STNG_SCENE_LJA_PROJECTION)},
-                         {"midna charge", VIEW_MIDNA_CHARGE_PROJECTION, "display projected path taken by a super jump", true,
-                         ACTIVE_FUNC(STNG_SCENE_MIDNA_CHARGE_PROJECTION)},
-                    } {}
+    : Menu(cursor) {}
 
 ProjectionViewMenu::~ProjectionViewMenu() {}
 
@@ -26,9 +28,9 @@ void ProjectionViewMenu::draw() {
     }
 
     if (GZ_getButtonTrig(SELECTION_BUTTON)) {
-        auto* stng [[maybe_unused]] = GZStng_get(l_mapping[cursor.y]);
+        GZSettingEntry* stng = GZStng_get(l_mapping[cursor.y]);
         if (!stng) {
-            stng = new GZSettingEntry{l_mapping[cursor.y], sizeof(bool), new bool};
+            stng = new GZSettingEntry(l_mapping[cursor.y], sizeof(bool), new bool);
             g_settings.push_back(stng);
         }
         *static_cast<bool*>(stng->data) = !*static_cast<bool*>(stng->data);

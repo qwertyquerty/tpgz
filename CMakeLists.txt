@@ -35,7 +35,7 @@ if(DEFINED PR_TEST)
 endif()
 
 if(DEFINED DEBUG)
-    set(DEBUG "-DDEBUG=1")
+    set(DEBUG "-DTPGZ_DEBUG=1")
 endif()
 
 # Start configuring the build directory
@@ -44,9 +44,13 @@ message(STATUS "Configuring for ${PLATFORM}_${REGION}...")
 # These two lists are used as a map to get the right ISO file name for each version.
 set(TPGZ_ISO_VERSIONS GCN_NTSCU GCN_NTSCJ GCN_PAL WII_NTSCU_10 WII_NTSCU_12 WII_NTSCJ WII_PAL)
 set(TPGZ_ISO_FILES    GZ2E01    GZ2J01    GZ2P01  RZDE01       RZDE01_2     RZDJ01    RZDP01)
+set(TPGZ_DECOMP_VERSIONS 0 2 1 3 4 6 5)
+set(TPGZ_DECOMP_ASSET_VERSIONS GZ2E01 GZ2J01 GZ2P01 RZDE01_00 RZDE01_02 RZDJ01 RZDP01)
 
 list(FIND TPGZ_ISO_VERSIONS ${PLATFORM}_${REGION} TPGZ_ISO_VERSION)
 list(GET TPGZ_ISO_FILES ${TPGZ_ISO_VERSION} TPGZ_ISO_FILE)
+list(GET TPGZ_DECOMP_VERSIONS ${TPGZ_ISO_VERSION} TPGZ_DECOMP_VERSION)
+list(GET TPGZ_DECOMP_ASSET_VERSIONS ${TPGZ_ISO_VERSION} TPGZ_DECOMP_ASSET_VERSION)
 
 list(APPEND CMAKE_MODULE_PATH
   ${CMAKE_SOURCE_DIR}/cmake
@@ -54,11 +58,8 @@ list(APPEND CMAKE_MODULE_PATH
 
 include(cmake/version.cmake)
 
-# Once we have the platform and region ready, we can check and setup the compiler toolchain.
-include(cmake/CheckDevkitPro.cmake)
-
-include_directories(${DEVKITPRO_LIBOGC_INC})
-link_directories(${DEVKITPRO_LIBOGC_LIB})
+# Once we have the platform and region ready, we can setup the compiler toolchain.
+include(cmake/mwcc.cmake)
 
 include(cmake/patcher.cmake)
 include(cmake/elf2rel.cmake)
@@ -68,18 +69,33 @@ include(cmake/fonts.cmake)
 project(TPGZ
         DESCRIPTION "Twilight Princess speedrunning practice and testing tool"
         HOMEPAGE_URL "tpgz.io"
-        LANGUAGES C CXX ASM)
+        LANGUAGES C CXX)
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/isos)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 
 # Set compiler stuff
-include_directories(external)
-add_definitions(-D${PLATFORM}_${REGION} -D${PLATFORM}_PLATFORM -DGZ_VERSION=${TPGZ_BUILD_VERSION} -D_PROJECT_NAME="${CMAKE_PROJECT_NAME}" -D_VERSION="${TPGZ_BUILD_VERSION}" -D_VARIANT="public" -D_BUILDID="${TPGZ_BUILD_VERSION}" ${DEBUG} ${RUN_PR_TEST})
-add_compile_options(-fdiagnostics-color=always -fvisibility=hidden)
+if(PLATFORM STREQUAL "GCN")
+    set(TPGZ_DECOMP_SDK_INCLUDES tp/libs/dolphin/include tp/libs/dolphin/include/dolphin)
+else()
+    set(TPGZ_DECOMP_SDK_INCLUDES tp/libs/revolution/include tp/libs/revolution/include/revolution)
+endif()
+include_directories(
+    common/rels/include
+    external
+    tp/include
+    tp/assets/${TPGZ_DECOMP_ASSET_VERSION}
+    tp/src
+    tp/libs/PowerPC_EABI_Support/MSL/MSL_C/MSL_Common/Include
+    tp/libs/PowerPC_EABI_Support/MSL/MSL_C/MSL_Common_Embedded/Math/Include
+    tp/libs/PowerPC_EABI_Support/MSL/MSL_C/PPC_EABI/Include
+    tp/libs/PowerPC_EABI_Support/MSL/MSL_C++/MSL_Common/Include
+    tp/libs/PowerPC_EABI_Support/Runtime/Inc
+    tp/libs/PowerPC_EABI_Support/MetroTRK
+    tp/libs/JSystem/include
+    ${TPGZ_DECOMP_SDK_INCLUDES})
+add_definitions(-D${PLATFORM}_${REGION} -D${PLATFORM}_PLATFORM -DVERSION=${TPGZ_DECOMP_VERSION} -D__GEKKO__ -DGZ_VERSION=${TPGZ_BUILD_VERSION} -D_PROJECT_NAME="${CMAKE_PROJECT_NAME}" -D_VERSION="${TPGZ_BUILD_VERSION}" -D_VARIANT="public" -D_BUILDID="${TPGZ_BUILD_VERSION}" ${DEBUG} ${RUN_PR_TEST})
 
-include(cmake/tp_c.cmake)
-include(cmake/gcn_c.cmake)
 include(cmake/${PLATFORM}_${REGION}.cmake)
 include(cmake/save_metadata.cmake)
 
@@ -93,8 +109,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/RomHack.toml.in ${CMAKE_CURRENT_BINAR
 add_subdirectory(modules)
 
 add_custom_target(tpgz ALL)
-add_dependencies(tpgz tp_c gcn_c modules)
-set_property(TARGET tpgz PROPERTY COMPILE_FLAGS "-g -c -Os -std=gnu++20 -Wall ${DEVKITPRO_MACHDEP}")
+add_dependencies(tpgz modules)
 
 get_target_property(TPGZ_MODULES modules TPGZ_MODULES)
 foreach(module ${TPGZ_MODULES})

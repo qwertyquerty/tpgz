@@ -1,7 +1,7 @@
 #include "menus/menu_scene/include/scene_menu.h"
 #include <cstdio>
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/d/meter/d_meter_HIO.h"
+#include "d/d_com_inf_game.h"
+#include "d/d_meter_HIO.h"
 #include "gz_flags.h"
 #include "settings.h"
 #include "rels/include/defines.h"
@@ -11,33 +11,35 @@ KEEP_FUNC bool is_active(GZSettingID id) {
     return GZStng_getData(id, false);
 }
 
+static Line lines[SCENE_MENU_MAX] = {
+    {"disable bg music", DISABLE_BG_INDEX,
+     "Disables background and enemy music", true,
+     ACTIVE_FUNC(STNG_SCENE_DISABLE_BG)},
+    {"disable sfx", DISABLE_SFX_INDEX, "Disables sound effects", true,
+     ACTIVE_FUNC(STNG_SCENE_DISABLE_SFX)},
+    {"freeze actors", FREEZE_ACTOR_INDEX, "Freezes actors", true,
+     ACTIVE_FUNC(STNG_SCENE_FREEZE_ACTOR)},
+    {"freeze camera", FREEZE_CAMERA_INDEX, "Locks the camera in place", true,
+     ACTIVE_FUNC(STNG_SCENE_FREEZE_CAMERA)},
+    {"hide actors", HIDE_ACTOR_INDEX, "Hides actors", true,
+     ACTIVE_FUNC(STNG_SCENE_HIDE_ACTOR)},
+    {"hide hud", HIDE_HUD_INDEX, "Hides the heads-up display", true,
+     ACTIVE_FUNC(STNG_SCENE_HIDE_HUD)},
+    {"freeze time", FREEZE_TIME_INDEX, "Freezes ingame time", true,
+     ACTIVE_FUNC(STNG_SCENE_FREEZE_TIME)},
+    {"time (hrs):", TIME_HOURS_INDEX, "The current in-game hour", false},
+    {"time (mins):", TIME_MINUTES_INDEX, "The current in-game minutes", false},
+    {"actor spawner", ACTOR_MENU_INDEX, "Spawn Actors at current position",
+     false},
+    {"actor list", ACTOR_LIST_INDEX, "Display info from the actor list", false},
+    {"collision viewer", COLLISION_VIEW_INDEX, "Change Collision Viewer settings", false},
+    {"projection viewer", PROJECTION_VIEW_INDEX, "Change Projection Viewer settings", false},
+    {"trigger viewer", TRIGGER_VIEW_INDEX, "Change Trigger Viewer settings", false},
+    {"sound test", SOUND_TEST_INDEX, "Play a specified sound effect", false},
+};
+
 KEEP_FUNC SceneMenu::SceneMenu(Cursor& cursor)
-    : Menu(cursor), lines{
-                        {"disable bg music", DISABLE_BG_INDEX,
-                         "Disables background and enemy music", true,
-                         ACTIVE_FUNC(STNG_SCENE_DISABLE_BG)},
-                        {"disable sfx", DISABLE_SFX_INDEX, "Disables sound effects", true,
-                         ACTIVE_FUNC(STNG_SCENE_DISABLE_SFX)},
-                        {"freeze actors", FREEZE_ACTOR_INDEX, "Freezes actors", true,
-                         ACTIVE_FUNC(STNG_SCENE_FREEZE_ACTOR)},
-                        {"freeze camera", FREEZE_CAMERA_INDEX, "Locks the camera in place", true,
-                         ACTIVE_FUNC(STNG_SCENE_FREEZE_CAMERA)},
-                        {"hide actors", HIDE_ACTOR_INDEX, "Hides actors", true,
-                         ACTIVE_FUNC(STNG_SCENE_HIDE_ACTOR)},
-                        {"hide hud", HIDE_HUD_INDEX, "Hides the heads-up display", true,
-                         ACTIVE_FUNC(STNG_SCENE_HIDE_HUD)},
-                        {"freeze time", FREEZE_TIME_INDEX, "Freezes ingame time", true,
-                         ACTIVE_FUNC(STNG_SCENE_FREEZE_TIME)},
-                        {"time (hrs):", TIME_HOURS_INDEX, "The current in-game hour", false},
-                        {"time (mins):", TIME_MINUTES_INDEX, "The current in-game minutes", false},
-                        {"actor spawner", ACTOR_MENU_INDEX, "Spawn Actors at current position",
-                         false},
-                        {"actor list", ACTOR_LIST_INDEX, "Display info from the actor list", false},
-                        {"collision viewer", COLLISION_VIEW_INDEX, "Change Collision Viewer settings", false},
-                        {"projection viewer", PROJECTION_VIEW_INDEX, "Change Projection Viewer settings", false},
-                        {"trigger viewer", TRIGGER_VIEW_INDEX, "Change Trigger Viewer settings", false},
-                        {"sound test", SOUND_TEST_INDEX, "Play a specified sound effect", false},
-                    } {}
+    : Menu(cursor) {}
 
 SceneMenu::~SceneMenu() {}
 
@@ -72,9 +74,9 @@ void SceneMenu::draw() {
 
     if (GZ_getButtonTrig(SELECTION_BUTTON)) {
         if (cursor.y < TIME_HOURS_INDEX) {
-            auto* stng = GZStng_get(l_mapping[cursor.y]);
+            GZSettingEntry* stng = GZStng_get(l_mapping[cursor.y]);
             if (!stng) {
-                stng = new GZSettingEntry{l_mapping[cursor.y], sizeof(bool), new bool(false)};
+                stng = new GZSettingEntry(l_mapping[cursor.y], sizeof(bool), new bool(false));
                 g_settings.push_back(stng);
             }
             *static_cast<bool*>(stng->data) = !*static_cast<bool*>(stng->data);
@@ -104,16 +106,16 @@ void SceneMenu::draw() {
 
     switch (cursor.y) {
     case TIME_HOURS_INDEX:
-        if (GZ_getButtonRepeat(GZPad::DPAD_RIGHT)) {
+        if (GZ_getButtonRepeat(DPAD_RIGHT)) {
             dComIfGs_setTime(current_time + 15.0f);
-        } else if (GZ_getButtonRepeat(GZPad::DPAD_LEFT)) {
+        } else if (GZ_getButtonRepeat(DPAD_LEFT)) {
             dComIfGs_setTime(current_time - 15.0f);
         }
         break;
     case TIME_MINUTES_INDEX:
-        if (GZ_getButtonRepeat(GZPad::DPAD_RIGHT)) {
+        if (GZ_getButtonRepeat(DPAD_RIGHT)) {
             dComIfGs_setTime(current_time + 0.25f);
-        } else if (GZ_getButtonRepeat(GZPad::DPAD_LEFT)) {
+        } else if (GZ_getButtonRepeat(DPAD_LEFT)) {
             dComIfGs_setTime(current_time - 0.25f);
         }
         break;

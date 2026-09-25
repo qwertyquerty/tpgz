@@ -1,4 +1,5 @@
-#pragma once
+#ifndef TPGZ_MODULES_MENUS_MENU_GENERAL_FLAGS_INCLUDE_GENERAL_FLAGS_MENU_H
+#define TPGZ_MODULES_MENUS_MENU_GENERAL_FLAGS_INCLUDE_GENERAL_FLAGS_MENU_H
 #include "menus/menu.h"
 
 struct GeneralFlagsData {
@@ -44,5 +45,6 @@ public:
     virtual void draw();
 
 private:
-    Line lines[GENERAL_FLAGS_COUNT];
 };
+
+#endif

@@ -3,20 +3,22 @@
 #include "utils/hook.h"
 #include "rels/include/defines.h"
 #include "menus/utils/menu_mgr.h"
-#include "libtp_c/include/msl_c/math.h"
+#include "tpgz_math.h"
 
 #define MAX_RNG_PRESETS 10
 
 KEEP_VAR ToolsRngData* toolsRngData;
 
+static Line lines[TOOLS_RNG_COUNT] = {
+    {"freeze rng values", FREEZE_RNG_INDEX, "Freeze main 3 RNG values", true,
+                 ACTIVE_FUNC(STNG_TOOLS_FREEZE_RNG)},
+                {"randomize values", RANDOMIZE_INDEX, "Advance one iteration of the Wichmann-Hill algorithm"},
+                {"load preset", LOAD_PRESET_INDEX, "Apply the RNG preset onto the current RNG values"},
+                {"rng presets:", PRESET_OPTIONS_INDEX, "Scroll through various known RNG values", false, NULL}
+};
+
 KEEP_FUNC ToolsRngMenu::ToolsRngMenu(Cursor& cursor)
-    : Menu(cursor),
-      lines{{"freeze rng values", FREEZE_RNG_INDEX, "Freeze main 3 RNG values", true,
-             ACTIVE_FUNC(STNG_TOOLS_FREEZE_RNG)},
-            {"randomize values", RANDOMIZE_INDEX, "Advance one iteration of the Wichmann-Hill algorithm"},
-            {"load preset", LOAD_PRESET_INDEX, "Apply the RNG preset onto the current RNG values"},
-            {"rng presets:", PRESET_OPTIONS_INDEX, "Scroll through various known RNG values", false, nullptr}
-            } {
+    : Menu(cursor) {
 }
 
 ToolsRngMenu::~ToolsRngMenu() {}
@@ -29,7 +31,7 @@ void ToolsRngMenu::draw() {
         return;
     }
 
-    GZSettingEntry* stng = nullptr;
+    GZSettingEntry* stng = NULL;
 
     RngPresetMember rng_opt[MAX_RNG_PRESETS] = {
         {"zant head 1st platform", 4134, 7345, 3379},
@@ -57,7 +59,7 @@ void ToolsRngMenu::draw() {
             case LOAD_PRESET_INDEX:
                 stng = GZStng_get(STNG_TOOLS_FREEZE_RNG);
                 if (!stng) {
-                    stng = new GZSettingEntry{STNG_TOOLS_FREEZE_RNG, sizeof(bool), new bool};
+                    stng = new GZSettingEntry(STNG_TOOLS_FREEZE_RNG, sizeof(bool), new bool);
                     g_settings.push_back(stng);
                 }
                 if (stng)
@@ -73,7 +75,7 @@ void ToolsRngMenu::draw() {
                 stng = GZStng_get(STNG_TOOLS_FREEZE_RNG);
 
                 if (!stng) {
-                    stng = new GZSettingEntry{STNG_TOOLS_FREEZE_RNG, sizeof(bool), new bool};
+                    stng = new GZSettingEntry(STNG_TOOLS_FREEZE_RNG, sizeof(bool), new bool);
                     g_settings.push_back(stng);
                 }
 

@@ -1,5 +1,5 @@
 #include "menus/menu.h"
-#include "libtp_c/include/f_op/f_op_actor_mng.h"
+#include "f_op/f_op_actor_mng.h"
 
 struct ActorListData {
     uint16_t l_index;
@@ -45,7 +45,6 @@ private:
     
     u16& l_index;
 
-    Line lines[ACTOR_LIST_LINE_COUNT];
     s32 l_cameraPlay;
     bool l_halt;
     u8 l_menuStatus;

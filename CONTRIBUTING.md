@@ -55,12 +55,7 @@ tpgz
 │   ├───fonts             // small rust program to generate raw bytes and c code for utilizing true-type fonts in game
 │   │   ├───fonts         // ttf files
 │   │   └───src           // source code for fonts
-│   ├───gcn_c             // game independent gamecube apis to link to
-│   │   ├───include       // header files for gcn_c
-│   │   └───src           // source code for gcn_c
-│   ├───libtp_c           // game bindings for twilight princess
-│   |   ├───include       // header files for libtp_c
-│   |   └───src           // source code for libtp_c
+│   ├───tp                // Twilight Princess decomp submodule and headers
 |   └───misc              // misc tools/scripts
 ├───isos                  // original game isos
 ├───modules               // tpgz module source code
@@ -100,7 +95,7 @@ Please format your files using the .clang-format file
 Example clang-format usage (Ubuntu):
 
 ```bash
-find . -type d \( -path ./external/gcn_c -o -path ./external/libtp_c -o \) -prune -false -o -regex '.*\.\(cpp\|hpp\|h\|cc\|cxx\)' -exec clang-format -style=file -i {} \;
+find . -type d \( -path ./tp -o \) -prune -false -o -regex '.*\.\(cpp\|hpp\|h\|cc\|cxx\)' -exec clang-format -style=file -i {} \;
 ```
 
 ### Sending a Pull Request

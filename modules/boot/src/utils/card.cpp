@@ -1,15 +1,16 @@
+#include "controller.h"
 #include <cstdio>
 #include <algorithm>
-#include <numeric>
 #include "commands.h"
 #include "settings.h"
 #include "fifo_queue.h"
-#include "libtp_c/include/SSystem/SComponent/c_counter.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/f_op/f_op_draw_tag.h"
-#include "libtp_c/include/m_Do/m_Do_printf.h"
-#include "libtp_c/include/msl_c/math.h"
-#include "libtp_c/include/utils.h"
+#include "SSystem/SComponent/c_counter.h"
+#include "d/d_com_inf_game.h"
+#include "d/d_com_inf_game.h"
+#include "f_op/f_op_camera_mng.h"
+#include "m_Do/m_Do_printf.h"
+#include "tpgz_math.h"
+#include "tpgz_utils.h"
 #include "memfiles.h"
 #include "gz_flags.h"
 #include "save_manager.h"
@@ -99,7 +100,8 @@ void GZ_storeSettings(GZSaveFile& save_file, void* data) {
         return;
     }
     uint32_t pos = 0;
-    for (auto& entry : g_settings) {
+    for (tpgz::containers::deque<GZSettingEntry*>::iterator entryIt = g_settings.begin(); entryIt != g_settings.end(); ++entryIt) {
+        GZSettingEntry* entry = *entryIt;
         memcpy((void*)((uint32_t)data + pos), &entry->id, sizeof(GZSettingID));
         pos += sizeof(GZSettingID);
         memcpy((void*)((uint32_t)data + pos), &entry->size, sizeof(size_t));
@@ -126,15 +128,15 @@ void GZ_loadSettings(GZSaveFile save_file, void* data) {
         memcpy(&size, (void*)((uint32_t)data + pos), sizeof(size_t));
         pos += sizeof(size_t);
         GZSettingEntry* entry = GZStng_get(id);
-        if (entry == nullptr) {
-            entry = new GZSettingEntry{id, size, size > 0 ? new uint8_t[size] : nullptr};
+        if (entry == NULL) {
+            entry = new GZSettingEntry(id, size, size > 0 ? new uint8_t[size] : NULL);
             g_settings.push_back(entry);
         } else {
             void* old_data = entry->data;
             if (old_data) {
                 delete[] (uint8_t*)old_data;
             }
-            entry->data = size > 0 ? new uint8_t[size] : nullptr;
+            entry->data = size > 0 ? new uint8_t[size] : NULL;
             entry->size = size;
         }
         memcpy(entry->data, (void*)((uint32_t)data + pos), size);
@@ -156,10 +158,11 @@ void GZ_loadPositionData(PositionData& pos_data) {
 void GZ_setupSaveFile(GZSaveFile& save_file) {
     save_file.header.version = GZ_SAVE_VERSION_NUMBER;
     save_file.header.entries = g_settings.size();
-    save_file.header.data_size =
-        std::transform_reduce(g_settings.begin(), g_settings.end(), (size_t)0, std::plus{},
-                              [](GZSettingEntry* entry) { return entry->size; }) +
-        (sizeof(GZSettingID) + sizeof(size_t)) * g_settings.size();
+    size_t data_size = 0;
+    for (tpgz::containers::deque<GZSettingEntry*>::iterator it = g_settings.begin(); it != g_settings.end(); ++it) {
+        data_size += (*it)->size;
+    }
+    save_file.header.data_size = data_size + (sizeof(GZSettingID) + sizeof(size_t)) * g_settings.size();
 }
 
 int32_t GZ_readSaveFile(Storage* storage, GZSaveFile& save_file, int32_t sector_size) {
@@ -176,14 +179,15 @@ int32_t GZ_readSaveFile(Storage* storage, GZSaveFile& save_file, int32_t sector_
     if (save_file.header.version != GZ_SAVE_VERSION_NUMBER) {
         return -30;  // Custom error code for "Version" (means a mismatch in the version number).
     }
-    uint8_t* data = nullptr;
+    uint8_t* data = NULL;
     if (save_file.header.data_size > 0) {
         data = new uint8_t[save_file.header.data_size];
         assert_result(GZ_storageRead(storage, data, save_file.header.data_size, pos, sector_size));
     }
 
     // Clear the settings before loading the saved ones.
-    for (auto& entry : g_settings) {
+    for (tpgz::containers::deque<GZSettingEntry*>::iterator entryIt = g_settings.begin(); entryIt != g_settings.end(); ++entryIt) {
+        GZSettingEntry* entry = *entryIt;
         delete[] (uint8_t*)entry->data;
         delete entry;
     }
@@ -192,7 +196,7 @@ int32_t GZ_readSaveFile(Storage* storage, GZSaveFile& save_file, int32_t sector_
 
     GZ_loadSettings(save_file, data);
 
-    if (data != nullptr) {
+    if (data != NULL) {
         delete[] data;
     }
 
@@ -239,21 +243,21 @@ KEEP_FUNC void GZ_storeMemCard(Storage& storage) {
             } else {
                 OSReport("failed to save\n");
                 char buff[32];
-                snprintf(buff, sizeof(buff), "failed to save: %d", storage.result);
+                snprintf(buff, sizeof(buff), "failed to save: %d", (int)storage.result);
                 FIFOQueue::push(buff, Queue);
             }
             storage.result = StorageClose(&storage.info);
         }
     }
-    if (data != nullptr) {
+    if (data != NULL) {
         delete[] (uint8_t*)data;
     }
 }
 
 KEEP_FUNC void GZ_storeMemfile(Storage& storage) {
     #ifdef GCN_PLATFORM
-    int bytesRemaining = 0;
-    int filesRemaining = 0;
+    s32 bytesRemaining = 0;
+    s32 filesRemaining = 0;
     StorageFreeBlocks(0, &bytesRemaining, &filesRemaining);
     OSReport("GZ_storeMemfile: bytes remaining: %d, files remaining: %d\n", bytesRemaining, filesRemaining);
 
@@ -270,10 +274,10 @@ KEEP_FUNC void GZ_storeMemfile(Storage& storage) {
     #endif
 
     PositionData posData;
-    posData.link = dComIfGp_getPlayer()->current.pos;
-    posData.cam.target = matrixInfo.matrix_info->target;
-    posData.cam.pos = matrixInfo.matrix_info->pos;
-    posData.angle = dComIfGp_getPlayer()->shape_angle.y;
+    posData.link = dComIfGp_getPlayer(0)->current.pos;
+    posData.cam.target = dComIfGp_getCamera(0)->mCamera.mViewCache.mCenter;
+    posData.cam.pos = dComIfGp_getCamera(0)->mCamera.mViewCache.mEye;
+    posData.angle = dComIfGp_getPlayer(0)->shape_angle.y;
     OSReport("GZ_storeMemfile: position: {%f, %f, %f}\n", posData.link.x, posData.link.y, posData.link.z);
     OSReport("GZ_storeMemfile: angle: %f\n", posData.angle);
     OSReport("GZ_storeMemfile: cam target: {%f, %f, %f}\n", posData.cam.target.x, posData.cam.target.y, posData.cam.target.z);
@@ -287,23 +291,23 @@ KEEP_FUNC void GZ_storeMemfile(Storage& storage) {
     if (storage.result == Ready || storage.result == Exist) {
         storage.result = StorageOpen(0, storage.file_name_buffer, &storage.info, OPEN_MODE_RW);
         if (storage.result == Ready) {
-            dComIfGs_putSave(g_dComIfG_gameInfo.info.mDan.mStageNo);
+            dComIfGs_putSave(*reinterpret_cast<s8*>(&g_dComIfG_gameInfo.info.mDan));
 
-            setReturnPlace(g_dComIfG_gameInfo.play.mStartStage.mStage,
-                           g_dComIfG_gameInfo.play.mEvent.field_0x12c, 0);
+            setReturnPlace(g_dComIfG_gameInfo.play.getStartStageName(),
+                           g_dComIfG_gameInfo.play.mEvent.mRoomNo, 0);
 
             uint8_t* data = new (-32) uint8_t[sizeof(dSv_info_c) + 1 + sizeof(PositionData)];
             memcpy(data, &g_dComIfG_gameInfo, sizeof(dSv_info_c));
             memcpy(&data[sizeof(dSv_info_c) + 1], &posData, sizeof(PositionData));
             storage.result = GZ_storageWrite(&storage, data, sizeof(dSv_info_c) + 1 + sizeof(PositionData), 0,
                                              storage.sector_size);
-            OSReport("GZ_storeMemfile: data write result: %d\n", storage.result);
+            OSReport("GZ_storeMemfile: data write result: %d\n", (int)storage.result);
             delete[] data;
             if (storage.result == Ready) {
                 FIFOQueue::push("saved memfile!", Queue);
             } else {
                 char buff[32];
-                snprintf(buff, sizeof(buff), "failed to save: %d", storage.result);
+                snprintf(buff, sizeof(buff), "failed to save: %d", (int)storage.result);
                 FIFOQueue::push(buff, Queue);
             }
             storage.result = StorageClose(&storage.info);
@@ -317,7 +321,7 @@ KEEP_FUNC void GZ_deleteMemCard(Storage& storage) {
         FIFOQueue::push("deleted card!", Queue);
     } else {
         char buff[32];
-        snprintf(buff, sizeof(buff), "failed to delete: %d", storage.result);
+        snprintf(buff, sizeof(buff), "failed to delete: %d", (int)storage.result);
         FIFOQueue::push(buff, Queue);
     }
 }
@@ -328,7 +332,7 @@ KEEP_FUNC void GZ_deleteMemfile(Storage& storage) {
         FIFOQueue::push("deleted memfile!", Queue);
     } else {
         char buff[32];
-        snprintf(buff, sizeof(buff), "failed to delete: %d", storage.result);
+        snprintf(buff, sizeof(buff), "failed to delete: %d", (int)storage.result);
         FIFOQueue::push(buff, Queue);
     }
 }
@@ -343,7 +347,7 @@ KEEP_FUNC void GZ_loadMemCard(Storage& storage) {
             GZ_initFont();
         } else {
             char buff[32];
-            snprintf(buff, sizeof(buff), "failed to load: %d", storage.result);
+            snprintf(buff, sizeof(buff), "failed to load: %d", (int)storage.result);
             FIFOQueue::push(buff, Queue);
         }
         storage.result = StorageClose(&storage.info);
@@ -371,7 +375,7 @@ KEEP_FUNC void GZ_loadMemfile(Storage& storage) {
         PositionData posData;
         OSReport("GZ_loadMemfile: reading position data at 0x%x\n", sizeof(dSv_info_c) + 1);
         storage.result = GZ_readMemfile(&storage, posData, storage.sector_size);
-        OSReport("GZ_loadMemfile: result: %d\n", storage.result);
+        OSReport("GZ_loadMemfile: result: %d\n", (int)storage.result);
         OSReport("GZ_loadMemfile: position: {%f, %f, %f}\n", posData.link.x, posData.link.y, posData.link.z);
         OSReport("GZ_loadMemfile: angle: %f\n", posData.angle);
         OSReport("GZ_loadMemfile: cam target: {%f, %f, %f}\n", posData.cam.target.x, posData.cam.target.y, posData.cam.target.z);
@@ -384,7 +388,7 @@ KEEP_FUNC void GZ_loadMemfile(Storage& storage) {
             g_menuMgr->hide();
         } else {
             char buff[32];
-            snprintf(buff, sizeof(buff), "failed to load: %d", storage.result);
+            snprintf(buff, sizeof(buff), "failed to load: %d", (int)storage.result);
             FIFOQueue::push(buff, Queue);
         }
         storage.result = StorageClose(&storage.info);
@@ -395,7 +399,7 @@ KEEP_FUNC void GZ_loadMemfile(Storage& storage) {
 #define FILE_NAME "tpgz01"
 
 KEEP_FUNC void GZ_loadGZSave(bool& card_load) {
-    uint8_t frame_count = cCt_getFrameCount();
+    uint8_t frame_count = GZ_getFrameCount();
     if (card_load && frame_count > FRAME_COUNT) {
         static Storage storage;
         storage.file_name = FILE_NAME;

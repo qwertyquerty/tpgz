@@ -14,14 +14,14 @@
 #define LINE_BYTE_OFFSET 100.0f
 
 #ifdef GCN_PLATFORM
-#define LINE_SIZE_BTN (GZPad::Y)
+#define LINE_SIZE_BTN (Y)
 #define LINE_SIZE_TEXT "Y"
 #else
-#define LINE_SIZE_BTN (GZPad::MINUS)
+#define LINE_SIZE_BTN (MINUS)
 #define LINE_SIZE_TEXT "-"
 #endif
 
-MemoryEditorMenu::MemoryEditorMenu(Cursor& cursor) : Menu(cursor) {}
+MemoryEditorMenu::MemoryEditorMenu(Cursor& cursor) : Menu(cursor), line_length(8) {}
 
 MemoryEditorMenu::~MemoryEditorMenu() {}
 
@@ -37,21 +37,21 @@ void MemoryEditorMenu::drawMemEditor() {
     snprintf(index, sizeof(index), "%08X", g_memoryEditor_addressIndex);
 
     if (l_idxSelected) {
-        if (GZ_getButtonRepeat(GZPad::DPAD_RIGHT)) {
+        if (GZ_getButtonRepeat(DPAD_RIGHT)) {
             if (l_idxPlace == line_length - 1) {
                 l_idxPlace = 0;
             } else if (l_idxPlace >= 0 && l_idxPlace < line_length) {
                 l_idxPlace++;
             }
         }
-        if (GZ_getButtonRepeat(GZPad::DPAD_LEFT)) {
+        if (GZ_getButtonRepeat(DPAD_LEFT)) {
             if (l_idxPlace == 0) {
                 l_idxPlace = line_length - 1;
             } else if (l_idxPlace >= 0 && l_idxPlace < line_length) {
                 l_idxPlace--;
             }
         }
-        if (GZ_getButtonRepeat(GZPad::DPAD_UP)) {
+        if (GZ_getButtonRepeat(DPAD_UP)) {
             if (l_idxPlace == 0) {
                 g_memoryEditor_addressIndex = MAX_ADDRESS;
             } else {
@@ -61,7 +61,7 @@ void MemoryEditorMenu::drawMemEditor() {
                 g_memoryEditor_addressIndex = MAX_ADDRESS;
             }
         }
-        if (GZ_getButtonRepeat(GZPad::DPAD_DOWN)) {
+        if (GZ_getButtonRepeat(DPAD_DOWN)) {
             g_memoryEditor_addressIndex -= (0x10000000 >> (l_idxPlace * 4));
             if (g_memoryEditor_addressIndex < 0x80000000) {
                 g_memoryEditor_addressIndex = 0x80000000;
@@ -74,14 +74,14 @@ void MemoryEditorMenu::drawMemEditor() {
     }
 
     if (cursor.y > 0 && !cursor.lock_x) {
-        if (GZ_getButtonRepeat(GZPad::DPAD_LEFT)) {
+        if (GZ_getButtonRepeat(DPAD_LEFT)) {
             if (l_byteIdx == 0) {
                 l_byteIdx = line_length - 1;
             } else if (l_byteIdx >= 0 && l_byteIdx < line_length) {
                 l_byteIdx--;
             }
         }
-        if (GZ_getButtonRepeat(GZPad::DPAD_RIGHT)) {
+        if (GZ_getButtonRepeat(DPAD_RIGHT)) {
             if (l_byteIdx == line_length - 1) {
                 l_byteIdx = 0;
             } else if (l_byteIdx >= 0 && l_byteIdx < line_length) {
@@ -108,8 +108,8 @@ void MemoryEditorMenu::drawMemEditor() {
         y_offset = ((100.0f) + (i * 20.0f));
 
         char address[10];
-        char b[line_length][3];
-        char c[line_length][3];
+        char b[16][3];
+        char c[16][3];
 
         snprintf(address, sizeof(address), "%08X ", g_memoryEditor_addressIndex + (i * line_length));
         for (uint8_t k = 0; k < line_length; ++k) {
@@ -118,16 +118,16 @@ void MemoryEditorMenu::drawMemEditor() {
         }
 
         if (cursor.y == (i + 1) && cursor.lock_x && cursor.lock_y) {
-            if (GZ_getButtonRepeat(GZPad::DPAD_UP)) {
+            if (GZ_getButtonRepeat(DPAD_UP)) {
                 *(uint8_t*)((g_memoryEditor_addressIndex + (i * line_length)) + l_byteIdx) += 0x1;
             }
-            if (GZ_getButtonRepeat(GZPad::DPAD_DOWN)) {
+            if (GZ_getButtonRepeat(DPAD_DOWN)) {
                 *(uint8_t*)((g_memoryEditor_addressIndex + (i * line_length)) + l_byteIdx) -= 0x1;
             }
-            if (GZ_getButtonRepeat(GZPad::DPAD_RIGHT)) {
+            if (GZ_getButtonRepeat(DPAD_RIGHT)) {
                 *(uint8_t*)((g_memoryEditor_addressIndex + (i * line_length)) + l_byteIdx) += 0x10;
             }
-            if (GZ_getButtonRepeat(GZPad::DPAD_LEFT)) {
+            if (GZ_getButtonRepeat(DPAD_LEFT)) {
                 *(uint8_t*)((g_memoryEditor_addressIndex + (i * line_length)) + l_byteIdx) -= 0x10;
             }
         }

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef TPGZ_MODULES_BOOT_INCLUDE_FIFO_QUEUE_H
+#define TPGZ_MODULES_BOOT_INCLUDE_FIFO_QUEUE_H
 #include "font.h"
 #define MAX_MESSAGES 25
 
@@ -29,3 +30,5 @@ public:
 void GZ_renderFifoQueue();
 
 extern _FIFOQueue Queue;
+
+#endif

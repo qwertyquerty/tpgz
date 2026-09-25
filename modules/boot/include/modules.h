@@ -1,8 +1,11 @@
-#pragma once
+#ifndef TPGZ_MODULES_BOOT_INCLUDE_MODULES_H
+#define TPGZ_MODULES_BOOT_INCLUDE_MODULES_H
 #include "utils/rels.h"
 #include "utils/containers/deque.h"
 
 struct Module {
+    Module(bool (*active_)(), const char* path) : active(active_), rel(path) {}
+
     bool (*active)();
     tpgz::dyn::GZModule rel;
 };
@@ -36,3 +39,5 @@ bool freeze_actor_active();
 bool hide_actor_active();
 bool freeze_camera_active();
 bool fast_eel_regrab_active();
+
+#endif

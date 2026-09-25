@@ -1,3 +1,4 @@
+#include "d/actor/d_a_alink.h"
 #include "utils/hook.h"
 #include <cstdio>
 #include "cheats.h"
@@ -6,8 +7,8 @@
 #include "rels/include/patch.h"
 #include "flaglog.h"
 #include "fifo_queue.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/SSystem/SComponent/c_lib.h"
+#include "d/d_com_inf_game.h"
+#include "SSystem/SComponent/c_lib.h"
 #include "utils/card.h"
 #include "global_data.h"
 #include "memfiles.h"
@@ -17,15 +18,15 @@
 #include "settings.h"
 #include "collision_view.h"
 #include "features/projection_view/include/projection_view.h"
-#include "libtp_c/include/m_Do/m_Do_printf.h"
-#include "libtp_c/include/d/s/d_s_logo.h"
-#include "libtp_c/include/msl_c/math.h"
+#include "m_Do/m_Do_printf.h"
+#include "d/d_s_logo.h"
+#include "tpgz_math.h"
 
 #define HOOK_DEF(rettype, name, params)                                                            \
     typedef rettype(*tp_##name##_t) params;                                                        \
     tp_##name##_t name##Trampoline;
 
-HOOK_DEF(void, fapGm_Execute, (void));
+HOOK_DEF(void, fapGm_Execute__Fv, (void));
 HOOK_DEF(void, ExceptionCallback, (void));
 HOOK_DEF(void, draw, (void*));
 
@@ -36,8 +37,7 @@ HOOK_DEF(void, draw, (void*));
 #define PAD_READ_RETURN_OFFSET (0x2DC)
 #endif
 
-extern volatile uint32_t gzCrashReport;
-
+extern volatile uint32_t developmentMode__7mDoMain;
 int preset_r0 = 100;
 int preset_r1 = 100;
 int preset_r2 = 100;
@@ -46,12 +46,12 @@ HOOK_DEF(uint32_t, PADRead, (uint16_t*));
 HOOK_DEF(uint32_t, checkHookshotStickBG, (void*, void*));
 HOOK_DEF(void, setSpecialGravity, (daAlink_c*, float, float, int));
 HOOK_DEF(uint32_t, checkCastleTownUseItem, (uint16_t));
-HOOK_DEF(uint32_t, query042, (void*, void*, int));
+HOOK_DEF(uint32_t, query042__10dMsgFlow_cFP21mesg_flow_node_branchP10fopAc_ac_ci, (void*, void*, int));
 
-HOOK_DEF(void, onEventBit, (void*, uint16_t));
-HOOK_DEF(void, offEventBit, (void*, uint16_t));
+HOOK_DEF(void, onEventBit__11dSv_event_cFUs, (void*, uint16_t));
+HOOK_DEF(void, offEventBit__11dSv_event_cFUs, (void*, uint16_t));
 HOOK_DEF(void, onSwitch, (void*, int, int));
-HOOK_DEF(void, putSave, (void*, int));
+HOOK_DEF(void, putSave__10dSv_info_cFi, (void*, int));
 
 HOOK_DEF(void, dCcS__draw, (dCcS*));
 HOOK_DEF(void, BeforeOfPaint, (void));
@@ -77,7 +77,7 @@ HOOK_DEF(void, dScnLogo_c__warningInDraw, (dScnLogo_c*));
 namespace Hook {
 void gameLoopHook(void) {
     game_loop();
-    fapGm_ExecuteTrampoline();
+    fapGm_Execute__FvTrampoline();
     post_game_loop();
 }
 
@@ -89,14 +89,14 @@ void drawHook(void* p1) {
 #ifdef PR_TEST
 void myExceptionCallbackHook(void) {
     ExceptionCallbackTrampoline();
-    gzCrashReport = 1;
-    DCFlushRange((void*)(&gzCrashReport), sizeof(gzCrashReport));
-    ICInvalidateRange((void*)(&gzCrashReport), sizeof(gzCrashReport));
+    developmentMode__7mDoMain = 1;
+    DCFlushRange((void*)(&developmentMode__7mDoMain), sizeof(developmentMode__7mDoMain));
+    ICInvalidateRange((void*)(&developmentMode__7mDoMain), sizeof(developmentMode__7mDoMain));
 }
 #endif  // PR_TEST
 
 uint32_t readControllerHook(uint16_t* p1) {
-    auto returnValue = PADReadTrampoline(p1);
+    uint32_t returnValue = PADReadTrampoline(p1);
     GZ_readController();
     return returnValue;
 }
@@ -139,7 +139,7 @@ uint32_t transformAnywhereHook(void* p1, void* p2, int p3) {
     if (GZ_checkCheat(STNG_CHEATS_TRANSFORM_ANYWHERE)) {
         return 0;
     } else {
-        return query042Trampoline(p1, p2, p3);
+        return query042__10dMsgFlow_cFP21mesg_flow_node_branchP10fopAc_ac_ciTrampoline(p1, p2, p3);
     }
 }
 
@@ -154,7 +154,7 @@ void onEventBitHook(void* addr, uint16_t pFlag) {
         FIFOQueue::push(buf, Queue, 0xFFFFFF00);
     }
 
-    return onEventBitTrampoline(addr, pFlag);
+    return onEventBit__11dSv_event_cFUsTrampoline(addr, pFlag);
 }
 
 void offEventBitHook(void* addr, uint16_t pFlag) {
@@ -168,7 +168,7 @@ void offEventBitHook(void* addr, uint16_t pFlag) {
         FIFOQueue::push(buf, Queue, 0xFFFFFF00);
     }
 
-    return offEventBitTrampoline(addr, pFlag);
+    return offEventBit__11dSv_event_cFUsTrampoline(addr, pFlag);
 }
 
 void onSwitchHook(void* addr, int pFlag, int i_roomNo) {
@@ -198,7 +198,7 @@ void putSaveHook(void* addr, int stageNo) {
     if (SaveManager::s_injectMemfile) {
         return;
     } else {
-        return putSaveTrampoline(addr, stageNo);
+        return putSave__10dSv_info_cFiTrampoline(addr, stageNo);
     }
 }
 
@@ -244,7 +244,7 @@ void dCcSMoveAfterCheckHook(dCcS* i_this) {
 void dBgS_AcchCrrPosHook(dBgS_Acch* i_this, dBgS& i_bgs) {
     dBgS_Acch__CrrPosTrampoline(i_this, i_bgs);
     if (g_actorViewEnabled/*  || g_moveLinkEnabled */) {
-        i_this->m_flags = dBgS_Acch::GROUND_HIT; // sets actor to always be in "coliding with ground" state
+        *reinterpret_cast<u32*>(reinterpret_cast<u8*>(i_this) + 0x2C) = 0x20; // sets actor to always be in "coliding with ground" state
     }
 }
 
@@ -278,7 +278,7 @@ void setupLJAProjectionLine(daAlink_c* i_this) {
     bool got_it = false;
 
     // if we haven't done the jump attack yet
-    if (i_this->mActionID == daAlink_c::PROC_ATN_ACTOR_WAIT) {
+    if (i_this->mProcID == daAlink_c::PROC_ATN_ACTOR_WAIT) {
         // lifted from procCutJumpInit
         i_this->mNormalSpeed = 25.0f;
         i_this->speed.y = 27.0f;
@@ -298,15 +298,15 @@ void setupLJAProjectionLine(daAlink_c* i_this) {
 }
 
 void setupMidnaChargeProjectionLine(daAlink_c* i_this) {
-    if (i_this->mActionID == daAlink_c::PROC_WOLF_ROLL_ATTACK_MOVE) {
+    if (i_this->mProcID == daAlink_c::PROC_WOLF_ROLL_ATTACK_MOVE) {
         // this is logic from procWolfLockAttackInit
         fopAc_ac_c* lock_actor = i_this->mWolfLockAcKeep[0].getActor();
         if (lock_actor != NULL) {
-            i_this->field_0x37c8 = lock_actor->mEyePos;
+            i_this->field_0x37c8 = lock_actor->eyePos;
         }
         i_this->shape_angle.y = cLib_targetAngleY(&i_this->current.pos,&i_this->field_0x37c8);
         i_this->current.angle.y = i_this->shape_angle.y;
-        cXyz l_eyePosDelta = i_this->field_0x37c8 - i_this->mEyePos;
+        cXyz l_eyePosDelta = i_this->field_0x37c8 - i_this->eyePos;
 
         if (l_eyePosDelta.y < 10.0f) {
             l_eyePosDelta.y = 10.0f;
@@ -330,19 +330,19 @@ void setupMidnaChargeProjectionLine(daAlink_c* i_this) {
 
         f32 check_frame = 85.0f / l_eyePosDelta.abs();
         i_this->mNormalSpeed = check_frame * l_eyePosDelta.absXZ();
-        setSpecialGravityTrampoline(i_this,(l_eyePosDelta.y * -2.0f) / (abs * abs), i_this->mMaxFallSpeed, 0);
-        i_this->speed.y = -i_this->mGravity * abs;
+        setSpecialGravityTrampoline(i_this,(l_eyePosDelta.y * -2.0f) / (abs * abs), i_this->maxFallSpeed, 0);
+        i_this->speed.y = -i_this->gravity * abs;
 
         for (int i = 0; i < 40; i++) {
             daAlink_c__posMoveTrampoline(i_this);
             g_midnaChargeProjectionLine.pos[i] = i_this->current.pos;
 
             // this is logic from procWolfLockAttack (is this actually required?)
-            // if (i_this->field_0x3008 != 0) {
-            //     i_this->field_0x3008--;
+            // if (i_this->mProcVar0.field_0x3008 != 0) {
+            //     i_this->mProcVar0.field_0x3008--;
 
-            //     if (i_this->field_0x3008 == 0) {
-            //         setSpecialGravityTrampoline(i_this,-9.0f, i_this->mMaxFallSpeed, 0);
+            //     if (i_this->mProcVar0.field_0x3008 == 0) {
+            //         setSpecialGravityTrampoline(i_this,-9.0f, i_this->maxFallSpeed, 0);
             //     }
             // } else if (i_this->mNormalSpeed > 30.0f) {
             //     cLib_addCalc(&i_this->mNormalSpeed, 30.0f, 0.3f, 5.0f, 1.0f);
@@ -364,32 +364,32 @@ void daAlink_c__posMoveHook(daAlink_c* i_this) {
         s16 shape_angle_y = i_this->shape_angle.y;
         f32 m_normal_speed = i_this->mNormalSpeed;
         s16 current_angle_y = i_this->current.angle.y;
-        cXyz eye_pos = i_this->mEyePos;
-        s16 field_3008 = i_this->field_0x3008;
-        f32 max_fall_speed = i_this->mMaxFallSpeed;
-        f32 gravity = i_this->mGravity;
+        cXyz eye_pos = i_this->eyePos;
+        s16 field_3008 = i_this->mProcVar0.field_0x3008;
+        f32 max_fall_speed = i_this->maxFallSpeed;
+        f32 gravity = i_this->gravity;
         cXyz field_0x37c8 = i_this->field_0x37c8;
         int reset_flag_3 = i_this->mNoResetFlg3;
-        dCcD_Cyl mAtCyl = i_this->field_0x10F0;
+        dCcD_Cyl mAtCyl = i_this->mAtCyl;
         f32 field_0x342c = i_this->field_0x342c;
         f32 field_0x3430 = i_this->field_0x3430;
         dBgS_LinkAcch m_link_acch = i_this->mLinkAcch;
 
-        dCcD_Cyl field_0x850[3];
-        dCcD_Cyl field_0xC04[3];
+        dCcD_Cyl mTgCyls[3];
+        dCcD_Cyl mWindTgCyls[3];
 
         for (int i = 0; i < 3; i++) {
-            field_0x850[i] = i_this->field_0x850[i];
-            field_0xC04[i] = i_this->field_0xC04[i];
+            mTgCyls[i] = i_this->mTgCyls[i];
+            mWindTgCyls[i] = i_this->mWindTgCyls[i];
         }
 
-        if (i_this->mActionID == daAlink_c::PROC_ATN_ACTOR_WAIT || i_this->mActionID == daAlink_c::PROC_CUT_JUMP) {
+        if (i_this->mProcID == daAlink_c::PROC_ATN_ACTOR_WAIT || i_this->mProcID == daAlink_c::PROC_CUT_JUMP) {
             if (GZStng_getData(STNG_SCENE_LJA_PROJECTION, false)) {
                 setupLJAProjectionLine(i_this);
             }
         }
 
-        if (i_this->mActionID == daAlink_c::PROC_WOLF_ROLL_ATTACK_MOVE || i_this->mActionID == daAlink_c::PROC_WOLF_LOCK_ATTACK || i_this->mActionID == daAlink_c::PROC_WOLF_LOCK_ATTACK_TURN) {
+        if (i_this->mProcID == daAlink_c::PROC_WOLF_ROLL_ATTACK_MOVE || i_this->mProcID == daAlink_c::PROC_WOLF_LOCK_ATTACK || i_this->mProcID == daAlink_c::PROC_WOLF_LOCK_ATTACK_TURN) {
             if (GZStng_getData(STNG_SCENE_MIDNA_CHARGE_PROJECTION, false)) {
                 setupMidnaChargeProjectionLine(i_this);
             }
@@ -401,20 +401,20 @@ void daAlink_c__posMoveHook(daAlink_c* i_this) {
         i_this->shape_angle.y = shape_angle_y;
         i_this->mNormalSpeed = m_normal_speed;
         i_this->current.angle.y = current_angle_y;
-        i_this->mEyePos = eye_pos;
-        i_this->field_0x3008 = field_3008;
-        i_this->mMaxFallSpeed = max_fall_speed;
-        i_this->mGravity = gravity;
+        i_this->eyePos = eye_pos;
+        i_this->mProcVar0.field_0x3008 = field_3008;
+        i_this->maxFallSpeed = max_fall_speed;
+        i_this->gravity = gravity;
         i_this->field_0x37c8 = field_0x37c8;
         i_this->mNoResetFlg3 = reset_flag_3;
-        i_this->field_0x10F0 = mAtCyl;
+        i_this->mAtCyl = mAtCyl;
         i_this->field_0x342c = field_0x342c;
         i_this->field_0x3430 = field_0x3430;
         i_this->mLinkAcch = m_link_acch;
 
         for (int i = 0; i < 3; i++) {
-            i_this->field_0x850[i] = field_0x850[i];
-            i_this->field_0xC04[i] = field_0xC04[i];
+            i_this->mTgCyls[i] = mTgCyls[i];
+            i_this->mWindTgCyls[i] = mWindTgCyls[i];
         }
     }
 
@@ -425,37 +425,35 @@ void daAlink_c__posMoveHook(daAlink_c* i_this) {
 }
 
 #ifdef WII_PLATFORM
-#define draw_console JUTConsoleManager__draw_void__const
-#define f_fapGm_Execute fapGm_Execute_void_
-#define clawshot_checkbg daAlink_c__checkHookshotStickBG_cBgS_PolyInfo___
-#define set_special_gravity daAlink_c__setSpecialGravity_float__float__int_
-#define checkCastleTownUseItem daAlink_c__checkCastleTownUseItem_unsigned_short_
-#define query042 dMsgFlow_c__query042_mesg_flow_node_branch____fopAc_ac_c____int_
-#define f_onSwitch dSv_info_c__onSwitch_int__int_
-#define f_onEventBit dSv_event_c__onEventBit_unsigned_short_
-#define f_offEventBit dSv_event_c__offEventBit_unsigned_short_
-#define f_putSave dSv_info_c__putSave_int_
-#define f_myExceptionCallback myExceptionCallback_unsigned
-#define f_dScnPly__phase_1 phase_1_dScnPly_c___
-#define f_dScnPly__phase_4 phase_4_dScnPly_c___
-#define f_dScnLogo_c__warningInDraw dScnLogo_c__warningInDraw_void_
-#define f_dCcS__Draw dCcS__Draw_void_
-#define f_dScnPly_BeforeOfPaint mDoGph_BeforeOfDraw_void_
-#define f_dCcS__MoveAfterCheck dCcS__MoveAfterCheck_void_
-#define f_dBgS_Acch__CrrPos dBgS_Acch__CrrPos_dBgS___
-#define f_daAlink_c__setCutJumpSpeed daAlink_c__setCutJumpSpeed_int_
-#define f_daAlink_c__posMove daAlink_c__posMove_void_
-#define f_dScnLogo_c__create dScnLogo_c__create_void_
-#define f_dScnLogo_c__dvdWaitDraw dScnLogo_c__dvdWaitDraw_void_
-#define f_mDoGph_gInf_c__startFadeOut mDoGph_gInf_c__startFadeOut_int_
-#define fpcBs_Execute fpcBs_Execute_base_process_class___
+#define draw_console draw__17JUTConsoleManagerCFv
+#define f_fapGm_Execute fapGm_Execute__Fv
+#define clawshot_checkbg checkHookshotStickBG__9daAlink_cFR13cBgS_PolyInfo
+#define set_special_gravity setSpecialGravity__9daAlink_cFffi
+#define checkCastleTownUseItem checkCastleTownUseItem__9daAlink_cFUs
+#define f_onSwitch onSwitch__10dSv_info_cFii
+#define f_onEventBit onEventBit__11dSv_event_cFUs
+#define f_offEventBit offEventBit__11dSv_event_cFUs
+#define f_putSave putSave__10dSv_info_cFi
+#define f_myExceptionCallback myExceptionCallback__FUsP9OSContextUlUl
+#define f_dScnPly__phase_1 phase_1__FP9dScnPly_c
+#define f_dScnPly__phase_4 phase_4__FP9dScnPly_c
+#define f_dScnLogo_c__warningInDraw warningInDraw__10dScnLogo_cFv
+#define f_dCcS__Draw Draw__4dCcSFv
+#define f_dScnPly_BeforeOfPaint mDoGph_BeforeOfDraw__Fv
+#define f_dCcS__MoveAfterCheck MoveAfterCheck__4dCcSFv
+#define f_dBgS_Acch__CrrPos CrrPos__9dBgS_AcchFR4dBgS
+#define f_daAlink_c__setCutJumpSpeed setCutJumpSpeed__9daAlink_cFi
+#define f_daAlink_c__posMove posMove__9daAlink_cFv
+#define f_dScnLogo_c__create create__10dScnLogo_cFv
+#define f_dScnLogo_c__dvdWaitDraw dvdWaitDraw__10dScnLogo_cFv
+#define f_mDoGph_gInf_c__startFadeOut startFadeOut__13mDoGph_gInf_cFi
+#define fpcBs_Execute fpcBs_Execute__FP18base_process_class
 #else
 #define draw_console draw__17JUTConsoleManagerCFv
 #define f_fapGm_Execute fapGm_Execute__Fv
 #define clawshot_checkbg checkHookshotStickBG__9daAlink_cFR13cBgS_PolyInfo
 #define set_special_gravity setSpecialGravity__9daAlink_cFffi
 #define checkCastleTownUseItem checkCastleTownUseItem__9daAlink_cFUs
-#define query042 query042__10dMsgFlow_cFP21mesg_flow_node_branchP10fopAc_ac_ci
 #define f_onSwitch onSwitch__10dSv_info_cFii
 #define f_onEventBit onEventBit__11dSv_event_cFUs
 #define f_offEventBit offEventBit__11dSv_event_cFUs
@@ -480,7 +478,7 @@ void f_fapGm_Execute();
 uint32_t clawshot_checkbg(void*, void*);
 void set_special_gravity(float, float, int);
 uint32_t checkCastleTownUseItem(uint16_t);
-uint32_t query042(void*, void*, int);
+uint32_t query042__10dMsgFlow_cFP21mesg_flow_node_branchP10fopAc_ac_ci(void*, void*, int);
 void f_onSwitch(void*, int, int);
 void f_onEventBit(void*, uint16_t);
 void f_offEventBit(void*, uint16_t);
@@ -506,18 +504,18 @@ void f_dScnLogo_c__warningInDraw(dScnLogo_c*);
 
 KEEP_FUNC void applyHooks() {
 #define APPLY_HOOK(name, addr, func) name##Trampoline = hookFunction((tp_##name##_t)(addr), func)
-    APPLY_HOOK(fapGm_Execute, &f_fapGm_Execute, gameLoopHook);
+    APPLY_HOOK(fapGm_Execute__Fv, &f_fapGm_Execute, gameLoopHook);
     APPLY_HOOK(draw, &draw_console, drawHook);
     APPLY_HOOK(PADRead, &PADRead, readControllerHook);
     APPLY_HOOK(checkHookshotStickBG, &clawshot_checkbg, superClawshotHook);
     APPLY_HOOK(setSpecialGravity, &set_special_gravity, disableGravityHook);
     APPLY_HOOK(checkCastleTownUseItem, &checkCastleTownUseItem, unrestrictedItemsHook);
-    APPLY_HOOK(query042, &query042, transformAnywhereHook);
+    APPLY_HOOK(query042__10dMsgFlow_cFP21mesg_flow_node_branchP10fopAc_ac_ci, &query042__10dMsgFlow_cFP21mesg_flow_node_branchP10fopAc_ac_ci, transformAnywhereHook);
 
     APPLY_HOOK(onSwitch, &f_onSwitch, onSwitchHook);
-    APPLY_HOOK(onEventBit, &f_onEventBit, onEventBitHook);
-    APPLY_HOOK(offEventBit, &f_offEventBit, offEventBitHook);
-    APPLY_HOOK(putSave, &f_putSave, putSaveHook);
+    APPLY_HOOK(onEventBit__11dSv_event_cFUs, &f_onEventBit, onEventBitHook);
+    APPLY_HOOK(offEventBit__11dSv_event_cFUs, &f_offEventBit, offEventBitHook);
+    APPLY_HOOK(putSave__10dSv_info_cFi, &f_putSave, putSaveHook);
     APPLY_HOOK(dScnPly__phase_1, &f_dScnPly__phase_1, saveInjectHook);
     APPLY_HOOK(dScnPly__phase_4, &f_dScnPly__phase_4, endSaveInjectHook);
 

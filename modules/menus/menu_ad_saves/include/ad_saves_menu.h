@@ -87,5 +87,4 @@ public:
     virtual void draw();
 
 private:
-    Line lines[AD_SAVES_COUNT];
 };

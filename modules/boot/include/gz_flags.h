@@ -1,19 +1,19 @@
-#pragma once
-
+#ifndef TPGZ_MODULES_BOOT_INCLUDE_GZ_FLAGS_H
+#define TPGZ_MODULES_BOOT_INCLUDE_GZ_FLAGS_H
 #include "font.h"
 #include "cheats.h"
 #include "save_manager.h"
 #include "settings.h"
 #include "fifo_queue.h"
+#include "controller.h"
 #include "utils/containers/deque.h"
-#include "libtp_c/include/m_Do/m_Re_controller_pad.h"
 
 #ifdef WII_PLATFORM
-#define FRAME_ADVANCE_BTN GZPad::TWO
+#define FRAME_ADVANCE_BTN TWO
 #define FRAME_ADVANCE_PAD CButton::TWO
 #endif
 #ifdef GCN_PLATFORM
-#define FRAME_ADVANCE_BTN GZPad::R
+#define FRAME_ADVANCE_BTN R
 #define FRAME_ADVANCE_PAD CButton::R
 #endif
 
@@ -40,6 +40,9 @@ enum GZFlags {
 };
 
 struct GZFlag {
+    GZFlag(GZFlags id_, bool (*flag)(), int phase, void (*activeFunc)(), void (*deactiveFunc)() = NULL)
+        : id(id_), mpFlag(flag), mPhase(phase), mpActiveFunc(activeFunc), mpDeactiveFunc(deactiveFunc) {}
+
     GZFlags id;
     bool (*mpFlag)();
     int mPhase;
@@ -64,7 +67,16 @@ void GZ_frameAdvance();
 void GZ_execute(int phase);
 void GZ_drawFrameTex(Texture* pauseTex, Texture* playTex);
 
-extern volatile uint8_t sPauseTimer;
+#if defined(WII_NTSCU_12)
+#define sPauseTimer lbl_80520E35
+extern volatile uint8_t lbl_80520E35;
+#elif defined(WII_NTSCJ)
+#define sPauseTimer lbl_8051ECA5
+extern volatile uint8_t lbl_8051ECA5;
+#else
+#define sPauseTimer nextPauseTimer__9dScnPly_c
+extern volatile uint8_t nextPauseTimer__9dScnPly_c;
+#endif
 
 bool GZ_freezeActors_active();
 bool GZ_hideActors_active();
@@ -73,3 +85,5 @@ bool GZ_hideHUD_active();
 bool GZ_freezeTime_active();
 bool GZ_disableBgm_active();
 bool GZ_disableSFX_active();
+
+#endif

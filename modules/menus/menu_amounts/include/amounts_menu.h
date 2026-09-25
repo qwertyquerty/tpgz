@@ -46,5 +46,4 @@ private:
     uint16_t& l_hpNum;
     uint16_t& l_rupeeNum;
 
-    Line lines[10];
 };

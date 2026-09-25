@@ -166,5 +166,4 @@ public:
     virtual void draw();
 
 private:
-    Line lines[ANY_BITE_SAVES_COUNT];
 };

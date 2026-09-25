@@ -9,13 +9,34 @@ make_directory(${TPGZ_MODULE_OUT_DIR})
 
 # Get source from common/rels. They are sources that have to be compiled with every REL module.
 file(GLOB_RECURSE TPGZ_EXTERNAL_REL_CPP CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/common/rels/src/*.cpp")
-file(GLOB_RECURSE TPGZ_EXTERNAL_REL_ASM CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/common/rels/src/*.s")
 
 list(APPEND TPGZ_EXTERNAL_REL_SRC ${TPGZ_EXTERNAL_REL_CPP})
-list(APPEND TPGZ_EXTERNAL_REL_SRC ${TPGZ_EXTERNAL_REL_ASM})
+if(PLATFORM STREQUAL "GCN")
+    list(APPEND TPGZ_EXTERNAL_REL_SRC ${CMAKE_SOURCE_DIR}/tp/libs/PowerPC_EABI_Support/Runtime/Src/global_destructor_chain.c)
+else()
+    list(APPEND TPGZ_EXTERNAL_REL_SRC ${CMAKE_SOURCE_DIR}/common/rels/src/runtime_wii.c)
+endif()
+set(TPGZ_REL_LCF ${CMAKE_SOURCE_DIR}/common/rels/src/rel.lcf)
 
-include_directories(${CMAKE_SOURCE_DIR}/external/)
-include_directories(${CMAKE_SOURCE_DIR}/common/)
+include_directories(BEFORE ${CMAKE_SOURCE_DIR}/external/)
+include_directories(BEFORE ${CMAKE_SOURCE_DIR}/common/)
+
+set(TPGZ_SYMBOL_MAP ${CMAKE_CURRENT_BINARY_DIR}/${PLATFORM}_${REGION}.lst)
+set(TPGZ_DECOMP_CONFIG_DIR ${CMAKE_SOURCE_DIR}/tp/config)
+set(TPGZ_REL_IDS ${CMAKE_SOURCE_DIR}/res/map/rel_ids/${PLATFORM}_${REGION}.lst)
+file(GLOB TPGZ_DECOMP_REL_SYMBOLS CONFIGURE_DEPENDS "${TPGZ_DECOMP_CONFIG_DIR}/${TPGZ_DECOMP_ASSET_VERSION}/rels/*/symbols.txt")
+if(EXISTS ${TPGZ_REL_IDS})
+    set(TPGZ_REL_IDS_ARGS --rel-ids ${TPGZ_REL_IDS})
+    set(TPGZ_REL_IDS_DEPENDS ${TPGZ_REL_IDS})
+endif()
+add_custom_command(OUTPUT ${TPGZ_SYMBOL_MAP}
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/bin/merge_lst.py
+        ${TPGZ_SYMBOL_MAP} ${TPGZ_DECOMP_CONFIG_DIR} ${TPGZ_DECOMP_ASSET_VERSION} ${TPGZ_REL_IDS_ARGS}
+    DEPENDS ${TPGZ_DECOMP_CONFIG_DIR}/${TPGZ_DECOMP_ASSET_VERSION}/config.yml
+        ${TPGZ_DECOMP_CONFIG_DIR}/${TPGZ_DECOMP_ASSET_VERSION}/symbols.txt
+        ${TPGZ_DECOMP_REL_SYMBOLS} ${TPGZ_REL_IDS_DEPENDS}
+        ${CMAKE_SOURCE_DIR}/bin/merge_lst.py)
+add_custom_target(tpgz_symbol_map DEPENDS ${TPGZ_SYMBOL_MAP})
 
 # Definition of the functions which sets up REL modules
 function(tpgz_add_main_module module_name module_srcs)
@@ -31,12 +52,11 @@ function(tpgz_add_main_module module_name module_srcs)
     add_executable(${module_name} EXCLUDE_FROM_ALL)
     target_sources(${module_name}
         PUBLIC ${module_srcs} ${TPGZ_EXTERNAL_REL_SRC})
-    target_link_libraries(${module_name} tp_c gcn_c)
-    set_property(TARGET ${module_name} APPEND PROPERTY LINK_OPTIONS -Wl,-Map,${module_name}.map -Wl,--gc-sections,--gc-keep-exported -lstdc++)
-    set_property(TARGET ${module_name} APPEND PROPERTY LINK_OPTIONS ${CMAKE_SOURCE_DIR}/common/rels/src/cxx.ld)
+    set_property(TARGET ${module_name} APPEND PROPERTY LINK_OPTIONS "SHELL:-map ${module_name}.map")
+    set_property(TARGET ${module_name} APPEND PROPERTY LINK_DEPENDS ${TPGZ_REL_LCF})
 
     if(module_inc_paths)
-        target_include_directories(${module_name} PUBLIC ${module_inc_paths})
+        target_include_directories(${module_name} BEFORE PUBLIC ${module_inc_paths})
     endif()
     if(module_lib_paths)
         target_link_directories(${module_name} ${module_lib_paths})
@@ -44,13 +64,14 @@ function(tpgz_add_main_module module_name module_srcs)
 
     file(GLOB relative_module_name LIST_DIRECTORIES true RELATIVE ${TPGZ_MODULE_SRC_DIR} CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR})
     add_custom_command(OUTPUT ${TPGZ_MODULE_OUT_DIR}/${module_name}.rel
-        DEPENDS ${module_name} ${CMAKE_SOURCE_DIR}/res/map/${PLATFORM}_${REGION}.lst
-        COMMAND ${TPGZ_ELF2REL_EXE} $<TARGET_FILE:${module_name}> -s ${CMAKE_SOURCE_DIR}/res/map/${PLATFORM}_${REGION}.lst --rel-id ${TPGZ_MODULE_ID_COUNTER} -o ${TPGZ_MODULE_OUT_DIR}/${module_name}.rel)
+        DEPENDS ${module_name} ${TPGZ_SYMBOL_MAP}
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/bin/run_elf2rel.py ${TPGZ_ELF2REL_EXE} $<TARGET_FILE:${module_name}> -s ${TPGZ_SYMBOL_MAP} --rel-id ${TPGZ_MODULE_ID_COUNTER} -o ${TPGZ_MODULE_OUT_DIR}/${module_name}.rel)
     add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${module_name}.lst
-        DEPENDS ${module_name} ${CMAKE_SOURCE_DIR}/res/map/${PLATFORM}_${REGION}.lst
-        COMMAND ${Python3_EXECUTABLE} ${TPGZ_RELMAPPER_EXE} -o ${CMAKE_CURRENT_BINARY_DIR}/${module_name}.lst -i ${CMAKE_SOURCE_DIR}/res/map/${PLATFORM}_${REGION}.lst -s ${TPGZ_MODULE_ID_COUNTER} $<TARGET_FILE:${module_name}>)
+        DEPENDS ${module_name} ${TPGZ_SYMBOL_MAP}
+        COMMAND ${Python3_EXECUTABLE} ${TPGZ_RELMAPPER_EXE} -o ${CMAKE_CURRENT_BINARY_DIR}/${module_name}.lst -i ${TPGZ_SYMBOL_MAP} -s ${TPGZ_MODULE_ID_COUNTER} $<TARGET_FILE:${module_name}>)
     add_custom_target(${module_name}_rel
         DEPENDS ${TPGZ_MODULE_OUT_DIR}/${module_name}.rel ${CMAKE_CURRENT_BINARY_DIR}/${module_name}.lst)
+    add_dependencies(${module_name}_rel tpgz_symbol_map)
     set_property(TARGET ${module_name}_rel PROPERTY TPGZ_MODULE_FILE ${TPGZ_MODULE_OUT_DIR}/${module_name}.rel)
 
     set_property(TARGET modules PROPERTY TPGZ_MAIN_MODULE_LST ${CMAKE_CURRENT_BINARY_DIR}/${module_name}.lst)
@@ -81,14 +102,13 @@ function(tpgz_add_module module_name module_srcs)
     add_executable(${module_name} EXCLUDE_FROM_ALL)
     target_sources(${module_name}
         PUBLIC ${module_srcs} ${TPGZ_EXTERNAL_REL_SRC})
-    set_property(TARGET ${module_name} APPEND PROPERTY LINK_OPTIONS -Wl,-Map,${module_name}.map -Wl,--gc-sections,--gc-keep-exported)
-    set_property(TARGET ${module_name} APPEND PROPERTY LINK_OPTIONS ${CMAKE_SOURCE_DIR}/common/rels/src/cxx.ld)
-
-    target_include_directories(${module_name} PUBLIC ${TPGZ_MAIN_MODULE_INC})
+    set_property(TARGET ${module_name} APPEND PROPERTY LINK_OPTIONS "SHELL:-map ${module_name}.map" -strip_partial)
+    set_property(TARGET ${module_name} APPEND PROPERTY LINK_DEPENDS ${TPGZ_REL_LCF})
 
     if(module_inc_paths)
-        target_include_directories(${module_name} PUBLIC ${module_inc_paths})
+        target_include_directories(${module_name} BEFORE PUBLIC ${module_inc_paths})
     endif()
+    target_include_directories(${module_name} BEFORE PUBLIC ${TPGZ_MAIN_MODULE_INC})
     if(module_lib_paths)
         target_link_directories(${module_name} ${module_lib_paths})
     endif()
@@ -96,9 +116,10 @@ function(tpgz_add_module module_name module_srcs)
     file(GLOB relative_module_name LIST_DIRECTORIES true RELATIVE ${TPGZ_MODULE_SRC_DIR} CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR})
     add_custom_command(OUTPUT ${TPGZ_MODULE_OUT_DIR}/${module_name}.rel
         DEPENDS ${module_name} ${TPGZ_MAIN_MODULE_TRG} ${TPGZ_MAIN_MODULE_LST}
-        COMMAND ${TPGZ_ELF2REL_EXE} $<TARGET_FILE:${module_name}> -s ${TPGZ_MAIN_MODULE_LST} --rel-id ${TPGZ_MODULE_ID_COUNTER} -o ${TPGZ_MODULE_OUT_DIR}/${module_name}.rel)
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/bin/run_elf2rel.py ${TPGZ_ELF2REL_EXE} $<TARGET_FILE:${module_name}> -s ${TPGZ_MAIN_MODULE_LST} --rel-id ${TPGZ_MODULE_ID_COUNTER} -o ${TPGZ_MODULE_OUT_DIR}/${module_name}.rel)
     add_custom_target(${module_name}_rel
         DEPENDS ${TPGZ_MODULE_OUT_DIR}/${module_name}.rel)
+    add_dependencies(${module_name}_rel tpgz_symbol_map)
     set_property(TARGET ${module_name}_rel PROPERTY TPGZ_MODULE_FILE ${TPGZ_MODULE_OUT_DIR}/${module_name}.rel)
 
     add_dependencies(modules ${module_name}_rel)
@@ -108,11 +129,20 @@ function(tpgz_add_module module_name module_srcs)
     set_property(TARGET modules PROPERTY "TPGZ_MODULE_LAST_ID" ${TPGZ_MODULE_ID_COUNTER})
 endfunction()
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(BEFORE ${CMAKE_CURRENT_SOURCE_DIR})
 add_definitions(-DREL_MODULE)
 
-add_compile_options(-fdiagnostics-color=always -fno-exceptions -fno-rtti -std=gnu++20 -fno-threadsafe-statics -nostdlib -ffreestanding -ffunction-sections -fdata-sections -g -Os -Wall -Werror -Wno-address-of-packed-member -r -e_prolog -u_prolog -u_epilog -u_unresolved -Wl,--gc-sections -nostdlib -g ${DEVKITPRO_MACHDEP_LIST})
-add_link_options(-r -e_prolog -u_prolog -u_epilog -u_unresolved -Wl,--gc-sections -nostdlib -g ${DEVKITPRO_MACHDEP_LIST})
+set(TPGZ_MW_CFLAGS
+    -nodefaults "SHELL:-proc gekko" "SHELL:-align powerpc" "SHELL:-enum int" "SHELL:-fp hardware" "SHELL:-Cpp_exceptions off"
+    "SHELL:-pragma \"cats off\"" "SHELL:-pragma \"warn_notinlined off\"" "SHELL:-maxerrors 1" -nosyspath "SHELL:-str reuse"
+    "SHELL:-use_lmw_stmw off" "SHELL:-schedule off" "SHELL:-sym on" "SHELL:-fp_contract off" "SHELL:-sdata 0" "SHELL:-sdata2 0")
+if(PLATFORM STREQUAL "GCN")
+    list(APPEND TPGZ_MW_CFLAGS -multibyte "SHELL:-RTTI off" "SHELL:-inline noauto" -O3,s "SHELL:-str reuse,pool,readonly")
+else()
+    list(APPEND TPGZ_MW_CFLAGS "SHELL:-enc SJIS" -D__REVOLUTION_SDK__ -DSDK_SEP2006 -DWIDESCREEN_SUPPORT=1 "SHELL:-ipa file" "SHELL:-RTTI on" "SHELL:-inline noauto" -O4,s)
+endif()
+add_compile_options(${TPGZ_MW_CFLAGS})
+add_link_options("SHELL:-fp hardware" -nodefaults "SHELL:-sdata 0" "SHELL:-sdata2 0" -r1 "SHELL:-lcf ${TPGZ_REL_LCF}" "SHELL:-m _prolog")
 
 file(GLOB TPGZ_SUB_MODULES CONFIGURE_DEPENDS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/*")
 

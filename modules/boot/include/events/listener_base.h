@@ -4,27 +4,16 @@
 #include <rels/include/cxx.h>
 #include <rels/include/defines.h>
 #include <cstddef>
-#include <concepts>
-#include <type_traits>
 #include <boot/include/utils/containers/deque.h>
-#include <algorithm>
 
 namespace events {
-/**
- * @brief C++20 Concept to constrain the types to executable functions.
- *
- * @tparam Callback Constraint to be a function.
- */
-template <typename Callback>
-concept Function = std::is_function_v<std::remove_pointer_t<Callback>>;
-
 /**
  * @brief Listener class, made to produce listeners which can dispatch events to registered
  * functions.
  *
  * @tparam Callback The signature of the callback functions to register.
  */
-template <Function Callback>
+template <typename Callback>
 class ListenerBase {
 public:
     ListenerBase() {}
@@ -45,7 +34,7 @@ public:
      * @return false The function was not previously registered.
      */
     bool removeListener(Callback* listener) {
-        for (auto it = callbacks.begin(); it != callbacks.end(); ++it) {
+        for (typename tpgz::containers::deque<Callback*>::iterator it = callbacks.begin(); it != callbacks.end(); ++it) {
             if (*it == listener) {
                 callbacks.erase(it);
                 return true;
@@ -55,22 +44,18 @@ public:
     }
 
     /**
-     * @brief Calls all the registered functions with the given arguments.
-     *
-     * @tparam Args
-     * @param args
+     * @brief Calls all the registered functions.
      */
-    template <typename... Args>
-    void dispatchAll(Args... args) requires std::invocable<Callback, Args...> {
-        for (Callback* cb : callbacks) {
-            cb(args...);
+    void dispatchAll() {
+        for (typename tpgz::containers::deque<Callback*>::iterator it = callbacks.begin(); it != callbacks.end(); ++it) {
+            (*it)();
         }
     }
 
-    size_t getCount() const { return std::distance(callbacks.begin(), callbacks.end()); }
+    size_t getCount() const { return callbacks.size(); }
 
 private:
-    tpgz::containers::deque<std::remove_pointer_t<Callback>*> callbacks;
+    tpgz::containers::deque<Callback*> callbacks;
 };
 
 }  // namespace events

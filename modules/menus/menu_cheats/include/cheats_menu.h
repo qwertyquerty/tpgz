@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef TPGZ_MODULES_MENUS_MENU_CHEATS_INCLUDE_CHEATS_MENU_H
+#define TPGZ_MODULES_MENUS_MENU_CHEATS_INCLUDE_CHEATS_MENU_H
 #include "menus/menu.h"
 #include "cheats.h"
 
@@ -42,5 +42,6 @@ public:
     virtual void draw();
 
 private:
-    Line lines[CHEAT_AMNT];
 };
+
+#endif

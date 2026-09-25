@@ -37,7 +37,6 @@ public:
     virtual void draw();
 
 private:
-    Line lines[EQUIPMENT_INDEX_COUNT];
 
     void resetIndex();
     void getEquipment();

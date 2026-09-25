@@ -9,30 +9,37 @@
 #include <cstdint>
 #include <cstring>
 
-#include "libtp_c/include/dolphin/os/OSCache.h"
-#include "libtp_c/include/m_Do/m_Do_ext.h"
-#include "libtp_c/include/JSystem/JKernel/JKRHeap.h"
-#include "libtp_c/include/defines.h"
+#include "os/OSCache.h"
+#include "JSystem/JKernel/JKRHeap.h"
+#include "JSystem/JKernel/JKRExpHeap.h"
+#include "JSystem/JKernel/JKRAssertHeap.h"
+#include "rels/include/defines.h"
 
 #ifdef WII_PLATFORM
-#include "libtp_c/include/dynamic_link.h"
+#include "DynamicLink.h"
 #endif
 
-void* getHeapPtr(int32_t id) {
-    static JKRHeap** heapPtrArray[] = {
-        &m_Do_ext::AssertHeap,
-        &m_Do_ext::DbPrintHeap,
-        &m_Do_ext::gameHeap,
-        &m_Do_ext::zeldaHeap,
-#ifdef PLATFORM_WII
-        // Cannot properly allocate from the command heap on GC
-        &m_Do_ext::commandHeap,
+extern JKRAssertHeap* AssertHeap;
+extern JKRExpHeap* DbPrintHeap;
+extern JKRExpHeap* gameHeap;
+extern JKRExpHeap* zeldaHeap;
+extern JKRExpHeap* archiveHeap;
+extern JKRExpHeap* j2dHeap;
+#ifndef WII_PLATFORM
+extern JKRExpHeap* HostIOHeap;
 #endif
-        &m_Do_ext::archiveHeap,
-        &m_Do_ext::j2dHeap,
+
+JKRHeap* getHeapPtr(int32_t id) {
+    static JKRHeap** heapPtrArray[] = {
+        (JKRHeap**)&AssertHeap,
+        (JKRHeap**)&DbPrintHeap,
+        (JKRHeap**)&gameHeap,
+        (JKRHeap**)&zeldaHeap,
+        (JKRHeap**)&archiveHeap,
+        (JKRHeap**)&j2dHeap,
 
 #ifndef WII_PLATFORM
-        &m_Do_ext::HostIOHeap,
+        (JKRHeap**)&HostIOHeap,
 #else
         &DynamicModuleControlBase::m_heap,
 #endif  // WII_PLATFORM
@@ -40,7 +47,7 @@ void* getHeapPtr(int32_t id) {
     };
 
     // Make sure the id is valid
-    constexpr uint32_t heapPtrArraySize = ARRAY_COUNT(heapPtrArray);
+    const uint32_t heapPtrArraySize = sizeof(heapPtrArray) / sizeof(heapPtrArray[0]);
     if ((id < 0) || (static_cast<uint32_t>(id) >= heapPtrArraySize)) {
         // The id is invalid, so use the archive heap by default
         id = HEAP_ARCHIVE;
@@ -49,72 +56,52 @@ void* getHeapPtr(int32_t id) {
     return *heapPtrArray[id];
 }
 
-void* allocateMemory(std::size_t size, void* heap, int32_t alignment) {
+void* allocateMemory(size_t size, JKRHeap* heap, int alignment) {
     // Make sure the heap exists
     if (!heap) {
-        return nullptr;
+        return NULL;
     }
 
-    void* ptr = __nw_JKRHeap(size, heap, alignment);
+    void* ptr = JKRHeap::alloc(size, alignment, heap);
     ptr = memset(ptr, 0, size);
     DCFlushRange(ptr, size);
     return ptr;
 }
 
-void* allocateMemoryFromMainHeap(std::size_t size, int32_t alignment) {
+void* allocateMemoryFromMainHeap(size_t size, int alignment) {
 #ifndef WII_PLATFORM
-    void* heapPtr = m_Do_ext::archiveHeap;
+    JKRHeap* heapPtr = archiveHeap;
 #else
-    void* heapPtr = m_Do_ext::zeldaHeap;
+    JKRHeap* heapPtr = zeldaHeap;
 #endif
     return allocateMemory(size, heapPtr, alignment);
 }
 
-void* allocateMemoryFromHeapId(std::size_t size, int32_t alignment, int32_t id) {
-    void* heapPtr = getHeapPtr(id);
+void* allocateMemoryFromHeapId(size_t size, int alignment, int id) {
+    JKRHeap* heapPtr = getHeapPtr(id);
     return allocateMemory(size, heapPtr, alignment);
 }
 
-void* operator new(std::size_t size) {
+void* operator new(size_t size) {
     return allocateMemoryFromMainHeap(size, 0x20);
 }
 
-void* operator new[](std::size_t size) {
+void* operator new[](size_t size) {
     return allocateMemoryFromMainHeap(size, 0x20);
 }
 
-void* operator new(std::size_t size, int32_t alignment) {
+void* operator new(size_t size, int alignment) {
     return allocateMemoryFromMainHeap(size, alignment);
 }
 
-void* operator new[](std::size_t size, int32_t alignment) {
+void* operator new[](size_t size, int alignment) {
     return allocateMemoryFromMainHeap(size, alignment);
 }
 
-void* operator new(size_t size, int32_t alignment, int32_t id) {
+void* operator new(size_t size, int alignment, int id) {
     return allocateMemoryFromHeapId(size, alignment, id);
 }
 
-void* operator new[](size_t size, int32_t alignment, int32_t id) {
+void* operator new[](size_t size, int alignment, int id) {
     return allocateMemoryFromHeapId(size, alignment, id);
-}
-
-void* operator new(unsigned int size, std::align_val_t alignment) {
-    return allocateMemoryFromMainHeap(size, (int)alignment);
-}
-
-void operator delete(void* ptr) {
-    return __dl_JKRHeap(ptr);
-}
-
-void operator delete[](void* ptr) {
-    return __dl_JKRHeap(ptr);
-}
-
-void operator delete(void* ptr, [[maybe_unused]] std::size_t size) {
-    return __dl_JKRHeap(ptr);
-}
-
-void operator delete[](void* ptr, [[maybe_unused]] std::size_t size) {
-    return __dl_JKRHeap(ptr);
 }

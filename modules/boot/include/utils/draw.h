@@ -1,7 +1,7 @@
-#pragma once
-
-#include "libtp_c/include/dolphin/gx/gx.h"
-#include "libtp_c/include/dolphin/mtx/vec.h"
+#ifndef TPGZ_MODULES_BOOT_INCLUDE_UTILS_DRAW_H
+#define TPGZ_MODULES_BOOT_INCLUDE_UTILS_DRAW_H
+#include "gx.h"
+#include "tpgz_vec.h"
 #include "utils/texture.h"
 
 extern Texture blankTex;
@@ -33,3 +33,5 @@ void drawRect(uint32_t color, Vec2 pos, Vec2 dim, Vec2 tex[4], GXTexObj* texture
 void drawRectOutline(uint32_t color, Vec2 pos, Vec2 dim);
 void drawRectOutline(uint32_t color, Vec2 pos, Vec2 dim, uint8_t width);
 };  // namespace Draw
+
+#endif

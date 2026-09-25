@@ -1,35 +1,35 @@
+#include "m_Do/m_Do_audio.h"
+#include "defines.h"
 #include "utils/audio.h"
 
 KEEP_FUNC void GZ_enableBGM() {
-    g_mDoAud_zelAudio.mAudioMgr.mSeqMgr.mHeightVol.mIntensity = 1.0f;  // BG Audio
+    Z2GetSeqMgr()->field_0x84.intensity_ = 1.0f;  // BG Audio
 #ifndef WII_PLATFORM
-    g_mDoAud_zelAudio.mAudioMgr.mSoundMgr.mSeqMgr.mMove.mParams.mVolume = 1.0f;
-    g_mDoAud_zelAudio.mAudioMgr.mSoundMgr.mStreamMgr.mParams.mParams.mVolume = 1.0f;
+    Z2GetSoundMgr()->getSeqMgr()->getParams()->params_.mVolume = 1.0f;
+    Z2GetSoundMgr()->getStreamMgr()->getParams()->params_.mVolume = 1.0f;
 #endif
 }
 
 KEEP_FUNC void GZ_disableBGM() {
-    g_mDoAud_zelAudio.mAudioMgr.mSeqMgr.mHeightVol.mIntensity = 0.0f;  // BG Audio
+    Z2GetSeqMgr()->field_0x84.intensity_ = 0.0f;  // BG Audio
 #ifndef WII_PLATFORM
-    g_mDoAud_zelAudio.mAudioMgr.mSoundMgr.mSeqMgr.mMove.mParams.mVolume = 0.0f;
-    g_mDoAud_zelAudio.mAudioMgr.mSoundMgr.mStreamMgr.mParams.mParams.mVolume = 0.0f;
+    Z2GetSoundMgr()->getSeqMgr()->getParams()->params_.mVolume = 0.0f;
+    Z2GetSoundMgr()->getStreamMgr()->getParams()->params_.mVolume = 0.0f;
 #endif
 }
 
 KEEP_FUNC void GZ_disableSFX() {
     for (int i = 0; i < 16; i++) {
-        g_mDoAud_zelAudio.mAudioMgr.mSoundMgr.mSeMgr.mCategoryMgrs[i].mParams.mParams.mVolume =
-            0.0f;
+        Z2GetSoundMgr()->getSeMgr()->getCategory(i)->getParams()->params_.mVolume = 0.0f;
     }
 
-    g_mDoAud_zelAudio.mAudioMgr.mSoundMgr.mSeMgr.mParams.mParams.mVolume = 0.0f;
+    Z2GetSoundMgr()->getSeMgr()->getParams()->params_.mVolume = 0.0f;
 }
 
 KEEP_FUNC void GZ_enableSFX() {
     for (int i = 0; i < 16; i++) {
-        g_mDoAud_zelAudio.mAudioMgr.mSoundMgr.mSeMgr.mCategoryMgrs[i].mParams.mParams.mVolume =
-            1.0f;
+        Z2GetSoundMgr()->getSeMgr()->getCategory(i)->getParams()->params_.mVolume = 1.0f;
     }
 
-    g_mDoAud_zelAudio.mAudioMgr.mSoundMgr.mSeMgr.mParams.mParams.mVolume = 1.0f;
+    Z2GetSoundMgr()->getSeMgr()->getParams()->params_.mVolume = 1.0f;
 }

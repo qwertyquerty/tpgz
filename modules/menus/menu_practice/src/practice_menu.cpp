@@ -3,23 +3,25 @@
 #include "rels/include/defines.h"
 #include "menus/utils/menu_mgr.h"
 
+static Line lines[PRACTICE_MENU_NUM] = {
+    #ifdef GCN_PLATFORM
+                            {"any%", ANY_INDEX, "Any% practice saves", false},
+    #endif
+    #ifdef GCN_PLATFORM
+                            {"any% BiTE", ANY_BITE_INDEX, "Any% (BiTE) practice saves", false},
+    #else
+                            {"any% FE", ANY_BITE_INDEX, "Any% (Faron Escape) practice saves", false},
+    #endif
+                            {"100%", HUNDO_INDEX, "100% practice saves", false},
+                            {"all dungeons", AD_INDEX, "All Dungeons practice saves", false},
+    #ifdef GCN_PLATFORM
+                            {"no save-quit", NOSQ_INDEX, "No Save-Quit practive saves", false},
+    #endif
+                            {"glitchless", GLITCHLESS_INDEX, "Glitchless practice saves", false},
+};
+
 KEEP_FUNC PracticeMenu::PracticeMenu(Cursor& cursor)
-    : Menu(cursor), lines{
-#ifdef GCN_PLATFORM
-                        {"any%", ANY_INDEX, "Any% practice saves", false},
-#endif
-#ifdef GCN_PLATFORM
-                        {"any% BiTE", ANY_BITE_INDEX, "Any% (BiTE) practice saves", false},
-#else
-                        {"any% FE", ANY_BITE_INDEX, "Any% (Faron Escape) practice saves", false},
-#endif
-                        {"100%", HUNDO_INDEX, "100% practice saves", false},
-                        {"all dungeons", AD_INDEX, "All Dungeons practice saves", false},
-#ifdef GCN_PLATFORM
-                        {"no save-quit", NOSQ_INDEX, "No Save-Quit practive saves", false},
-#endif
-                        {"glitchless", GLITCHLESS_INDEX, "Glitchless practice saves", false},
-                    } {}
+    : Menu(cursor) {}
 
 PracticeMenu::~PracticeMenu() {}
 

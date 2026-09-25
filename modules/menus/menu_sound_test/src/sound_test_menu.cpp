@@ -1,20 +1,22 @@
 #include "menus/menu_sound_test/include/sound_test_menu.h"
 #include <cstdio>
 #include "settings.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/f_op/f_op_actor_mng.h"
-#include "libtp_c/include/m_Do/m_Do_printf.h"
-#include "libtp_c/include/m_Do/m_Do_audio.h"
+#include "d/d_com_inf_game.h"
+#include "f_op/f_op_actor_mng.h"
+#include "m_Do/m_Do_printf.h"
+#include "m_Do/m_Do_audio.h"
 #include "rels/include/defines.h"
 #include "menus/utils/menu_mgr.h"
 
+static Line lines[4] = {
+    {"category id:", 0, "Select Sound Category ID", false},
+    {"sound id:", 1, "Select Sound Effect ID", false},
+    {"play", 2, "Play Sound Effect", false},
+    {"stop", 3, "Stop Sound Effect", false},
+};
+
 KEEP_FUNC SoundTestMenu::SoundTestMenu(Cursor& cursor)
-    : Menu(cursor), lines{
-          {"category id:", 0, "Select Sound Category ID", false},
-          {"sound id:", 1, "Select Sound Effect ID", false},
-          {"play", 2, "Play Sound Effect", false},
-          {"stop", 3, "Stop Sound Effect", false},
-      } {}
+    : Menu(cursor) {}
 
 SoundTestMenu::~SoundTestMenu() {}
 
@@ -48,7 +50,7 @@ void SoundTestMenu::draw() {
     if (GZ_getButtonTrig(SELECTION_BUTTON)) {
         switch (cursor.y) {
         case 2:
-            mDoAud_seStart(composite_id, nullptr, 0, 0);
+            mDoAud_seStart(composite_id, NULL, 0, 0);
             break;
         case 3:
             mDoAud_seStop(composite_id, 0);

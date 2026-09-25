@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef TPGZ_MODULES_BOOT_INCLUDE_PRACTICE_H
+#define TPGZ_MODULES_BOOT_INCLUDE_PRACTICE_H
 #include "save_manager.h"
 
 enum {
@@ -22,3 +22,5 @@ extern int last_save_index;
 extern char last_category[5];
 extern special last_special;
 extern int last_special_size;
+
+#endif

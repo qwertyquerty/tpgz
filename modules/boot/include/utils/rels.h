@@ -1,8 +1,10 @@
 #ifndef TPGZ_BOOT_UTILS_RELS_H
 #define TPGZ_BOOT_UTILS_RELS_H
-#include "libtp_c/include/dolphin/os/OS.h"
+#include "os.h"
+#include <stdint.h>
 
-namespace tpgz::dyn {
+namespace tpgz {
+namespace dyn {
 class GZModule {
 public:
     GZModule(const char* path);
@@ -27,5 +29,6 @@ private:
 
     bool load(bool negativeAlignment, bool fixedLinking);
 };
+}
 }  // namespace tpgz::dyn
 #endif

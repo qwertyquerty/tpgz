@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef TPGZ_MODULES_MENUS_MENU_PROJECTION_VIEW_INCLUDE_PROJECTION_VIEW_MENU_H
+#define TPGZ_MODULES_MENUS_MENU_PROJECTION_VIEW_INCLUDE_PROJECTION_VIEW_MENU_H
 #include "menus/menu.h"
 #include "features/projection_view/include/projection_view.h"
 
@@ -10,5 +10,6 @@ public:
     virtual void draw();
 
 private:
-    Line lines[PROJECTION_VIEW_MAX];
 };
+
+#endif

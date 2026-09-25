@@ -4,9 +4,17 @@
 #include "rels/include/defines.h"
 #include "menus/utils/menu_mgr.h"
 
+static bool flagLogActive() {
+    return g_flagLogEnabled;
+}
+
+static Line lines[1] = {
+    {"log activated", 0, "toggle flag logger on/off", true,
+                               flagLogActive}
+};
+
 KEEP_FUNC FlagLogMenu::FlagLogMenu(Cursor& cursor)
-    : Menu(cursor), lines{{"log activated", 0, "toggle flag logger on/off", true,
-                           [](){return g_flagLogEnabled;}}} {}
+    : Menu(cursor) {}
 
 FlagLogMenu::~FlagLogMenu() {}
 

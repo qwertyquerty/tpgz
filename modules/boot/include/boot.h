@@ -1,6 +1,7 @@
-#pragma once
-
-namespace tpgz::modules {
+#ifndef TPGZ_MODULES_BOOT_INCLUDE_BOOT_H
+#define TPGZ_MODULES_BOOT_INCLUDE_BOOT_H
+namespace tpgz {
+namespace modules {
 /***********************************************************************************
  * We're creating a cusutom REL file and thus the real main function already ran
  * before we even load this program.
@@ -15,6 +16,7 @@ namespace tpgz::modules {
 void main();
 void exit();
 
+}
 }  // namespace tpgz::modules
 
 void GZ_drawPacketNumOverflow();
@@ -33,3 +35,5 @@ void game_loop();
 void post_game_loop();
 void draw();
 }
+
+#endif
