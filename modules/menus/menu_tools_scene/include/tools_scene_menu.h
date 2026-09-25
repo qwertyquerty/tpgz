@@ -8,8 +8,8 @@
 #define FRAME_PAUSE_TEXT "R"
 #define RELOAD_AREA_TEXT "L+R+A+Start"
 #define FREE_CAM_TEXT "Z+B+A"
-#define SAVE_STATE_TEXT "L+R+D-Pad Left"
-#define LOAD_STATE_TEXT "L+R+D-Pad Right"
+#define SAVE_STATE_TEXT "R+X"
+#define LOAD_STATE_TEXT "R+Y"
 #endif
 
 #ifdef WII_PLATFORM

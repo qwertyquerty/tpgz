@@ -578,10 +578,12 @@ KEEP_FUNC void GZ_handleSaveStates() {
     g_skipGameFrame = false;
     u16 buttons = GZ_getButtonStatus();
 
+#ifdef WII_PLATFORM
     if ((buttons & SAVE_STATE_MODIFIER_BUTTONS) == SAVE_STATE_MODIFIER_BUTTONS) {
         PAD_HOLD &= ~SAVE_STATE_DPAD_BUTTONS;
         PAD_TRIG &= ~SAVE_STATE_DPAD_BUTTONS;
     }
+#endif
 
     if (l_pendingAction == SS_ACTION_NONE) {
         bool pressedSave = buttons == SAVE_STATE_BUTTONS && l_lastButtons != SAVE_STATE_BUTTONS;
