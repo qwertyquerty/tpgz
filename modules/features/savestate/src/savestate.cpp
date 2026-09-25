@@ -5,6 +5,8 @@
 #include "game_state.h"
 #include "global_data.h"
 #include "modules.h"
+#include "commands.h"
+#include "settings.h"
 #include "utils/mem2.h"
 #include "menus/utils/menu_mgr.h"
 #include "utils/texture.h"
@@ -578,16 +580,12 @@ KEEP_FUNC void GZ_handleSaveStates() {
     g_skipGameFrame = false;
     u16 buttons = GZ_getButtonStatus();
 
-#ifdef WII_PLATFORM
-    if ((buttons & SAVE_STATE_MODIFIER_BUTTONS) == SAVE_STATE_MODIFIER_BUTTONS) {
-        PAD_HOLD &= ~SAVE_STATE_DPAD_BUTTONS;
-        PAD_TRIG &= ~SAVE_STATE_DPAD_BUTTONS;
-    }
-#endif
 
     if (l_pendingAction == SS_ACTION_NONE) {
-        bool pressedSave = buttons == SAVE_STATE_BUTTONS && l_lastButtons != SAVE_STATE_BUTTONS;
-        bool pressedLoad = buttons == LOAD_STATE_BUTTONS && l_lastButtons != LOAD_STATE_BUTTONS;
+        u16 saveButtons = GZStng_getData<uint16_t>(STNG_CMD_STORE_POSITION, STORE_POSITION_BUTTONS);
+        u16 loadButtons = GZStng_getData<uint16_t>(STNG_CMD_LOAD_POSITION, LOAD_POSITION_BUTTONS);
+        bool pressedSave = buttons == saveButtons && l_lastButtons != saveButtons;
+        bool pressedLoad = buttons == loadButtons && l_lastButtons != loadButtons;
         l_lastButtons = buttons;
         if ((!pressedSave && !pressedLoad) || g_menuMgr->isOpen()) {
             return;

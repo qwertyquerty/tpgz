@@ -8,8 +8,6 @@
 #define FRAME_PAUSE_TEXT "R"
 #define RELOAD_AREA_TEXT "L+R+A+Start"
 #define FREE_CAM_TEXT "Z+B+A"
-#define SAVE_STATE_TEXT "R+X"
-#define LOAD_STATE_TEXT "R+Y"
 #endif
 
 #ifdef WII_PLATFORM
@@ -17,8 +15,6 @@
 #define FRAME_PAUSE_TEXT "2"
 #define RELOAD_AREA_TEXT "Z+C+B+2"
 #define FREE_CAM_TEXT "Z+C+B+Minus"
-#define SAVE_STATE_TEXT "Z+C+D-Pad Left"
-#define LOAD_STATE_TEXT "Z+C+D-Pad Right"
 #endif
 
 enum ToolsSceneIndex {

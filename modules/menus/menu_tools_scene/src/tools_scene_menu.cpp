@@ -24,7 +24,7 @@ const char l_descTemplates[TOOLS_SCENE_COUNT][100] = {
     "use %s to pause, %s to frame advance",
     FREE_CAM_TEXT " to activate, " FREE_CAM_MOVEMENT_TEXT " to move, " FREE_CAM_VIEW_TEXT " to view, Z to speed",
     "show Heap size info",
-    "use " SAVE_STATE_TEXT " to save state, " LOAD_STATE_TEXT " to load state",
+    "use %s to save state, %s to load state",
 };
 
 static Line lines[TOOLS_SCENE_COUNT] = {
@@ -38,8 +38,7 @@ static Line lines[TOOLS_SCENE_COUNT] = {
                  true, ACTIVE_FUNC(STNG_TOOLS_FREE_CAM)},
                 {"heap debug info", HEAP_DEBUG_INDEX, "show Heap size info", true,
                  ACTIVE_FUNC(STNG_TOOLS_HEAP_DEBUG)},
-                {"save states", SAVE_STATES_INDEX,
-                 "use " SAVE_STATE_TEXT " to save state, " LOAD_STATE_TEXT " to load state", true,
+                {"save states", SAVE_STATES_INDEX, "save and load states", true,
                  ACTIVE_FUNC(STNG_TOOLS_SAVE_STATES)}
 };
 
@@ -105,6 +104,18 @@ void ToolsSceneMenu::draw() {
         snprintf(buf, sizeof(buf), l_descTemplates[cursor.y], comboPauseStr, comboAdvanceStr);
         delete[] comboAdvanceStr;
         delete[] comboPauseStr;
+        break;
+    }
+    case SAVE_STATES_INDEX: {
+        uint16_t comboSave = GZStng_getData<uint16_t>(STNG_CMD_STORE_POSITION, STORE_POSITION_BUTTONS);
+        char* comboSaveStr = new char[GZCmd_getComboLen(comboSave) + 1];
+        GZCmd_comboToStr(comboSave, comboSaveStr);
+        uint16_t comboLoad = GZStng_getData<uint16_t>(STNG_CMD_LOAD_POSITION, LOAD_POSITION_BUTTONS);
+        char* comboLoadStr = new char[GZCmd_getComboLen(comboLoad) + 1];
+        GZCmd_comboToStr(comboLoad, comboLoadStr);
+        snprintf(buf, sizeof(buf), l_descTemplates[cursor.y], comboSaveStr, comboLoadStr);
+        delete[] comboLoadStr;
+        delete[] comboSaveStr;
         break;
     }
     default: {
