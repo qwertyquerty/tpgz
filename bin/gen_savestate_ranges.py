@@ -50,6 +50,10 @@ EXCLUDED_UNITS = (
     "JSystem/JAudio2/*dsp*.cpp",
 )
 
+INCLUDED_SYMBOLS = (
+    "*memPool_*",
+)
+
 OS_MODULE_LIST = (0x800030C8, 0x800030D4)
 
 
@@ -73,10 +77,20 @@ def parse_splits(path):
     return units
 
 
+def parse_symbols(path):
+    symbols = []
+    for line in open(path):
+        m = re.match(r"(\S+) = (\.\w+):0x([0-9A-Fa-f]+);.*\bsize:0x([0-9A-Fa-f]+)", line)
+        if m and m.group(2) in DATA_SECTIONS:
+            symbols.append((m.group(1), int(m.group(3), 16), int(m.group(4), 16)))
+    return symbols
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("output")
     parser.add_argument("splits")
+    parser.add_argument("symbols")
     args = parser.parse_args()
 
     ranges = [OS_MODULE_LIST]
@@ -86,6 +100,9 @@ def main():
         for name, start, end in sections:
             if name in DATA_SECTIONS and end > start:
                 ranges.append((start, end))
+    for name, addr, size in parse_symbols(args.symbols):
+        if size > 0 and any(fnmatch.fnmatchcase(name, pattern) for pattern in INCLUDED_SYMBOLS):
+            ranges.append((addr, addr + size))
 
     ranges.sort()
     merged = []

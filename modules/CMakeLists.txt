@@ -44,7 +44,9 @@ set(TPGZ_SAVESTATE_RANGES ${TPGZ_GENERATED_DIR}/savestate_ranges.h)
 add_custom_command(OUTPUT ${TPGZ_SAVESTATE_RANGES}
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/bin/gen_savestate_ranges.py
         ${TPGZ_SAVESTATE_RANGES} ${TPGZ_DECOMP_CONFIG_DIR}/${TPGZ_DECOMP_ASSET_VERSION}/splits.txt
+        ${TPGZ_DECOMP_CONFIG_DIR}/${TPGZ_DECOMP_ASSET_VERSION}/symbols.txt
     DEPENDS ${TPGZ_DECOMP_CONFIG_DIR}/${TPGZ_DECOMP_ASSET_VERSION}/splits.txt
+        ${TPGZ_DECOMP_CONFIG_DIR}/${TPGZ_DECOMP_ASSET_VERSION}/symbols.txt
         ${CMAKE_SOURCE_DIR}/bin/gen_savestate_ranges.py)
 add_custom_target(tpgz_savestate_ranges DEPENDS ${TPGZ_SAVESTATE_RANGES})
 
