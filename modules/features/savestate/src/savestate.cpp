@@ -21,6 +21,7 @@
 #include "JSystem/JAudio2/JAIStreamMgr.h"
 #include "JSystem/JAudio2/JAISeMgr.h"
 #include "JSystem/JAudio2/JAISeqMgr.h"
+#include "JSystem/JAudio2/JASDriverIF.h"
 #include "Z2AudioLib/Z2SoundMgr.h"
 #include "Z2AudioLib/Z2SceneMgr.h"
 #include "os/OSCache.h"
@@ -49,6 +50,7 @@ extern Texture l_framePlayTex;
 #define MEM2_MARGIN 0x100000
 #define MAX_WAIT_FRAMES 120
 #define GP_IDLE_POLLS 100000
+#define MAX_AUDIO_DRAIN_SUBFRAMES 240
 #define MAX_OUTSIDE_MODULES 8
 #define JKRTHREAD_MESSAGE_QUEUE_OFFSET 0x30
 #define DVD_THREAD_COMMAND_LIST_OFFSET 0x24
@@ -158,6 +160,7 @@ static OSModuleInfo* l_bootModule;
 static SaveStateAction l_pendingAction;
 static int l_waitFrames;
 static u16 l_lastButtons;
+static const char* l_busyReason;
 
 static const u8* sceneWaves() {
     return reinterpret_cast<const u8*>(Z2GetSceneMgr()) + Z2_SCENE_WAVES_OFFSET;
@@ -370,22 +373,41 @@ static bool ensureStorage(u32 size) {
 #endif
 }
 
-static bool isQuiet() {
-    GXBool overhi, underlow, readIdle, cmdIdle, brkpt;
+static bool drainAudio() {
+    Z2SoundMgr* soundMgr = Z2GetSoundMgr();
+    for (int i = 0; i < MAX_AUDIO_DRAIN_SUBFRAMES; i++) {
+        soundMgr->getSeMgr()->stop();
+        soundMgr->getSeqMgr()->stop();
+        soundMgr->getStreamMgr()->stop();
+        soundMgr->calc();
+        if (soundMgr->getSeMgr()->getNumActiveSe() == 0 && soundMgr->getSeqMgr()->getNumActiveSeqs() == 0 &&
+            !soundMgr->getStreamMgr()->isActive())
+        {
+            return true;
+        }
+        soundMgr->mixOut();
+        JASDriver::waitSubFrame();
+    }
+    return false;
+}
+
+static const char* findBusyReason() {
     node_list_class* commands = reinterpret_cast<node_list_class*>(reinterpret_cast<u8*>(&mDoDvdThd::l_param) +
                                                                    DVD_THREAD_COMMAND_LIST_OFFSET);
-    if (Z2GetSoundMgr()->getSeMgr()->getNumActiveSe() != 0 || Z2GetSoundMgr()->getSeqMgr()->getNumActiveSeqs() != 0 ||
-        Z2GetSoundMgr()->getStreamMgr()->isActive() || commands->mSize != 0 || DVDGetDriveStatus() != DVD_STATE_END)
-    {
-        return false;
+    if (commands->mSize != 0 || DVDGetDriveStatus() != DVD_STATE_END) {
+        return "disc";
     }
+    if (!drainAudio()) {
+        return "audio";
+    }
+    GXBool overhi, underlow, readIdle, cmdIdle, brkpt;
     for (int i = 0; i < GP_IDLE_POLLS; i++) {
         GXGetGPStatus(&overhi, &underlow, &readIdle, &cmdIdle, &brkpt);
         if (readIdle && cmdIdle) {
-            return true;
+            return NULL;
         }
     }
-    return false;
+    return "graphics";
 }
 
 static bool isInPlayableScene() {
@@ -521,11 +543,8 @@ static bool tryRunPendingAction() {
     if (l_framePlayTex.loadCode == TEX_OK) {
         free_texture(&l_framePlayTex);
     }
-    Z2GetSoundMgr()->getSeMgr()->stop();
-    Z2GetSoundMgr()->getSeqMgr()->stop();
-    Z2GetSoundMgr()->getStreamMgr()->stop();
-
-    if (!isQuiet()) {
+    l_busyReason = findBusyReason();
+    if (l_busyReason != NULL) {
         return false;
     }
     if (l_pendingAction == SS_ACTION_SAVE) {
@@ -596,7 +615,9 @@ KEEP_FUNC void GZ_handleSaveStates() {
         l_pendingAction = SS_ACTION_NONE;
     } else if (++l_waitFrames > MAX_WAIT_FRAMES) {
         l_pendingAction = SS_ACTION_NONE;
-        pushMessage("save state failed: game did not go idle");
+        char buf[64];
+        snprintf(buf, sizeof(buf), "save state failed: %s did not go idle", l_busyReason);
+        pushMessage(buf);
     } else {
         g_skipGameFrame = true;
         VIWaitForRetrace();
