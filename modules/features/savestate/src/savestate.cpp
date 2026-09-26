@@ -14,6 +14,7 @@
 #include "rels/include/defines.h"
 #include "d/d_com_inf_game.h"
 #include "m_Do/m_Do_dvd_thread.h"
+#include "m_Do/m_Do_graphic.h"
 #include "JSystem/JKernel/JKRExpHeap.h"
 #include "JSystem/JKernel/JKRThread.h"
 #include "JSystem/JKernel/JKRDisposer.h"
@@ -62,6 +63,7 @@ extern Texture l_framePlayTex;
 #define JKRSOLIDHEAP_TAIL_OFFSET 0x74
 #define MAX_HEAP_DEPTH 8
 #define MIN_ZERO_RUN 32
+#define CHECK_SAVE_STATE_LOCATION 1
 #define ZERO_SEGMENT_FLAG 0x80000000
 #define DVD_THREAD_COMMAND_LIST_OFFSET 0x24
 #define Z2_SCENE_WAVES_OFFSET 0x0D
@@ -440,6 +442,15 @@ static bool collectSegments(RangeList& segments, const RangeList& skipped) {
             return false;
         }
     }
+#ifdef WII_PLATFORM
+    JKRExpHeap::CMemBlock* capture = JKRExpHeap::CMemBlock::getBlock(mDoGph_gInf_c::getFrameBufferTimg());
+    if (capture->isValid()) {
+        u32 start = (u32)capture->getContent();
+        if (!segments.push(start, start + capture->getSize())) {
+            return false;
+        }
+    }
+#endif
     return true;
 }
 
@@ -662,6 +673,7 @@ static void captureState() {
 }
 
 static const char* validateState(SaveStateHeader* header) {
+#if CHECK_SAVE_STATE_LOCATION
     if (strncmp(header->stageName, dComIfGp_getStartStageName(), sizeof(header->stageName)) != 0) {
         return "load state failed: different stage";
     }
@@ -671,6 +683,7 @@ static const char* validateState(SaveStateHeader* header) {
     if (header->audioMemoryHash != audioMemoryHash()) {
         return "load state failed: audio memory changed";
     }
+#endif
 
     ModuleLink outsideModules[MAX_OUTSIDE_MODULES];
     u32 outsideModuleCount;
