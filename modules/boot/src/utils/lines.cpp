@@ -1,5 +1,5 @@
 #include "utils/lines.h"
-#include "libtp_c/include/msl_c/math.h"
+#include "tpgz_math.h"
 #include "pos_settings.h"
 #include "settings.h"
 #include "utils/draw.h"

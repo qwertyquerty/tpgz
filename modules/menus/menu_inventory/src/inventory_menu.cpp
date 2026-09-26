@@ -4,12 +4,14 @@
 #include "rels/include/defines.h"
 #include "menus/utils/menu_mgr.h"
 
+static Line lines[3] = {
+    {"item wheel", ITEM_WHEEL_INDEX, "Modify the item wheel", false},
+    {"pause menu", PAUSE_MENU_INDEX, "Modify the pause menu collection", false},
+    {"amounts", AMOUNTS_MENU_INDEX, "Modify ammo / collectible amounts", false},
+};
+
 KEEP_FUNC InventoryMenu::InventoryMenu(Cursor& cursor)
-    : Menu(cursor), lines{
-                        {"item wheel", ITEM_WHEEL_INDEX, "Modify the item wheel", false},
-                        {"pause menu", PAUSE_MENU_INDEX, "Modify the pause menu collection", false},
-                        {"amounts", AMOUNTS_MENU_INDEX, "Modify ammo / collectible amounts", false},
-                    } {}
+    : Menu(cursor) {}
 
 InventoryMenu::~InventoryMenu() {}
 

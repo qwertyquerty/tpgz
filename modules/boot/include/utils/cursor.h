@@ -1,16 +1,16 @@
-#pragma once
-
+#ifndef TPGZ_MODULES_BOOT_INCLUDE_UTILS_CURSOR_H
+#define TPGZ_MODULES_BOOT_INCLUDE_UTILS_CURSOR_H
 #include <stdint.h>
 #include "controller.h"
 
 #ifdef GCN_PLATFORM
-#define SCROLL_P10_BTN GZPad::X
-#define SCROLL_M10_BTN GZPad::Y
+#define SCROLL_P10_BTN X
+#define SCROLL_M10_BTN Y
 #endif
 
 #ifdef WII_PLATFORM
-#define SCROLL_P10_BTN GZPad::TWO
-#define SCROLL_M10_BTN GZPad::ONE
+#define SCROLL_P10_BTN TWO
+#define SCROLL_M10_BTN ONE
 #endif
 
 struct Cursor {
@@ -26,9 +26,9 @@ struct Cursor {
 
     template <typename T>
     static void moveList(T& index) {
-        if (GZ_getButtonRepeat(GZPad::DPAD_LEFT)) {
+        if (GZ_getButtonRepeat(DPAD_LEFT)) {
             index--;
-        } else if (GZ_getButtonRepeat(GZPad::DPAD_RIGHT)) {
+        } else if (GZ_getButtonRepeat(DPAD_RIGHT)) {
             index++;
         } else if (GZ_getButtonRepeat(SCROLL_M10_BTN)) {
             index -= 10;
@@ -41,13 +41,15 @@ struct Cursor {
     void lock(bool x, bool y);
     void setMode(uint8_t m);
 
-    int x = 0;
-    int y = 0;
-    uint8_t mode = 0;
-    bool lock_x = false;
-    bool lock_y = false;
+    int x;
+    int y;
+    uint8_t mode;
+    bool lock_x;
+    bool lock_y;
 };
 
 extern bool g_cursorEnabled;
 
 void GZ_setCursorColor();
+
+#endif

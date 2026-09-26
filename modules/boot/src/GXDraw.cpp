@@ -1,12 +1,27 @@
+#include "defines.h"
 /**
  * This is decompiled dolphin SDK code from dolsdk decomp (https://github.com/doldecomp/dolsdk2001)
  * These functions were stripped from retail tp, so we have to manually add them
  */
 
-#include "libtp_c/include/dolphin/gx/gx.h"
-#include "libtp_c/include/dolphin/os/OS.h"
-#include "libtp_c/include/m_Do/m_Do_printf.h"
-#include "libtp_c/include/msl_c/math.h"
+#include "gx.h"
+#include "os.h"
+#include "m_Do/m_Do_printf.h"
+#include "tpgz_math.h"
+
+struct TPGZGXData {
+    u8 pad_0x000[0x14];
+    u32 vcdLo;
+    u32 vcdHi;
+    u32 vatA[8];
+    u32 vatB[8];
+    u32 vatC[8];
+    u8 pad_0x07c[0x4D4 - 0x07C];
+    GXBool hasNrms;
+    GXBool hasBiNrms;
+};
+extern "C" TPGZGXData* gxData;
+#define gx gxData
 
 extern "C" {
 

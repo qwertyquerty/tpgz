@@ -1,12 +1,15 @@
+#include "defines.h"
+#include "d/actor/d_a_alink.h"
+#include "controller.h"
 #include "ee_checker.h"
 #include "controller.h"
 #include "fifo_queue.h"
 #include <cstdio>
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/f_op/f_op_actor_mng.h"
-#include "libtp_c/include/m_Do/m_Do_printf.h"
-#include "libtp_c/include/d/d_procname.h"
-#include "libtp_c/include/SSystem/SComponent/c_counter.h"
+#include "d/d_com_inf_game.h"
+#include "f_op/f_op_actor_mng.h"
+#include "m_Do/m_Do_printf.h"
+#include "f_pc/f_pc_name.h"
+#include "SSystem/SComponent/c_counter.h"
 
 u16 previous_action;        // Tracks the previous action
 char msg_buffer[20];        // Buffer for the message to be printed
@@ -17,24 +20,24 @@ const u8 metamorphose_anm_length = 56; // length of the metamorphose animation i
 s32 metamorphose_start_frame; // frame that the metamorphose animation starts on
 
 void checkRollFrame(daAlink_c* link) {
-    switch (link->mActionID) {
+    switch (link->mProcID) {
     case daAlink_c::PROC_TALK:
         previous_action = daAlink_c::PROC_TALK;
         break;
     case daAlink_c::PROC_METAMORPHOSE:
         if (previous_action == daAlink_c::PROC_TALK) {
-            metamorphose_start_frame = cCt_getFrameCount();
+            metamorphose_start_frame = GZ_getFrameCount();
         }
 
-#if DEBUG
+#if TPGZ_DEBUG
         OSReport("previous action: %d\n", previous_action);
         OSReport("metamorphose start frame: %d\n", metamorphose_start_frame);
-        OSReport("Current metamorphose frame: %d\n", (cCt_getFrameCount() - metamorphose_start_frame));
+        OSReport("Current metamorphose frame: %d\n", (GZ_getFrameCount() - metamorphose_start_frame));
 #endif
             
         if (GZ_getButtonPressed(A) && !GZ_getButtonHold(A)) {
-            early_roll_frame = cCt_getFrameCount();
-            snprintf(msg_buffer, sizeof(msg_buffer), "early by %df", metamorphose_anm_length - (cCt_getFrameCount() - metamorphose_start_frame));
+            early_roll_frame = GZ_getFrameCount();
+            snprintf(msg_buffer, sizeof(msg_buffer), "early by %df", (int)(metamorphose_anm_length - (GZ_getFrameCount() - metamorphose_start_frame)));
             FIFOQueue::push(msg_buffer, Queue, 0x0000CC00);
         }
 
@@ -43,17 +46,17 @@ void checkRollFrame(daAlink_c* link) {
 
     case daAlink_c::PROC_WAIT:
         late_roll_frame = 0;
-        target_frame = cCt_getFrameCount();
+        target_frame = GZ_getFrameCount();
         break;
     case daAlink_c::PROC_MOVE:
     case daAlink_c::PROC_WAIT_TURN:
     case daAlink_c::PROC_MOVE_TURN:
         if (GZ_getButtonPressed(A) && !GZ_getButtonHold(A)) {
-            late_roll_frame = cCt_getFrameCount();
+            late_roll_frame = GZ_getFrameCount();
         }
         break;
     case daAlink_c::PROC_FRONT_ROLL:
-#if DEBUG
+#if TPGZ_DEBUG
             OSReport("Front roll, last action: %d\n", previous_action);
             OSReport("Early roll frame: %d\n", early_roll_frame);
             OSReport("Late roll frame: %d\n", late_roll_frame);
@@ -61,7 +64,7 @@ void checkRollFrame(daAlink_c* link) {
         if (late_roll_frame == 0 && previous_action != daAlink_c::PROC_FRONT_ROLL) {
             FIFOQueue::push("<3", Queue, 0x00CC0000);
         } else if (previous_action != daAlink_c::PROC_FRONT_ROLL) {
-            snprintf(msg_buffer, sizeof(msg_buffer), "late by %df", late_roll_frame - target_frame);
+            snprintf(msg_buffer, sizeof(msg_buffer), "late by %df", (int)(late_roll_frame - target_frame));
             FIFOQueue::push(msg_buffer, Queue, 0xCC000000);
         }
 
@@ -74,31 +77,31 @@ void checkRollFrame(daAlink_c* link) {
 }
 
 KEEP_FUNC void EEChecker::execute() {
-    daAlink_c* link = dComIfGp_getPlayer();
+    daAlink_c* link = (daAlink_c*)dComIfGp_getPlayer(0);
 
     if (!link) {
-#if DEBUG
+#if TPGZ_DEBUG
         OSReport("Player is not loaded\n");
 #endif
         return;
     }
 
-    if (!daAlink_c__checkStageName("R_SP110")) {
-#if DEBUG
+    if (!daAlink_c::checkStageName("R_SP110")) {
+#if TPGZ_DEBUG
         OSReport("Player is not in goron elder room\n");
 #endif
         return;
     }
 
     if (link->current.pos.x > -1400.0f || link->current.pos.x < -1600.0f) {
-#if DEBUG
+#if TPGZ_DEBUG
         OSReport("Player is not in the correct x position\n");
 #endif
         return;
     }
 
     if (link->current.pos.z < 4000.0f || link->current.pos.z > 4400.0f) {
-#if DEBUG
+#if TPGZ_DEBUG
         OSReport("Player is not in the correct z position\n");
 #endif
         return;

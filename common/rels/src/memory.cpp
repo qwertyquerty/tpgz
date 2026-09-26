@@ -3,7 +3,7 @@
 
 #include <cstring>
 
-#include "libtp_c/include/dolphin/os/OSCache.h"
+#include "os/OSCache.h"
 
 void* clearMemory(void* ptr, size_t size) {
     return memset(ptr, 0, size);

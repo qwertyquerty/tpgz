@@ -1,7 +1,7 @@
 #include "menus/menu_golden_bugs/include/golden_bugs_menu.h"
 #include <cstdio>
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/utils.h"
+#include "d/d_com_inf_game.h"
+#include "tpgz_utils.h"
 #include "gz_flags.h"
 #include "rels/include/defines.h"
 #include "menus/utils/menu_mgr.h"
@@ -10,34 +10,35 @@ KEEP_VAR GoldenBugData* gbData;
 
 #define MAX_GB_OPT 3
 
+static Line lines[GB_INDEX_COUNT] = {
+    {"Ant (M):", M_ANT_INDEX, "Male Ant", false, NULL, MAX_GB_OPT},
+    {"Ant (F):", F_ANT_INDEX, "Female Ant", false, NULL, MAX_GB_OPT},
+    {"Beetle (M:", M_BEETLE_INDEX, "Male Beetle", false, NULL, MAX_GB_OPT},
+    {"Beetle (F):", F_BEETLE_INDEX, "Female Beetle", false, NULL, MAX_GB_OPT},
+    {"Butterfly (M):", M_BUTTERFLY_INDEX, "Male Butterfly", false, NULL, MAX_GB_OPT},
+    {"Butterfly (F):", F_BUTTERFLY_INDEX, "Female Butterfly", false, NULL, MAX_GB_OPT},
+    {"Dayfly (M):", M_DAYFLY_INDEX, "Male Dayfly", false, NULL, MAX_GB_OPT},
+    {"Dayfly (F):", F_DAYFLY_INDEX, "Female Dayfly", false, NULL, MAX_GB_OPT},
+    {"Dragonfly (M):", M_DRAGONFLY_INDEX, "Male Dragonfly", false, NULL, MAX_GB_OPT},
+    {"Dragonfly (F):", F_DRAGONFLY_INDEX, "Female Dragonfly", false, NULL, MAX_GB_OPT},
+    {"Grasshopper (M):", M_GRASSHOPPER_INDEX, "Male Grasshopper", false, NULL, MAX_GB_OPT},
+    {"Grasshopper (F):", F_GRASSHOPPER_INDEX, "Female Grasshopper", false, NULL, MAX_GB_OPT},
+    {"Ladybug (M):", M_LADYBUG_INDEX, "Male Ladybug", false, NULL, MAX_GB_OPT},
+    {"Ladybug (F):", F_LADYBUG_INDEX, "Female Ladybug", false, NULL, MAX_GB_OPT},
+    {"Mantis (M):", M_MANTIS_INDEX, "Male Mantis", false, NULL, MAX_GB_OPT},
+    {"Mantis (F):", F_MANTIS_INDEX, "Female Mantis", false, NULL, MAX_GB_OPT},
+    {"Phasmid (M):", M_PHASMID_INDEX, "Male Phasmid", false, NULL, MAX_GB_OPT},
+    {"Phasmid (F):", F_PHASMID_INDEX, "Female Phasmid", false, NULL, MAX_GB_OPT},
+    {"Pill Bug (M):", M_PILL_BUG_INDEX, "Male Pill Bug", false, NULL, MAX_GB_OPT},
+    {"Pill Bug (F):", F_PILL_BUG_INDEX, "Female Pill Bug", false, NULL, MAX_GB_OPT},
+    {"Snail (M):", M_SNAIL_INDEX, "Male Snail", false, NULL, MAX_GB_OPT},
+    {"Snail (F):", F_SNAIL_INDEX, "Female Snail", false, NULL, MAX_GB_OPT},
+    {"Stag Beetle (M):", M_STAG_BEETLE_INDEX, "Male Stag Beetle", false, NULL, MAX_GB_OPT},
+    {"Stag Beetle (F):", F_STAG_BEETLE_INDEX, "Female Stag Beetle", false, NULL, MAX_GB_OPT},
+};
+
 KEEP_FUNC GoldenBugMenu::GoldenBugMenu(Cursor& cursor)
-    : Menu(cursor),
-      lines{
-        {"Ant (M):", M_ANT_INDEX, "Male Ant", false, nullptr, MAX_GB_OPT},
-        {"Ant (F):", F_ANT_INDEX, "Female Ant", false, nullptr, MAX_GB_OPT},
-        {"Beetle (M:", M_BEETLE_INDEX, "Male Beetle", false, nullptr, MAX_GB_OPT},
-        {"Beetle (F):", F_BEETLE_INDEX, "Female Beetle", false, nullptr, MAX_GB_OPT},
-        {"Butterfly (M):", M_BUTTERFLY_INDEX, "Male Butterfly", false, nullptr, MAX_GB_OPT},
-        {"Butterfly (F):", F_BUTTERFLY_INDEX, "Female Butterfly", false, nullptr, MAX_GB_OPT},
-        {"Dayfly (M):", M_DAYFLY_INDEX, "Male Dayfly", false, nullptr, MAX_GB_OPT},
-        {"Dayfly (F):", F_DAYFLY_INDEX, "Female Dayfly", false, nullptr, MAX_GB_OPT},
-        {"Dragonfly (M):", M_DRAGONFLY_INDEX, "Male Dragonfly", false, nullptr, MAX_GB_OPT},
-        {"Dragonfly (F):", F_DRAGONFLY_INDEX, "Female Dragonfly", false, nullptr, MAX_GB_OPT},
-        {"Grasshopper (M):", M_GRASSHOPPER_INDEX, "Male Grasshopper", false, nullptr, MAX_GB_OPT},
-        {"Grasshopper (F):", F_GRASSHOPPER_INDEX, "Female Grasshopper", false, nullptr, MAX_GB_OPT},
-        {"Ladybug (M):", M_LADYBUG_INDEX, "Male Ladybug", false, nullptr, MAX_GB_OPT},
-        {"Ladybug (F):", F_LADYBUG_INDEX, "Female Ladybug", false, nullptr, MAX_GB_OPT},
-        {"Mantis (M):", M_MANTIS_INDEX, "Male Mantis", false, nullptr, MAX_GB_OPT},
-        {"Mantis (F):", F_MANTIS_INDEX, "Female Mantis", false, nullptr, MAX_GB_OPT},
-        {"Phasmid (M):", M_PHASMID_INDEX, "Male Phasmid", false, nullptr, MAX_GB_OPT},
-        {"Phasmid (F):", F_PHASMID_INDEX, "Female Phasmid", false, nullptr, MAX_GB_OPT},
-        {"Pill Bug (M):", M_PILL_BUG_INDEX, "Male Pill Bug", false, nullptr, MAX_GB_OPT},
-        {"Pill Bug (F):", F_PILL_BUG_INDEX, "Female Pill Bug", false, nullptr, MAX_GB_OPT},
-        {"Snail (M):", M_SNAIL_INDEX, "Male Snail", false, nullptr, MAX_GB_OPT},
-        {"Snail (F):", F_SNAIL_INDEX, "Female Snail", false, nullptr, MAX_GB_OPT},
-        {"Stag Beetle (M):", M_STAG_BEETLE_INDEX, "Male Stag Beetle", false, nullptr, MAX_GB_OPT},
-        {"Stag Beetle (F):", F_STAG_BEETLE_INDEX, "Female Stag Beetle", false, nullptr, MAX_GB_OPT},
-    } {
+    : Menu(cursor) {
 
     }
 
@@ -46,360 +47,360 @@ GoldenBugMenu::~GoldenBugMenu() {}
 void GoldenBugMenu::setBugs() {
     switch (gbData->l_mAntIdx) {
     case 0:
-        dComIfGs_offItemFirstBit(M_ANT);
+        dComIfGs_offItemFirstBit(dItemNo_M_ANT_e);
         dComIfGs_offEventBit(0x3301);
         break;
     case 1:
-        dComIfGs_onItemFirstBit(M_ANT);
+        dComIfGs_onItemFirstBit(dItemNo_M_ANT_e);
         dComIfGs_offEventBit(0x3301);
         break;
     case 2:
-        dComIfGs_onItemFirstBit(M_ANT);
+        dComIfGs_onItemFirstBit(dItemNo_M_ANT_e);
         dComIfGs_onEventBit(0x3301);
         break;
     }
 
     switch (gbData->l_fAntIdx) {
     case 0:
-        dComIfGs_offItemFirstBit(F_ANT);
+        dComIfGs_offItemFirstBit(dItemNo_F_ANT_e);
         dComIfGs_offEventBit(0x3480);
         break;
     case 1:
-        dComIfGs_onItemFirstBit(F_ANT);
+        dComIfGs_onItemFirstBit(dItemNo_F_ANT_e);
         dComIfGs_offEventBit(0x3480);
         break;
     case 2:
-        dComIfGs_onItemFirstBit(F_ANT);
+        dComIfGs_onItemFirstBit(dItemNo_F_ANT_e);
         dComIfGs_onEventBit(0x3480);
         break;
     }
 
     switch (gbData->l_mBeetleIdx) {
     case 0:
-        dComIfGs_offItemFirstBit(M_BEETLE);
+        dComIfGs_offItemFirstBit(dItemNo_M_BEETLE_e);
         dComIfGs_offEventBit(0x3110);
         break;
     case 1:
-        dComIfGs_onItemFirstBit(M_BEETLE);
+        dComIfGs_onItemFirstBit(dItemNo_M_BEETLE_e);
         dComIfGs_offEventBit(0x3110);
         break;
     case 2:
-        dComIfGs_onItemFirstBit(M_BEETLE);
+        dComIfGs_onItemFirstBit(dItemNo_M_BEETLE_e);
         dComIfGs_onEventBit(0x3110);
         break;
     }
 
     switch (gbData->l_fBeetleIdx) {
     case 0:
-        dComIfGs_offItemFirstBit(F_BEETLE);
+        dComIfGs_offItemFirstBit(dItemNo_F_BEETLE_e);
         dComIfGs_offEventBit(0x3108);
         break;
     case 1:
-        dComIfGs_onItemFirstBit(F_BEETLE);
+        dComIfGs_onItemFirstBit(dItemNo_F_BEETLE_e);
         dComIfGs_offEventBit(0x3108);
         break;
     case 2:
-        dComIfGs_onItemFirstBit(F_BEETLE);
+        dComIfGs_onItemFirstBit(dItemNo_F_BEETLE_e);
         dComIfGs_onEventBit(0x3108);
         break;
     }
 
     switch (gbData->l_mButterflyIdx) {
     case 0:
-        dComIfGs_offItemFirstBit(M_BUTTERFLY);
+        dComIfGs_offItemFirstBit(dItemNo_M_BUTTERFLY_e);
         dComIfGs_offEventBit(0x3104);
         break;
     case 1:
-        dComIfGs_onItemFirstBit(M_BUTTERFLY);
+        dComIfGs_onItemFirstBit(dItemNo_M_BUTTERFLY_e);
         dComIfGs_offEventBit(0x3104);
         break;
     case 2:
-        dComIfGs_onItemFirstBit(M_BUTTERFLY);
+        dComIfGs_onItemFirstBit(dItemNo_M_BUTTERFLY_e);
         dComIfGs_onEventBit(0x3104);
         break;
     }
 
     switch (gbData->l_fButterflyIdx) {
     case 0:
-        dComIfGs_offItemFirstBit(F_BUTTERFLY);
+        dComIfGs_offItemFirstBit(dItemNo_F_BUTTERFLY_e);
         dComIfGs_offEventBit(0x3102);
         break;
     case 1:
-        dComIfGs_onItemFirstBit(F_BUTTERFLY);
+        dComIfGs_onItemFirstBit(dItemNo_F_BUTTERFLY_e);
         dComIfGs_offEventBit(0x3102);
         break;
     case 2:
-        dComIfGs_onItemFirstBit(F_BUTTERFLY);
+        dComIfGs_onItemFirstBit(dItemNo_F_BUTTERFLY_e);
         dComIfGs_onEventBit(0x3102);
         break;
     }
 
     switch (gbData->l_mDayflyIdx) {
     case 0:
-        dComIfGs_offItemFirstBit(M_MAYFLY);
+        dComIfGs_offItemFirstBit(dItemNo_M_MAYFLY_e);
         dComIfGs_offEventBit(0x3440);
         break;
     case 1:
-        dComIfGs_onItemFirstBit(M_MAYFLY);
+        dComIfGs_onItemFirstBit(dItemNo_M_MAYFLY_e);
         dComIfGs_offEventBit(0x3440);
         break;
     case 2:
-        dComIfGs_onItemFirstBit(M_MAYFLY);
+        dComIfGs_onItemFirstBit(dItemNo_M_MAYFLY_e);
         dComIfGs_onEventBit(0x3440);
         break;
     }
 
     switch (gbData->l_fDayflyIdx) {
     case 0:
-        dComIfGs_offItemFirstBit(F_MAYFLY);
+        dComIfGs_offItemFirstBit(dItemNo_F_MAYFLY_e);
         dComIfGs_offEventBit(0x3420);
         break;
     case 1:
-        dComIfGs_onItemFirstBit(F_MAYFLY);
+        dComIfGs_onItemFirstBit(dItemNo_F_MAYFLY_e);
         dComIfGs_offEventBit(0x3420);
         break;
     case 2:
-        dComIfGs_onItemFirstBit(F_MAYFLY);
+        dComIfGs_onItemFirstBit(dItemNo_F_MAYFLY_e);
         dComIfGs_onEventBit(0x3420);
         break;
     }
 
     switch (gbData->l_mDragonflyIdx) {
     case 0:
-        dComIfGs_offItemFirstBit(M_DRAGONFLY);
+        dComIfGs_offItemFirstBit(dItemNo_M_DRAGONFLY_e);
         dComIfGs_offEventBit(0x3304);
         break;
     case 1:
-        dComIfGs_onItemFirstBit(M_DRAGONFLY);
+        dComIfGs_onItemFirstBit(dItemNo_M_DRAGONFLY_e);
         dComIfGs_offEventBit(0x3304);
         break;
     case 2:
-        dComIfGs_onItemFirstBit(M_DRAGONFLY);
+        dComIfGs_onItemFirstBit(dItemNo_M_DRAGONFLY_e);
         dComIfGs_onEventBit(0x3304);
         break;
     }
 
     switch (gbData->l_fDragonflyIdx) {
     case 0:
-        dComIfGs_offItemFirstBit(F_DRAGONFLY);
+        dComIfGs_offItemFirstBit(dItemNo_F_DRAGONFLY_e);
         dComIfGs_offEventBit(0x3302);
         break;
     case 1:
-        dComIfGs_onItemFirstBit(F_DRAGONFLY);
+        dComIfGs_onItemFirstBit(dItemNo_F_DRAGONFLY_e);
         dComIfGs_offEventBit(0x3302);
         break;
     case 2:
-        dComIfGs_onItemFirstBit(F_DRAGONFLY);
+        dComIfGs_onItemFirstBit(dItemNo_F_DRAGONFLY_e);
         dComIfGs_onEventBit(0x3302);
         break;
     }
 
     switch (gbData->l_mGrasshopperIdx) {
     case 0:
-        dComIfGs_offItemFirstBit(M_GRASSHOPPER);
+        dComIfGs_offItemFirstBit(dItemNo_M_GRASSHOPPER_e);
         dComIfGs_offEventBit(0x3240);
         break;
     case 1:
-        dComIfGs_onItemFirstBit(M_GRASSHOPPER);
+        dComIfGs_onItemFirstBit(dItemNo_M_GRASSHOPPER_e);
         dComIfGs_offEventBit(0x3240);
         break;
     case 2:
-        dComIfGs_onItemFirstBit(M_GRASSHOPPER);
+        dComIfGs_onItemFirstBit(dItemNo_M_GRASSHOPPER_e);
         dComIfGs_onEventBit(0x3240);
         break;
     }
 
     switch (gbData->l_fGrasshopperIdx) {
     case 0:
-        dComIfGs_offItemFirstBit(F_GRASSHOPPER);
+        dComIfGs_offItemFirstBit(dItemNo_F_GRASSHOPPER_e);
         dComIfGs_offEventBit(0x3220);
         break;
     case 1:
-        dComIfGs_onItemFirstBit(F_GRASSHOPPER);
+        dComIfGs_onItemFirstBit(dItemNo_F_GRASSHOPPER_e);
         dComIfGs_offEventBit(0x3220);
         break;
     case 2:
-        dComIfGs_onItemFirstBit(F_GRASSHOPPER);
+        dComIfGs_onItemFirstBit(dItemNo_F_GRASSHOPPER_e);
         dComIfGs_onEventBit(0x3220);
         break;
     }
 
     switch (gbData->l_mLadybugIdx) {
     case 0:
-        dComIfGs_offItemFirstBit(M_LADYBUG);
+        dComIfGs_offItemFirstBit(dItemNo_M_LADYBUG_e);
         dComIfGs_offEventBit(0x3340);
         break;
     case 1:
-        dComIfGs_onItemFirstBit(M_LADYBUG);
+        dComIfGs_onItemFirstBit(dItemNo_M_LADYBUG_e);
         dComIfGs_offEventBit(0x3340);
         break;
     case 2:
-        dComIfGs_onItemFirstBit(M_LADYBUG);
+        dComIfGs_onItemFirstBit(dItemNo_M_LADYBUG_e);
         dComIfGs_onEventBit(0x3340);
         break;
     }
 
     switch (gbData->l_fLadybugIdx) {
     case 0:
-        dComIfGs_offItemFirstBit(F_LADYBUG);
+        dComIfGs_offItemFirstBit(dItemNo_F_LADYBUG_e);
         dComIfGs_offEventBit(0x3320);
         break;
     case 1:
-        dComIfGs_onItemFirstBit(F_LADYBUG);
+        dComIfGs_onItemFirstBit(dItemNo_F_LADYBUG_e);
         dComIfGs_offEventBit(0x3320);
         break;
     case 2:
-        dComIfGs_onItemFirstBit(F_LADYBUG);
+        dComIfGs_onItemFirstBit(dItemNo_F_LADYBUG_e);
         dComIfGs_onEventBit(0x3320);
         break;
     }
 
     switch (gbData->l_mMantisIdx) {
     case 0:
-        dComIfGs_offItemFirstBit(M_MANTIS);
+        dComIfGs_offItemFirstBit(dItemNo_M_MANTIS_e);
         dComIfGs_offEventBit(0x3201);
         break;
     case 1:
-        dComIfGs_onItemFirstBit(M_MANTIS);
+        dComIfGs_onItemFirstBit(dItemNo_M_MANTIS_e);
         dComIfGs_offEventBit(0x3201);
         break;
     case 2:
-        dComIfGs_onItemFirstBit(M_MANTIS);
+        dComIfGs_onItemFirstBit(dItemNo_M_MANTIS_e);
         dComIfGs_onEventBit(0x3201);
         break;
     }
 
     switch (gbData->l_fMantisIdx) {
     case 0:
-        dComIfGs_offItemFirstBit(F_MANTIS);
+        dComIfGs_offItemFirstBit(dItemNo_F_MANTIS_e);
         dComIfGs_offEventBit(0x3380);
         break;
     case 1:
-        dComIfGs_onItemFirstBit(F_MANTIS);
+        dComIfGs_onItemFirstBit(dItemNo_F_MANTIS_e);
         dComIfGs_offEventBit(0x3380);
         break;
     case 2:
-        dComIfGs_onItemFirstBit(F_MANTIS);
+        dComIfGs_onItemFirstBit(dItemNo_F_MANTIS_e);
         dComIfGs_onEventBit(0x3380);
         break;
     }
 
     switch (gbData->l_mPhasmidIdx) {
     case 0:
-        dComIfGs_offItemFirstBit(M_NANAFUSHI);
+        dComIfGs_offItemFirstBit(dItemNo_M_NANAFUSHI_e);
         dComIfGs_offEventBit(0x3210);
         break;  
     case 1:
-        dComIfGs_onItemFirstBit(M_NANAFUSHI);
+        dComIfGs_onItemFirstBit(dItemNo_M_NANAFUSHI_e);
         dComIfGs_offEventBit(0x3210);
         break;
     case 2:
-        dComIfGs_onItemFirstBit(M_NANAFUSHI);
+        dComIfGs_onItemFirstBit(dItemNo_M_NANAFUSHI_e);
         dComIfGs_onEventBit(0x3210);
         break;
     }
 
     switch (gbData->l_fPhasmidIdx) {
     case 0:
-        dComIfGs_offItemFirstBit(F_NANAFUSHI);
+        dComIfGs_offItemFirstBit(dItemNo_F_NANAFUSHI_e);
         dComIfGs_offEventBit(0x3208);
         break;
     case 1:
-        dComIfGs_onItemFirstBit(F_NANAFUSHI);
+        dComIfGs_onItemFirstBit(dItemNo_F_NANAFUSHI_e);
         dComIfGs_offEventBit(0x3208);
         break;
     case 2:
-        dComIfGs_onItemFirstBit(F_NANAFUSHI);
+        dComIfGs_onItemFirstBit(dItemNo_F_NANAFUSHI_e);
         dComIfGs_onEventBit(0x3208);
         break;
     }
 
     switch (gbData->l_mPillBugIdx) {
     case 0:
-        dComIfGs_offItemFirstBit(M_DANGOMUSHI);
+        dComIfGs_offItemFirstBit(dItemNo_M_DANGOMUSHI_e);
         dComIfGs_offEventBit(0x3204);
         break;
     case 1:
-        dComIfGs_onItemFirstBit(M_DANGOMUSHI);
+        dComIfGs_onItemFirstBit(dItemNo_M_DANGOMUSHI_e);
         dComIfGs_offEventBit(0x3204);
         break;
     case 2:
-        dComIfGs_onItemFirstBit(M_DANGOMUSHI);
+        dComIfGs_onItemFirstBit(dItemNo_M_DANGOMUSHI_e);
         dComIfGs_onEventBit(0x3204);
         break;
     }
 
     switch (gbData->l_fPillBugIdx) {
     case 0:
-        dComIfGs_offItemFirstBit(F_DANGOMUSHI);
+        dComIfGs_offItemFirstBit(dItemNo_F_DANGOMUSHI_e);
         dComIfGs_offEventBit(0x3202);
         break;
     case 1:
-        dComIfGs_onItemFirstBit(F_DANGOMUSHI);
+        dComIfGs_onItemFirstBit(dItemNo_F_DANGOMUSHI_e);
         dComIfGs_offEventBit(0x3202);
         break;
     case 2:
-        dComIfGs_onItemFirstBit(F_DANGOMUSHI);
+        dComIfGs_onItemFirstBit(dItemNo_F_DANGOMUSHI_e);
         dComIfGs_onEventBit(0x3202);
         break;
     }
 
     switch (gbData->l_mSnailIdx) {
     case 0:
-        dComIfGs_offItemFirstBit(M_SNAIL);
+        dComIfGs_offItemFirstBit(dItemNo_M_SNAIL_e);
         dComIfGs_offEventBit(0x3310);
         break;
     case 1:
-        dComIfGs_onItemFirstBit(M_SNAIL);
+        dComIfGs_onItemFirstBit(dItemNo_M_SNAIL_e);
         dComIfGs_offEventBit(0x3310);
         break;
     case 2:
-        dComIfGs_onItemFirstBit(M_SNAIL);
+        dComIfGs_onItemFirstBit(dItemNo_M_SNAIL_e);
         dComIfGs_onEventBit(0x3310);
         break;
     }
 
     switch (gbData->l_fSnailIdx) {
     case 0:
-        dComIfGs_offItemFirstBit(F_SNAIL);
+        dComIfGs_offItemFirstBit(dItemNo_F_SNAIL_e);
         dComIfGs_offEventBit(0x3308);
         break;
     case 1:
-        dComIfGs_onItemFirstBit(F_SNAIL);
+        dComIfGs_onItemFirstBit(dItemNo_F_SNAIL_e);
         dComIfGs_offEventBit(0x3308);
         break;
     case 2:
-        dComIfGs_onItemFirstBit(F_SNAIL);
+        dComIfGs_onItemFirstBit(dItemNo_F_SNAIL_e);
         dComIfGs_onEventBit(0x3308);
         break;
     }
 
     switch (gbData->l_mStagBeetleIdx) {
     case 0:
-        dComIfGs_offItemFirstBit(M_STAG_BEETLE);
+        dComIfGs_offItemFirstBit(dItemNo_M_STAG_BEETLE_e);
         dComIfGs_offEventBit(0x3101);
         break;
     case 1:
-        dComIfGs_onItemFirstBit(M_STAG_BEETLE);
+        dComIfGs_onItemFirstBit(dItemNo_M_STAG_BEETLE_e);
         dComIfGs_offEventBit(0x3101);
         break;
     case 2:
-        dComIfGs_onItemFirstBit(M_STAG_BEETLE);
+        dComIfGs_onItemFirstBit(dItemNo_M_STAG_BEETLE_e);
         dComIfGs_onEventBit(0x3101);
         break;
     }
 
     switch (gbData->l_fStagBeetleIdx) {
     case 0:
-        dComIfGs_offItemFirstBit(F_STAG_BEETLE);
+        dComIfGs_offItemFirstBit(dItemNo_F_STAG_BEETLE_e);
         dComIfGs_offEventBit(0x3280);
         break;
     case 1:
-        dComIfGs_onItemFirstBit(F_STAG_BEETLE);
+        dComIfGs_onItemFirstBit(dItemNo_F_STAG_BEETLE_e);
         dComIfGs_offEventBit(0x3280);
         break;
     case 2:
-        dComIfGs_onItemFirstBit(F_STAG_BEETLE);
+        dComIfGs_onItemFirstBit(dItemNo_F_STAG_BEETLE_e);
         dComIfGs_onEventBit(0x3280);
         break;
     }
@@ -426,30 +427,30 @@ void GoldenBugMenu::draw() {
     }
 
     // update gb flags
-    gbData->l_mAntIdx = getBugIdx(M_ANT,0x3301);
-    gbData->l_fAntIdx = getBugIdx(F_ANT,0x3480);
-    gbData->l_mBeetleIdx = getBugIdx(M_BEETLE,0x3110);
-    gbData->l_fBeetleIdx = getBugIdx(F_BEETLE,0x3108);
-    gbData->l_mButterflyIdx = getBugIdx(M_BUTTERFLY,0x3104);
-    gbData->l_fButterflyIdx = getBugIdx(F_BUTTERFLY,0x3102);
-    gbData->l_mDayflyIdx = getBugIdx(M_MAYFLY,0x3440);
-    gbData->l_fDayflyIdx = getBugIdx(F_MAYFLY,0x3420);
-    gbData->l_mDragonflyIdx = getBugIdx(M_DRAGONFLY,0x3304);
-    gbData->l_fDragonflyIdx = getBugIdx(F_DRAGONFLY,0x3302);
-    gbData->l_mGrasshopperIdx = getBugIdx(M_GRASSHOPPER,0x3240);
-    gbData->l_fGrasshopperIdx = getBugIdx(F_GRASSHOPPER,0x3220);
-    gbData->l_mLadybugIdx = getBugIdx(M_LADYBUG,0x3340);
-    gbData->l_fLadybugIdx = getBugIdx(F_LADYBUG,0x3320);
-    gbData->l_mMantisIdx = getBugIdx(M_MANTIS,0x3201);
-    gbData->l_fMantisIdx = getBugIdx(F_MANTIS,0x3380);
-    gbData->l_mPhasmidIdx = getBugIdx(M_NANAFUSHI,0x3210);
-    gbData->l_fPhasmidIdx = getBugIdx(F_NANAFUSHI,0x3208);
-    gbData->l_mPillBugIdx = getBugIdx(M_DANGOMUSHI,0x3204);
-    gbData->l_fPillBugIdx = getBugIdx(F_DANGOMUSHI,0x3202);
-    gbData->l_mSnailIdx = getBugIdx(M_SNAIL,0x3310);
-    gbData->l_fSnailIdx = getBugIdx(F_SNAIL,0x3308);
-    gbData->l_mStagBeetleIdx = getBugIdx(M_STAG_BEETLE,0x3101);
-    gbData->l_fStagBeetleIdx = getBugIdx(F_STAG_BEETLE,0x3280);
+    gbData->l_mAntIdx = getBugIdx(dItemNo_M_ANT_e,0x3301);
+    gbData->l_fAntIdx = getBugIdx(dItemNo_F_ANT_e,0x3480);
+    gbData->l_mBeetleIdx = getBugIdx(dItemNo_M_BEETLE_e,0x3110);
+    gbData->l_fBeetleIdx = getBugIdx(dItemNo_F_BEETLE_e,0x3108);
+    gbData->l_mButterflyIdx = getBugIdx(dItemNo_M_BUTTERFLY_e,0x3104);
+    gbData->l_fButterflyIdx = getBugIdx(dItemNo_F_BUTTERFLY_e,0x3102);
+    gbData->l_mDayflyIdx = getBugIdx(dItemNo_M_MAYFLY_e,0x3440);
+    gbData->l_fDayflyIdx = getBugIdx(dItemNo_F_MAYFLY_e,0x3420);
+    gbData->l_mDragonflyIdx = getBugIdx(dItemNo_M_DRAGONFLY_e,0x3304);
+    gbData->l_fDragonflyIdx = getBugIdx(dItemNo_F_DRAGONFLY_e,0x3302);
+    gbData->l_mGrasshopperIdx = getBugIdx(dItemNo_M_GRASSHOPPER_e,0x3240);
+    gbData->l_fGrasshopperIdx = getBugIdx(dItemNo_F_GRASSHOPPER_e,0x3220);
+    gbData->l_mLadybugIdx = getBugIdx(dItemNo_M_LADYBUG_e,0x3340);
+    gbData->l_fLadybugIdx = getBugIdx(dItemNo_F_LADYBUG_e,0x3320);
+    gbData->l_mMantisIdx = getBugIdx(dItemNo_M_MANTIS_e,0x3201);
+    gbData->l_fMantisIdx = getBugIdx(dItemNo_F_MANTIS_e,0x3380);
+    gbData->l_mPhasmidIdx = getBugIdx(dItemNo_M_NANAFUSHI_e,0x3210);
+    gbData->l_fPhasmidIdx = getBugIdx(dItemNo_F_NANAFUSHI_e,0x3208);
+    gbData->l_mPillBugIdx = getBugIdx(dItemNo_M_DANGOMUSHI_e,0x3204);
+    gbData->l_fPillBugIdx = getBugIdx(dItemNo_F_DANGOMUSHI_e,0x3202);
+    gbData->l_mSnailIdx = getBugIdx(dItemNo_M_SNAIL_e,0x3310);
+    gbData->l_fSnailIdx = getBugIdx(dItemNo_F_SNAIL_e,0x3308);
+    gbData->l_mStagBeetleIdx = getBugIdx(dItemNo_M_STAG_BEETLE_e,0x3101);
+    gbData->l_fStagBeetleIdx = getBugIdx(dItemNo_F_STAG_BEETLE_e,0x3280);
 
     ListMember mAnt_opt[3] = {"none", "Ant (M)", "Ant (M) (turned in)"};
     ListMember fAnt_opt[3] = {"none", "Ant (F)", "Ant (F) (turned in)"};

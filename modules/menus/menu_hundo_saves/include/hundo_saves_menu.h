@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef TPGZ_MODULES_MENUS_MENU_HUNDO_SAVES_INCLUDE_HUNDO_SAVES_MENU_H
+#define TPGZ_MODULES_MENUS_MENU_HUNDO_SAVES_INCLUDE_HUNDO_SAVES_MENU_H
 #include "menus/menu.h"
 
 #define HND_SPECIALS_AMNT 25
@@ -266,8 +266,8 @@ public:
 
 private:
 #ifdef WII_PLATFORM
-    Line lines[WND_SAVES_MAX];
 #else
-    Line lines[HND_SAVES_MAX];
 #endif
 };
+
+#endif

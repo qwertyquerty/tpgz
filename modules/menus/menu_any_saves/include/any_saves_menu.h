@@ -120,5 +120,4 @@ public:
     virtual void draw();
 
 private:
-    Line lines[ANY_SAVES_COUNT];
 };

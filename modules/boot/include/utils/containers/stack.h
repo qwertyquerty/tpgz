@@ -4,17 +4,16 @@
 #include <rels/include/cxx.h>
 #include <rels/include/defines.h>
 #include <cstddef>
-#include <atomic>
-#include <iterator>
-#include <concepts>
-#include <type_traits>
 
-namespace tpgz::containers {
+namespace tpgz {
+namespace containers {
 
 template <typename T>
 class stack {
 private:
     struct Node {
+        Node(const T& d, Node* n) : data(d), next(n) {}
+
         T data;
         Node* next;
     };
@@ -52,24 +51,24 @@ public:
     };
 
 private:
-    std::atomic<Node*> top;
+    Node* top;
 
 public:
-    stack() : top(nullptr) {}
+    stack() : top(NULL) {}
 
     ~stack() { clear(); }
 
     void erase(iterator it) {
-        Node* currentTop = top.load();
-        Node* previousNode = nullptr;
+        Node* currentTop = top;
+        Node* previousNode = NULL;
 
-        while (currentTop != nullptr) {
+        while (currentTop != NULL) {
             if (currentTop == it.node) {
-                if (previousNode == nullptr) {
+                if (previousNode == NULL) {
                     // The top node matches the iterator
-                    std::atomic_compare_exchange_strong(&top, &currentTop, currentTop->next);
+                    top = currentTop->next;
                     delete currentTop;
-                    currentTop = top.load();
+                    currentTop = top;
                 } else {
                     // A node in the middle of the stack matches the iterator
                     previousNode->next = currentTop->next;
@@ -85,25 +84,18 @@ public:
     }
 
     void push(const T& value) {
-        Node* newNode = new Node{value, nullptr};
-        Node* oldTop = top.load();
-        do {
-            newNode->next = oldTop;
-        } while (!std::atomic_compare_exchange_strong(&top, &oldTop, newNode));
+        top = new Node(value, top);
     }
 
     void pop() {
-        Node* oldTop = top.load();
-        while (oldTop != nullptr &&
-               !std::atomic_compare_exchange_strong(&top, &oldTop, oldTop->next)) {
-            oldTop = top.load();
-        }
-        if (oldTop != nullptr) {
+        Node* oldTop = top;
+        if (oldTop != NULL) {
+            top = oldTop->next;
             delete oldTop;
         }
     }
 
-    bool empty() const { return top.load() == nullptr; }
+    bool empty() const { return top == NULL; }
 
     void clear() {
         while (!empty()) {
@@ -112,20 +104,21 @@ public:
     }
 
     size_t size() const {
-        Node* currentTop = top.load();
+        Node* currentTop = top;
         size_t count = 0;
-        while (currentTop != nullptr) {
+        while (currentTop != NULL) {
             currentTop = currentTop->next;
             ++count;
         }
         return count;
     }
 
-    iterator begin() { return iterator(top.load()); }
+    iterator begin() { return iterator(top); }
 
-    iterator end() { return iterator(nullptr); }
+    iterator end() { return iterator(NULL); }
 };
 
+}
 }  // namespace tpgz::containers
 
 #endif

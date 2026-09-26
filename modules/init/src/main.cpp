@@ -20,12 +20,13 @@
 #include "events/draw_listener.h"
 #include "events/pre_loop_listener.h"
 #include "events/post_loop_listener.h"
-#include "libtp_c/include/dolphin/os/OSCache.h"
+#include "os/OSCache.h"
 
 void GZ_PosSettings_initDefaults();
 void GZ_patchLinkColor();
 
-namespace tpgz::modules {
+namespace tpgz {
+namespace modules {
 void main() {
     // Utilities initialization
     Hook::applyHooks();
@@ -56,29 +57,29 @@ void main() {
     g_drawListener->addListener(GZ_drawPacketNumOverflow);
 
     // Init the module list
-    g_modules.push_back(new Module{inputViewer_active, "/tpgz/rels/features/input_viewer.rel"});
-    g_modules.push_back(new Module{freeCam_active, "/tpgz/rels/features/free_cam.rel"});
-    g_modules.push_back(new Module{moveLink_active, "/tpgz/rels/features/moveactor.rel"});
-    g_modules.push_back(new Module{projectionView_active, "/tpgz/rels/features/projection_view.rel"});
-    g_modules.push_back(new Module{triggerViewer_active, "/tpgz/rels/features/trigger_view.rel"});
-    g_modules.push_back(new Module{actorView_active, "/tpgz/rels/features/actor_view.rel"});
+    g_modules.push_back(new Module(inputViewer_active, "/tpgz/rels/features/input_viewer.rel"));
+    g_modules.push_back(new Module(freeCam_active, "/tpgz/rels/features/free_cam.rel"));
+    g_modules.push_back(new Module(moveLink_active, "/tpgz/rels/features/moveactor.rel"));
+    g_modules.push_back(new Module(projectionView_active, "/tpgz/rels/features/projection_view.rel"));
+    g_modules.push_back(new Module(triggerViewer_active, "/tpgz/rels/features/trigger_view.rel"));
+    g_modules.push_back(new Module(actorView_active, "/tpgz/rels/features/actor_view.rel"));
     g_modules.push_back(
-        new Module{transformIndicator_active, "/tpgz/rels/features/transform_indicator.rel"});
-    g_modules.push_back(new Module{umd_active, "/tpgz/rels/features/umd.rel"});
+        new Module(transformIndicator_active, "/tpgz/rels/features/transform_indicator.rel"));
+    g_modules.push_back(new Module(umd_active, "/tpgz/rels/features/umd.rel"));
 #ifdef WII_PLATFORM
-    g_modules.push_back(new Module{bit_active, "/tpgz/rels/features/bit.rel"});
-    g_modules.push_back(new Module{slash_active, "/tpgz/rels/features/slash_checker.rel"});
+    g_modules.push_back(new Module(bit_active, "/tpgz/rels/features/bit.rel"));
+    g_modules.push_back(new Module(slash_active, "/tpgz/rels/features/slash_checker.rel"));
 #endif
-    g_modules.push_back(new Module{corotd_active, "/tpgz/rels/features/corotd.rel"});
-    g_modules.push_back(new Module{fast_eel_regrab_active, "/tpgz/rels/features/fast_eel_regrab.rel"});
-    g_modules.push_back(new Module{lfc_active, "/tpgz/rels/features/lfc_checker.rel"});
-    g_modules.push_back(new Module{ebmb_active, "/tpgz/rels/features/ebmb_checker.rel"});
-    g_modules.push_back(new Module{ee_active, "/tpgz/rels/features/ee_checker.rel"});
-    g_modules.push_back(new Module{mash_checker_active, "/tpgz/rels/features/mash_checker.rel"});
-    g_modules.push_back(new Module{gorge_wolf_active, "/tpgz/rels/features/gorge.rel"});
-    g_modules.push_back(new Module{gorge_human_active, "/tpgz/rels/features/gorge.rel"});
-    g_modules.push_back(new Module{rollcheck_active, "/tpgz/rels/features/rollcheck.rel"});
-    g_modules.push_back(new Module{moon_jump_active, "/tpgz/rels/features/moon_jump.rel"});
+    g_modules.push_back(new Module(corotd_active, "/tpgz/rels/features/corotd.rel"));
+    g_modules.push_back(new Module(fast_eel_regrab_active, "/tpgz/rels/features/fast_eel_regrab.rel"));
+    g_modules.push_back(new Module(lfc_active, "/tpgz/rels/features/lfc_checker.rel"));
+    g_modules.push_back(new Module(ebmb_active, "/tpgz/rels/features/ebmb_checker.rel"));
+    g_modules.push_back(new Module(ee_active, "/tpgz/rels/features/ee_checker.rel"));
+    g_modules.push_back(new Module(mash_checker_active, "/tpgz/rels/features/mash_checker.rel"));
+    g_modules.push_back(new Module(gorge_wolf_active, "/tpgz/rels/features/gorge.rel"));
+    g_modules.push_back(new Module(gorge_human_active, "/tpgz/rels/features/gorge.rel"));
+    g_modules.push_back(new Module(rollcheck_active, "/tpgz/rels/features/rollcheck.rel"));
+    g_modules.push_back(new Module(moon_jump_active, "/tpgz/rels/features/moon_jump.rel"));
 
     // Init the pre-loop listener
     g_PreLoopListener = new PreLoopListener();
@@ -101,42 +102,43 @@ void main() {
     g_PostLoopListener->addListener(GZ_setTunicColor);
 
     // Init the gz flags
-    GZFlg_addFlag(new GZFlag{GZFLG_FREEZE_ACTOR, GZ_freezeActors_active,
-                             GAME_LOOP, GZ_freezeActors, GZ_unfreezeActors});
-    GZFlg_addFlag(new GZFlag{GZFLG_HIDE_ACTOR, GZ_hideActors_active, GAME_LOOP,
-                             GZ_hideActors, GZ_showActors});
-    GZFlg_addFlag(new GZFlag{GZFLG_FREEZE_CAMERA, GZ_freezeCamera_active,
-                             GAME_LOOP, GZ_freezeCamera, GZ_unfreezeCamera});
-    GZFlg_addFlag(new GZFlag{GZFLG_HIDE_HUD, GZ_hideHUD_active, GAME_LOOP,
-                             GZ_hideHUD, GZ_showHUD});
-    GZFlg_addFlag(new GZFlag{GZFLG_FREEZE_TIME, GZ_freezeTime_active, GAME_LOOP,
-                             GZ_freezeTime});
-    GZFlg_addFlag(new GZFlag{GZFLG_DISABLE_BGM, GZ_disableBgm_active, GAME_LOOP,
-                             GZ_disableBGM, GZ_enableBGM});
-    GZFlg_addFlag(new GZFlag{GZFLG_DISABLE_SFX, GZ_disableSFX_active, GAME_LOOP,
-                             GZ_disableSFX, GZ_enableSFX});
+    GZFlg_addFlag(new GZFlag(GZFLG_FREEZE_ACTOR, GZ_freezeActors_active,
+                             GAME_LOOP, GZ_freezeActors, GZ_unfreezeActors));
+    GZFlg_addFlag(new GZFlag(GZFLG_HIDE_ACTOR, GZ_hideActors_active, GAME_LOOP,
+                             GZ_hideActors, GZ_showActors));
+    GZFlg_addFlag(new GZFlag(GZFLG_FREEZE_CAMERA, GZ_freezeCamera_active,
+                             GAME_LOOP, GZ_freezeCamera, GZ_unfreezeCamera));
+    GZFlg_addFlag(new GZFlag(GZFLG_HIDE_HUD, GZ_hideHUD_active, GAME_LOOP,
+                             GZ_hideHUD, GZ_showHUD));
+    GZFlg_addFlag(new GZFlag(GZFLG_FREEZE_TIME, GZ_freezeTime_active, GAME_LOOP,
+                             GZ_freezeTime));
+    GZFlg_addFlag(new GZFlag(GZFLG_DISABLE_BGM, GZ_disableBgm_active, GAME_LOOP,
+                             GZ_disableBGM, GZ_enableBGM));
+    GZFlg_addFlag(new GZFlag(GZFLG_DISABLE_SFX, GZ_disableSFX_active, GAME_LOOP,
+                             GZ_disableSFX, GZ_enableSFX));
 }
 void exit() {}
 
+}
 }  // namespace tpgz::modules
 
 void GZ_PosSettings_initDefaults() {
 #ifdef GCN_PLATFORM
-    GZStng_add(STNG_SPRITES_INPUT_VIEWER, new Vec2{220.f, 380.f}, sizeof(Vec2));
+    GZStng_add(STNG_SPRITES_INPUT_VIEWER, new Vec2(makeVec2(220.f, 380.f)), sizeof(Vec2));
 #elif defined(WII_PLATFORM)
-    GZStng_add(STNG_SPRITES_INPUT_VIEWER, new Vec2{250.f, 360.f}, sizeof(Vec2));
+    GZStng_add(STNG_SPRITES_INPUT_VIEWER, new Vec2(makeVec2(250.f, 360.f)), sizeof(Vec2));
 #endif
-    GZStng_add(STNG_SPRITES_MENU, new Vec2{25.f, 60.f}, sizeof(Vec2));
-    GZStng_add(STNG_SPRITES_DEBUG_INFO, new Vec2{450.0f, 200.f}, sizeof(Vec2));
-    GZStng_add(STNG_SPRITES_STAGE_INFO, new Vec2{145.0f, 350.f}, sizeof(Vec2));
-    GZStng_add(STNG_SPRITES_TIMER_SPR, new Vec2{450.0f, 420.f}, sizeof(Vec2));
-    GZStng_add(STNG_SPRITES_LOAD_TIMER_SPR, new Vec2{450.0f, 30.f}, sizeof(Vec2));
-    GZStng_add(STNG_SPRITES_IGT_TIMER_SPR, new Vec2{35.0f, 30.f}, sizeof(Vec2));
-    GZStng_add(STNG_SPRITES_FIFO_SPR, new Vec2{5.0f, 440.f}, sizeof(Vec2));
-    GZStng_add(STNG_SPRITES_HEAP_INFO, new Vec2{145.0f, 25.0f}, sizeof(Vec2));
-    GZStng_add(STNG_SPRITES_MASH_INFO, new Vec2{450.0f, 400.0f}, sizeof(Vec2));
-    GZStng_add(STNG_SPRITES_TRANSFORM_IND, new Vec2{465.0f, 30.0f}, sizeof(Vec2));
-    GZStng_add(STNG_SPRITES_DISPLACEMENT, new Vec2{450.0f, 60.0f}, sizeof(Vec2));
+    GZStng_add(STNG_SPRITES_MENU, new Vec2(makeVec2(25.f, 60.f)), sizeof(Vec2));
+    GZStng_add(STNG_SPRITES_DEBUG_INFO, new Vec2(makeVec2(450.0f, 200.f)), sizeof(Vec2));
+    GZStng_add(STNG_SPRITES_STAGE_INFO, new Vec2(makeVec2(145.0f, 350.f)), sizeof(Vec2));
+    GZStng_add(STNG_SPRITES_TIMER_SPR, new Vec2(makeVec2(450.0f, 420.f)), sizeof(Vec2));
+    GZStng_add(STNG_SPRITES_LOAD_TIMER_SPR, new Vec2(makeVec2(450.0f, 30.f)), sizeof(Vec2));
+    GZStng_add(STNG_SPRITES_IGT_TIMER_SPR, new Vec2(makeVec2(35.0f, 30.f)), sizeof(Vec2));
+    GZStng_add(STNG_SPRITES_FIFO_SPR, new Vec2(makeVec2(5.0f, 440.f)), sizeof(Vec2));
+    GZStng_add(STNG_SPRITES_HEAP_INFO, new Vec2(makeVec2(145.0f, 25.0f)), sizeof(Vec2));
+    GZStng_add(STNG_SPRITES_MASH_INFO, new Vec2(makeVec2(450.0f, 400.0f)), sizeof(Vec2));
+    GZStng_add(STNG_SPRITES_TRANSFORM_IND, new Vec2(makeVec2(465.0f, 30.0f)), sizeof(Vec2));
+    GZStng_add(STNG_SPRITES_DISPLACEMENT, new Vec2(makeVec2(450.0f, 60.0f)), sizeof(Vec2));
 }
 
 inline void GZ_patchLinkColor() {

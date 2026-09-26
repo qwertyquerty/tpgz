@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef TPGZ_MODULES_BOOT_INCLUDE_SCENE_H
+#define TPGZ_MODULES_BOOT_INCLUDE_SCENE_H
 #define SCENE_AMNT 7
 
 enum SceneIndex {
@@ -36,3 +36,5 @@ void GZ_freezeActors();
 void GZ_unfreezeActors();
 void GZ_hideActors();
 void GZ_showActors();
+
+#endif

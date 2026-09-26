@@ -1,8 +1,8 @@
-#pragma once
-
+#ifndef TPGZ_MODULES_BOOT_INCLUDE_MEMFILES_H
+#define TPGZ_MODULES_BOOT_INCLUDE_MEMFILES_H
 #include <cstdint>
-#include "libtp_c/include/dolphin/mtx/vec.h"
-#include "libtp_c/include/SSystem/SComponent/c_xyz.h"
+#include "tpgz_vec.h"
+#include "SSystem/SComponent/c_xyz.h"
 
 struct PositionData {
     cXyz link;
@@ -13,3 +13,5 @@ struct PositionData {
 extern PositionData memfile_posdata;
 
 void GZ_setLinkPosition();
+
+#endif

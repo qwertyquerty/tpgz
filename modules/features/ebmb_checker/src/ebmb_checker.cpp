@@ -1,12 +1,14 @@
+#include "defines.h"
+#include "d/actor/d_a_alink.h"
 #include "ebmb_checker.h"
 #include "controller.h"
 #include "fifo_queue.h"
 #include <cstdio>
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/f_op/f_op_actor_mng.h"
-#include "libtp_c/include/m_Do/m_Do_printf.h"
-#include "libtp_c/include/d/d_procname.h"
-#include "libtp_c/include/SSystem/SComponent/c_counter.h"
+#include "d/d_com_inf_game.h"
+#include "f_op/f_op_actor_mng.h"
+#include "m_Do/m_Do_printf.h"
+#include "f_pc/f_pc_name.h"
+#include "SSystem/SComponent/c_counter.h"
 
 char msg_buffer[40];     // buffer for the message to be printed
 u16 previous_action;     // tracks the previous action
@@ -15,7 +17,7 @@ bool ib_on;              // tracks whether or not IB are equipped
 bool ib_on_last_frame;   // tracks whether or not IB was equipped on the last frame
 
 void checkFrame(daAlink_c* link) {
-    switch (link->mActionID) {
+    switch (link->mProcID) {
     case daAlink_c::PROC_ATN_ACTOR_WAIT:
         previous_action = daAlink_c::PROC_ATN_ACTOR_WAIT;
         break;
@@ -26,13 +28,13 @@ void checkFrame(daAlink_c* link) {
 
         ib_on = link->checkEquipHeavyBoots();
 
-        if (g_dComIfG_gameInfo.play.mPauseFlag) {
-#if DEBUG
+        if (dComIfGp_isPauseFlag()) {
+#if TPGZ_DEBUG
             OSReport("game paused!\n");
 #endif
         } else {
             eb_frame_delta++;
-#if DEBUG
+#if TPGZ_DEBUG
             OSReport("frame delta: %d\n", eb_frame_delta);
             OSReport("ib on: %d\n", ib_on);
             OSReport("ib on last frame: %d\n", ib_on_last_frame);
@@ -42,7 +44,7 @@ void checkFrame(daAlink_c* link) {
                 if (eb_frame_delta == 4) {
                     FIFOQueue::push("<3", Queue, 0x00CC0000);
                 } else if (eb_frame_delta > 4 && eb_frame_delta <= 10) {
-                    snprintf(msg_buffer, sizeof(msg_buffer), "late by %df", (eb_frame_delta - 4));
+                    snprintf(msg_buffer, sizeof(msg_buffer), "late by %df", (int)(eb_frame_delta - 4));
                     FIFOQueue::push(msg_buffer, Queue, 0xCC000000);
                 }
             } else if (!ib_on && eb_frame_delta == 3) {
@@ -60,10 +62,10 @@ void checkFrame(daAlink_c* link) {
 }
 
 KEEP_FUNC void EBMBChecker::execute() {
-    daAlink_c* link = dComIfGp_getPlayer();
+    daAlink_c* link = (daAlink_c*)dComIfGp_getPlayer(0);
 
     if (!link) {
-#if DEBUG
+#if TPGZ_DEBUG
         OSReport("Player is not loaded\n");
 #endif
         return;

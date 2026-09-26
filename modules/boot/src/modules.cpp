@@ -1,5 +1,5 @@
 #include "modules.h"
-#include "libtp_c/include/defines.h"
+#include "rels/include/defines.h"
 
 #include "commands.h"
 #include "global_data.h"
@@ -14,13 +14,15 @@ KEEP_VAR tpgz::containers::deque<Module*> g_modules;
  *          Registered to run before the main loop.
  */
 KEEP_FUNC void GZ_handleModules() {
-    for (auto mod : g_modules) {
+    for (tpgz::containers::deque<Module*>::iterator modIt = g_modules.begin(); modIt != g_modules.end(); ++modIt) {
+        Module* mod = *modIt;
         if (!mod->active() && mod->rel.isLoaded()) {
             mod->rel.close();
         }
     }
 
-    for (auto mod : g_modules) {
+    for (tpgz::containers::deque<Module*>::iterator modIt = g_modules.begin(); modIt != g_modules.end(); ++modIt) {
+        Module* mod = *modIt;
         if (mod->active() && !mod->rel.isLoaded()) {
             mod->rel.load(true);
         }

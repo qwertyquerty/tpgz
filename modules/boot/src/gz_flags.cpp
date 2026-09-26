@@ -1,3 +1,6 @@
+#include "d/actor/d_a_alink.h"
+#include "m_Do/m_Do_controller_pad.h"
+#include "game_state.h"
 #include "gz_flags.h"
 #include <cstring>
 #include "controller.h"
@@ -12,11 +15,10 @@
 #include "save_manager.h"
 #include "memfiles.h"
 #include "utils/draw.h"
-#include "libtp_c/include/JSystem/JUtility/JUTGamePad.h"
-#include "libtp_c/include/m_Do/m_Re_controller_pad.h"
-#include "libtp_c/include/f_op/f_op_scene_req.h"
+#include "JSystem/JUtility/JUTGamePad.h"
+#include "f_op/f_op_scene_req.h"
 #include "rels/include/defines.h"
-#include "libtp_c/include/m_Do/m_Do_printf.h"
+#include "m_Do/m_Do_printf.h"
 
 bool g_framePaused = false;
 
@@ -24,13 +26,13 @@ bool g_framePaused = false;
 KEEP_VAR tpgz::containers::deque<GZFlag*> g_gzFlags;
 
 #ifdef GCN_PLATFORM
-#define HOLD_BTNS cPadInfo[0].mButtonFlags
-#define TRIG_BTNS cPadInfo[0].mPressedButtonFlags
+#define HOLD_BTNS mDoCPd_c::getCpadInfo(0).mButtonFlags
+#define TRIG_BTNS mDoCPd_c::getCpadInfo(0).mPressedButtonFlags
 #endif
 
 #ifdef WII_PLATFORM
-#define HOLD_BTNS mPad.mHoldButton
-#define TRIG_BTNS mPad.mTrigButton
+#define HOLD_BTNS GZ_getWiiPadStatus().hold
+#define TRIG_BTNS GZ_getWiiPadStatus().trig
 #endif
 
 KEEP_FUNC void GZFlg_addFlag(GZFlag* flag) {
@@ -38,13 +40,13 @@ KEEP_FUNC void GZFlg_addFlag(GZFlag* flag) {
 }
 
 KEEP_FUNC GZFlag* GZFlg_removeFlag(GZFlags flag_id) {
-    auto it = g_gzFlags.begin();
+    tpgz::containers::deque<GZFlag*>::iterator it = g_gzFlags.begin();
     for (;it != g_gzFlags.end(); ++it) {
         if ((*it)->id == flag_id) {
             break;
         }
     }
-    auto* flag = *it;
+    GZFlag* flag = *it;
     g_gzFlags.erase(it);
     return flag;
 }
@@ -85,26 +87,22 @@ KEEP_FUNC void GZ_frameAdvance() {
     }
 }
 
-#ifdef WII_PLATFORM
-extern bool isWidescreen;
-#else
-#define isWidescreen (false)
-#endif
 void GZ_drawFrameTex(Texture* pauseTex, Texture* playTex) {
     if (g_framePaused) {
         if (sPauseTimer == 1) {
-            Draw::drawRect(0xFFFFFFFF, {550.0f, 5.0f}, {32 * (isWidescreen ? 0.75f : 1.0f), 32},
+            Draw::drawRect(0xFFFFFFFF, makeVec2(550.0f, 5.0f), makeVec2(32 * (isWidescreen ? 0.75f : 1.0f), 32),
                            &pauseTex->_texObj);
         } else {
-            Draw::drawRect(0xFFFFFFFF, {550.0f, 5.0f}, {32 * (isWidescreen ? 0.75f : 1.0f), 32},
+            Draw::drawRect(0xFFFFFFFF, makeVec2(550.0f, 5.0f), makeVec2(32 * (isWidescreen ? 0.75f : 1.0f), 32),
                            &playTex->_texObj);
         }
     }
 }
 
 void GZ_execute(int phase) {
-    for (auto gzFlag : g_gzFlags) {
-        if (gzFlag->mPhase == phase && gzFlag->mpFlag != nullptr) {
+    for (tpgz::containers::deque<GZFlag*>::iterator gzFlagIt = g_gzFlags.begin(); gzFlagIt != g_gzFlags.end(); ++gzFlagIt) {
+        GZFlag* gzFlag = *gzFlagIt;
+        if (gzFlag->mPhase == phase && gzFlag->mpFlag != NULL) {
             if (gzFlag->mpFlag() && gzFlag->mpActiveFunc) {
                 gzFlag->mpActiveFunc();
             } else if (gzFlag->mpDeactiveFunc) {
@@ -114,23 +112,23 @@ void GZ_execute(int phase) {
     }
 
     if (GZStng_getData(STNG_TOOLS_SAND, false)) {
-        if (dComIfGp_getPlayer() != nullptr) {
-            dComIfGp_getPlayer()->field_0x2ba8 = 0.0f;
+        if (dComIfGp_getPlayer(0) != NULL) {
+            ((daAlink_c*)dComIfGp_getPlayer(0))->mSinkShapeOffset = 0.0f;
         }
     }
 
     // separate variable to make sure the after-callback is only run after a load has happened
     static bool load_started = false;
     static bool load_finished_will_teleport = false;
-    if (fopScnRq.isLoading && !load_started) {
+    if (l_fopScnRq_IsUsingOfOverlap && !load_started) {
         load_started = true;
     }
 
     // Check for post load callback and run it once link is valid
-    if (load_started && !fopScnRq.isLoading && dComIfGp_getPlayer()) {
+    if (load_started && !l_fopScnRq_IsUsingOfOverlap && dComIfGp_getPlayer(0)) {
         if (gSaveManager.mPracticeFileOpts.inject_options_after_load) {
             gSaveManager.mPracticeFileOpts.inject_options_after_load();
-            gSaveManager.mPracticeFileOpts.inject_options_after_load = nullptr;
+            gSaveManager.mPracticeFileOpts.inject_options_after_load = NULL;
         }
         load_started = false;
         if (gSaveManager.mPracticeFileOpts.inject_options_after_counter > 0) {
@@ -139,7 +137,7 @@ void GZ_execute(int phase) {
     }
 
     // maybe a bit convoluted but if Link needs to be teleported x frames after the post load
-    if (load_finished_will_teleport && !fopScnRq.isLoading && dComIfGp_getPlayer()) {
+    if (load_finished_will_teleport && !l_fopScnRq_IsUsingOfOverlap && dComIfGp_getPlayer(0)) {
         if (gSaveManager.mPracticeFileOpts.inject_options_after_counter > 0) {
             gSaveManager.mPracticeFileOpts.inject_options_after_counter--;
         } else {
@@ -150,10 +148,10 @@ void GZ_execute(int phase) {
 
     // normally oxygen doesn't get set until going to the file select screen
     // so this fixes oxygen issues when loading a save from title screen directly after boot
-    if (g_dComIfG_gameInfo.play.mMaxOxygen == 0) {
-        dComIfGs_setOxygen(600);
-        dComIfGs_setNowOxygen(600);
-        dComIfGs_setMaxOxygen(600);
+    if (g_dComIfG_gameInfo.play.getMaxOxygen() == 0) {
+        dComIfGp_setOxygen(600);
+        dComIfGp_setNowOxygen(600);
+        dComIfGp_setMaxOxygen(600);
     }
 }
 

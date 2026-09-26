@@ -1,4 +1,8 @@
-#pragma once
+#ifndef TPGZ_MODULES_BOOT_INCLUDE_SETTINGS_H
+#define TPGZ_MODULES_BOOT_INCLUDE_SETTINGS_H
+#ifndef ARRAY_COUNT
+#define ARRAY_COUNT(array) (sizeof(array) / sizeof((array)[0]))
+#endif
 
 #include <stdint.h>
 #include "utils/lines.h"
@@ -10,7 +14,7 @@
 #define LOAD_AREA 0
 #define LOAD_FILE 1
 
-#define ACTIVE_FUNC(id) []() { return GZStng_getData(id, false); }
+#define ACTIVE_FUNC(id) GZStng_isActive<id>
 
 extern ListMember g_font_opt[7];
 
@@ -19,7 +23,7 @@ extern ListMember g_font_opt[7];
 // Add them at the end, even if it should be with an other group.
 // Changes in the order is only allowed when the
 // version number GZ_SAVE_VERSION_NUMBER is changed.
-enum GZSettingID : uint32_t {
+enum GZSettingID {
     // Miscellaneous
     STNG_DROP_SHADOWS,
     STNG_AREA_RELOAD_BEHAVIOUR,
@@ -120,6 +124,8 @@ enum GZSettingID : uint32_t {
 };
 
 struct GZSettingEntry {
+    GZSettingEntry(GZSettingID id_, size_t size_, void* data_) : id(id_), size(size_), data(data_) {}
+
     GZSettingID id;
     size_t size;
     void* data;
@@ -137,7 +143,7 @@ void GZStng_add(GZSettingID id, void* data, size_t size);
  */
 void GZStng_remove(GZSettingID id);
 /**
- * Returns a setting entry if it is in the list. nullptr otherwise.
+ * Returns a setting entry if it is in the list. NULL otherwise.
  */
 GZSettingEntry* GZStng_get(GZSettingID id);
 /**
@@ -147,8 +153,13 @@ tpgz::containers::deque<GZSettingID>* GZStng_getList();
 
 template <typename T>
 T GZStng_getData(GZSettingID id, T defaultValue) {
-    auto* stng = GZStng_get(id);
+    GZSettingEntry* stng = GZStng_get(id);
     return stng ? *static_cast<T*>(stng->data) : defaultValue;
+}
+
+template <GZSettingID id>
+bool GZStng_isActive() {
+    return GZStng_getData(id, false);
 }
 
 enum cursor_colors {
@@ -163,21 +174,23 @@ enum cursor_colors {
 void GZ_initFont();
 
 inline bool GZ_checkDropShadows() {
-    auto* stng = GZStng_get(STNG_DROP_SHADOWS);
+    GZSettingEntry* stng = GZStng_get(STNG_DROP_SHADOWS);
     return stng && *static_cast<bool*>(stng->data);
 }
 
 inline bool GZ_checkAdvancedMode() {
-    auto* stng = GZStng_get(STNG_ADVANCED_MODE);
+    GZSettingEntry* stng = GZStng_get(STNG_ADVANCED_MODE);
     return stng && *static_cast<bool*>(stng->data);
 }
 
 inline bool GZ_checkFreezeRng() {
-    auto* stng = GZStng_get(STNG_TOOLS_FREEZE_RNG);
+    GZSettingEntry* stng = GZStng_get(STNG_TOOLS_FREEZE_RNG);
     return stng && *static_cast<bool*>(stng->data);
 }
 
 inline bool GZ_checkSwapEquips() {
-    auto* stng = GZStng_get(STNG_SWAP_EQUIPS);
+    GZSettingEntry* stng = GZStng_get(STNG_SWAP_EQUIPS);
     return stng && *static_cast<bool*>(stng->data);
 }
+
+#endif

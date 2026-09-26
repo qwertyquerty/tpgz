@@ -13,7 +13,8 @@ void onDelete();
 
 ActorListMenu* l_menu;
 
-namespace tpgz::modules {
+namespace tpgz {
+namespace modules {
 void main() {
     g_menuMgr->setCreateHook(onCreate);
     g_menuMgr->setLoadHook(onLoad);
@@ -21,10 +22,11 @@ void main() {
     g_menuMgr->setDeleteHook(onDelete);
 }
 void exit() {
-    g_menuMgr->setCreateHook(nullptr);
-    g_menuMgr->setLoadHook(nullptr);
-    g_menuMgr->setUnloadHook(nullptr);
-    g_menuMgr->setDeleteHook(nullptr);
+    g_menuMgr->setCreateHook(NULL);
+    g_menuMgr->setLoadHook(NULL);
+    g_menuMgr->setUnloadHook(NULL);
+    g_menuMgr->setDeleteHook(NULL);
+}
 }
 }  // namespace tpgz::modules
 
@@ -51,7 +53,7 @@ void onUnload() {
 }
 
 void onDelete() {
-    auto data = g_menuMgr->getPersistentData<ActorListData>();
+    ActorListData* data = g_menuMgr->getPersistentData<ActorListData>();
     delete data;
-    g_menuMgr->setPersistentData<ActorListData>(nullptr);
+    g_menuMgr->setPersistentData(NULL);
 }

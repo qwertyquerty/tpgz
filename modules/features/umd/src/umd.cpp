@@ -1,13 +1,16 @@
-﻿#include "umd.h"
-#include <cstdio>
+#include "d/d_meter2_info.h"
+#include "defines.h"
 #include "controller.h"
+#include "umd.h"
+#include <cstdio>
 #include "gz_flags.h"
 #include "fifo_queue.h"
 #include "fs.h"
-#include "libtp_c/include/JSystem/JUtility/JUTGamePad.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/SSystem/SComponent/c_counter.h"
-#include "libtp_c/include/f_op/f_op_scene_req.h"
+#include "JSystem/JUtility/JUTGamePad.h"
+#include "d/d_com_inf_game.h"
+#include "d/d_menu_window.h"
+#include "SSystem/SComponent/c_counter.h"
+#include "f_op/f_op_scene_req.h"
 
 static bool lastFrameADown = false;
 static bool lastFrameBDown = false;
@@ -39,12 +42,12 @@ KEEP_FUNC void UMDIndicator::execute() {
     }
 
     if (g_meter2_info.mMenuWindowClass != NULL) {
-        current_counter = cCt_getFrameCount();
+        current_counter = GZ_getFrameCount();
 
         // Activate frame counter as soon as a map opening was scheduled
         if (start_timer == false &&
             (g_meter2_info.mMapStatus == 2 || g_meter2_info.mMapStatus == 3)) {
-            bool eventRunning = dMw_c__isEventCheck(g_meter2_info.mMenuWindowClass);
+            bool eventRunning = g_meter2_info.mMenuWindowClass->isEventCheck();
 
             if (!eventRunning) {
                 start_timer = true;

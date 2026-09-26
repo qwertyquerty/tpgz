@@ -1,10 +1,10 @@
 #include "menus/menu_actor_spawn/include/actor_spawn_menu.h"
 #include <cstdio>
 #include "settings.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/f_op/f_op_actor_mng.h"
-#include "libtp_c/include/f_pc/f_pc_stdcreate_req.h"
-#include "libtp_c/include/m_Do/m_Do_printf.h"
+#include "d/d_com_inf_game.h"
+#include "f_op/f_op_actor_mng.h"
+#include "f_pc/f_pc_stdcreate_req.h"
+#include "m_Do/m_Do_printf.h"
 #include "gz_flags.h"
 #include "pos_settings.h"
 #include "rels/include/defines.h"
@@ -13,22 +13,22 @@
 #include "fs.h"
 
 #ifdef GCN_PLATFORM
-#define CONTROLLER_RIGHT GZPad::DPAD_RIGHT
-#define CONTROLLER_LEFT GZPad::DPAD_LEFT
-#define CONTROLLER_UP GZPad::DPAD_UP
-#define CONTROLLER_DOWN GZPad::DPAD_DOWN
-#define CONTROLLER_SKIP_10 GZPad::X
-#define CONTROLLER_SKIP_MINUS_10 GZPad::Y
+#define CONTROLLER_RIGHT DPAD_RIGHT
+#define CONTROLLER_LEFT DPAD_LEFT
+#define CONTROLLER_UP DPAD_UP
+#define CONTROLLER_DOWN DPAD_DOWN
+#define CONTROLLER_SKIP_10 X
+#define CONTROLLER_SKIP_MINUS_10 Y
 #define CONTROL_TEXT "X/Y"
 #endif
 
 #ifdef WII_PLATFORM
-#define CONTROLLER_RIGHT GZPad::DPAD_RIGHT
-#define CONTROLLER_LEFT GZPad::DPAD_LEFT
-#define CONTROLLER_UP GZPad::DPAD_UP
-#define CONTROLLER_DOWN GZPad::DPAD_DOWN
-#define CONTROLLER_SKIP_10 GZPad::ONE
-#define CONTROLLER_SKIP_MINUS_10 GZPad::TWO
+#define CONTROLLER_RIGHT DPAD_RIGHT
+#define CONTROLLER_LEFT DPAD_LEFT
+#define CONTROLLER_UP DPAD_UP
+#define CONTROLLER_DOWN DPAD_DOWN
+#define CONTROLLER_SKIP_10 ONE
+#define CONTROLLER_SKIP_MINUS_10 TWO
 #define CONTROL_TEXT "1/2"
 #endif
 
@@ -37,22 +37,19 @@
  */
 procBinData l_procData;
 
-#ifdef WII_PLATFORM
-extern bool isWidescreen;
-#else
-#define isWidescreen (false)
-#endif
+#include "game_state.h"
+
+static Line lines[4] = {
+    {"actor name:", ACTOR_NAME_INDEX, "Actor Name (Dpad / " CONTROL_TEXT " to scroll)", false},
+    {"actor params:", ACTOR_PARAM_INDEX, "Actor Parameters (default: 0)", false},
+    {"actor subtype:", ACTOR_SUBTYPE_INDEX,
+     "Actor subtype (default: -1) (Dpad / " CONTROL_TEXT " to scroll)", false},
+    {"spawn", ACTOR_SPAWN_INDEX, "Spawn actor at current position", false},
+};
 
 KEEP_FUNC ActorSpawnMenu::ActorSpawnMenu(ActorSpawnData& data)
     : Menu(data.cursor), l_actorID(data.l_actorID), l_actorParams(data.l_actorParams),
-      l_actorType(data.l_actorType), l_paramIdx(data.l_paramIdx), l_paramsSelected(false),
-      lines{
-          {"actor name:", ACTOR_NAME_INDEX, "Actor Name (Dpad / " CONTROL_TEXT " to scroll)", false},
-          {"actor params:", ACTOR_PARAM_INDEX, "Actor Parameters (default: 0)", false},
-          {"actor subtype:", ACTOR_SUBTYPE_INDEX,
-           "Actor subtype (default: -1) (Dpad / " CONTROL_TEXT " to scroll)", false},
-          {"spawn", ACTOR_SPAWN_INDEX, "Spawn actor at current position", false},
-      } {
+      l_actorType(data.l_actorType), l_paramIdx(data.l_paramIdx), l_paramsSelected(false) {
         loadActorName(l_actorID);
       }
 
@@ -61,15 +58,15 @@ ActorSpawnMenu::~ActorSpawnMenu() {}
 void actorFastCreateAtLink(s16 id, u32 parameters, s8 subtype) {
     fopAcM_prm_class* appen = fopAcM_CreateAppend();
     if (appen != NULL) {
-        appen->mParameter = parameters;
-        appen->mPos = dComIfGp_getPlayer()->current.pos;
-        appen->mAngle = dComIfGp_getPlayer()->current.angle;
-        appen->mEnemyNo = 0xFFFF;
-        appen->mSubtype = subtype;
-        appen->mRoomNo = dComIfGp_getPlayer()->current.roomNo;
+        appen->base.parameters = parameters;
+        appen->base.position = dComIfGp_getPlayer(0)->current.pos;
+        appen->base.angle = dComIfGp_getPlayer(0)->current.angle;
+        appen->base.setID = 0xFFFF;
+        appen->argument = subtype;
+        appen->room_no = dComIfGp_getPlayer(0)->current.roomNo;
         
         layer_class* curLayer = fpcLy_CurrentLayer();
-        fpcSCtRq_Request(curLayer, id, nullptr, nullptr, appen);
+        fpcSCtRq_Request(curLayer, id, NULL, NULL, appen);
     }
 }
 
@@ -140,7 +137,7 @@ void ActorSpawnMenu::draw() {
         break;
     }
 
-    auto menu_offset = GZ_getSpriteOffset(STNG_SPRITES_MENU);
+    Vec2 menu_offset = GZ_getSpriteOffset(STNG_SPRITES_MENU);
     float param_offset_x = menu_offset.x + Font::getStrWidth("actor params:  ");
     float param_offset_y = menu_offset.y + 20.0f * (float)(int)ACTOR_PARAM_INDEX;
 

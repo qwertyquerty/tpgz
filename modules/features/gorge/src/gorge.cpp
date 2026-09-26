@@ -1,3 +1,7 @@
+#include "game_state.h"
+#include "defines.h"
+#include "d/actor/d_a_alink.h"
+#include "controller.h"
 #include <cstdio>
 #include "gorge.h"
 #include "commands.h"
@@ -6,13 +10,13 @@
 #include "fs.h"
 #include "save_manager.h"
 #include "menus/menu_any_saves/include/any_saves_menu.h"
-#include "libtp_c/include/JSystem/JUtility/JUTGamePad.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/SSystem/SComponent/c_counter.h"
-#include "libtp_c/include/f_op/f_op_scene_req.h"
-#include "libtp_c/include/f_op/f_op_actor_mng.h"
-#include "libtp_c/include/utils.h"
-#include "libtp_c/include/m_Do/m_Do_printf.h"
+#include "JSystem/JUtility/JUTGamePad.h"
+#include "d/d_com_inf_game.h"
+#include "SSystem/SComponent/c_counter.h"
+#include "f_op/f_op_scene_req.h"
+#include "f_op/f_op_actor_mng.h"
+#include "tpgz_utils.h"
+#include "m_Do/m_Do_printf.h"
 #include "settings.h"
 #include "modules.h"
 
@@ -59,12 +63,12 @@ uint32_t current_counter = 0;
 uint32_t counter_difference = 0;
 static int after_cs_val = 0;
 static bool got_it = false;
-static char buf[21];
+static char buf[32];
 
 void actorFastCreateAtLink(short id, uint32_t parameters, int8_t subtype) {
-    fopAcM_create(id, parameters, &dComIfGp_getPlayer()->current.pos,
-                  dComIfGp_getPlayer()->current.roomNo, &dComIfGp_getPlayer()->current.angle,
-                  nullptr, subtype);
+    fopAcM_create(id, parameters, &dComIfGp_getPlayer(0)->current.pos,
+                  dComIfGp_getPlayer(0)->current.roomNo, &dComIfGp_getPlayer(0)->current.angle,
+                  NULL, subtype);
 }
 
 #if defined(WII_NTSCU_10) || defined(WII_PAL)
@@ -75,7 +79,7 @@ void actorFastCreateAtLink(short id, uint32_t parameters, int8_t subtype) {
 
 void initState() {
     dComIfGs_onSwitch(21, 3);  // turn on portal flag
-    dComIfGp_getEvent().mOrder[0].mEventId = 9;
+    dComIfGp_getEvent()->mOrder[0].mEventId = 9;
 #ifdef WII_PLATFORM
     actorFastCreateAtLink(KYTAG09_ACTOR_ID, -1, -1);
 #endif
@@ -88,43 +92,44 @@ void initState() {
 
 void warpToPosition() {
     // set gorge map info
-    g_dComIfG_gameInfo.info.mMemory.mBit.mSwitch[0] = 0;  // optimize later
-    dComIfGs_putSave(g_dComIfG_gameInfo.info.mDan.mStageNo);
+    for (int i = 0; i < 32; ++i) {
+        g_dComIfG_gameInfo.info.getMemory().getBit().offSwitch(i);
+    }
+    dComIfGs_putSave(*reinterpret_cast<s8*>(&g_dComIfG_gameInfo.info.getDan()));
 
     // set loading info
-    g_dComIfG_gameInfo.play.mNextStage.wipe = 13;
-    g_dComIfG_gameInfo.info.mRestart.mRoomParam = 0;
-    g_dComIfG_gameInfo.info.mRestart.mLastMode = 0;
+    setNextStageWipe(13);
+    dSv_restart_c& restart = g_dComIfG_gameInfo.info.getRestart();
+    restart.setRoomParam(0);
     setNextStagePoint(2);
     setNextStageRoom(3);
     setNextStageLayer(0xE);
     setNextStageName("F_SP121");
 
     // reset health, item
-    g_dComIfG_gameInfo.info.mRestart.mLastMode |= 0x28000000;
+    restart.setLastSceneInfo(restart.getLastSpeedF(), 0x28000000, restart.getLastAngleY());
     dComIfGs_setLife(12);  // 3 hearts
 
     // trigger loading, convert some of these to const later
-    g_dComIfG_gameInfo.info.mRestart.mStartPoint = 2;
+    restart.setStartPoint(2);
     cXyz pos(-11856.857f, -5700.0f, 56661.5);
-    g_dComIfG_gameInfo.info.mRestart.mRoomPos = pos;
-    g_dComIfG_gameInfo.info.mRestart.mRoomAngleY = 24169;
+    restart.setRoom(pos, 24169, restart.getRoomNo());
 }
 
 KEEP_FUNC void execute() {
     // reset counters on load
-    if (fopScnRq.isLoading == 1) {
+    if (l_fopScnRq_IsUsingOfOverlap == 1) {
         counter_difference = 0;
         after_cs_val = 0;
         got_it = false;
         start_timer = false;
     }
 
-    current_counter = cCt_getFrameCount();
+    current_counter = GZ_getFrameCount();
 
     // situation specific frame counters
-    if (start_timer == false && dComIfGp_getEvent().mHalt == 1 &&
-        daAlink_c__checkStageName("F_SP121")) {
+    if (start_timer == false && dComIfGp_getEvent()->mEventStatus == 1 &&
+        daAlink_c::checkStageName("F_SP121")) {
         start_timer = true;
         previous_counter = current_counter;
         counter_difference = 0;

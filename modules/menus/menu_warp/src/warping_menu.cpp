@@ -3,8 +3,8 @@
 #include "commands.h"
 #include "fifo_queue.h"
 #include "fs.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/utils.h"
+#include "d/d_com_inf_game.h"
+#include "tpgz_utils.h"
 #include "gz_flags.h"
 #include "rels/include/defines.h"
 #include "menus/utils/menu_mgr.h"
@@ -17,17 +17,20 @@
 #define ROOM_OFFSET 64
 #define DEFAULT_LAYER 0xFF
 
+static Line lines[7] = {
+    {"type:", WARP_TYPE_INDEX, "The type of stage", false},
+                {"stage:", WARP_STAGE_INDEX, "Current stage name", false},
+                {"room:", WARP_ROOM_INDEX, "Current room name", false},
+                {"spawn:", WARP_SPAWN_INDEX, "Current spawn number", false},
+                {"layer:", WARP_LAYER_INDEX, "Current layer number", false},
+                {"warp", WARP_BUTTON_INDEX, "Trigger warp", false},
+                {"save", SAVE_LOCATION_INDEX, "Set savefile location to selected location", false}
+};
+
 KEEP_FUNC WarpingMenu::WarpingMenu(WarpingData& data)
     : Menu(data.cursor), l_warpInfo(data.l_warpInfo), l_warpLayer(data.l_warpLayer),
       l_typeIdx(data.l_typeIdx), l_stageIdx(data.l_stageIdx), l_roomIdx(data.l_roomIdx),
-      l_spawnIdx(data.l_spawnIdx), l_dataLoaded(data.l_dataLoaded),
-      lines{{"type:", WARP_TYPE_INDEX, "The type of stage", false},
-            {"stage:", WARP_STAGE_INDEX, "Current stage name", false},
-            {"room:", WARP_ROOM_INDEX, "Current room name", false},
-            {"spawn:", WARP_SPAWN_INDEX, "Current spawn number", false},
-            {"layer:", WARP_LAYER_INDEX, "Current layer number", false},
-            {"warp", WARP_BUTTON_INDEX, "Trigger warp", false},
-            {"save", SAVE_LOCATION_INDEX, "Set savefile location to selected location", false}} {}
+      l_spawnIdx(data.l_spawnIdx), l_dataLoaded(data.l_dataLoaded) {}
 
 WarpingMenu::~WarpingMenu() {}
 
@@ -148,7 +151,7 @@ void WarpingMenu::draw() {
         l_dataLoaded = true;
     }
 
-    if (GZ_getButtonRepeat(GZPad::DPAD_RIGHT)) {
+    if (GZ_getButtonRepeat(DPAD_RIGHT)) {
         switch (cursor.y) {
         case WARP_TYPE_INDEX:
             l_typeIdx++;
@@ -184,7 +187,7 @@ void WarpingMenu::draw() {
         }
     }
 
-    if (GZ_getButtonRepeat(GZPad::DPAD_LEFT)) {
+    if (GZ_getButtonRepeat(DPAD_LEFT)) {
         switch (cursor.y) {
         case WARP_TYPE_INDEX:
             l_typeIdx--;
@@ -229,9 +232,12 @@ void WarpingMenu::draw() {
             setNextStageLayer(l_warpLayer);
             GZ_setFifoVisible(true);
             g_menuMgr->hide();
-            g_dComIfG_gameInfo.play.mNextStage.wipe = 13;  // instant load
-            g_dComIfG_gameInfo.info.mRestart.mLastMode = 0;
-            g_dComIfG_gameInfo.play.mNextStage.enabled = true;
+            setNextStageWipe(13);  // instant load
+            {
+                dSv_restart_c& restart = g_dComIfG_gameInfo.info.getRestart();
+                restart.setLastSceneInfo(restart.getLastSpeedF(), 0, restart.getLastAngleY());
+            }
+            enableNextStage();
             break;
         case SAVE_LOCATION_INDEX:
             setReturnPlace(l_warpInfo.stage_info.stage_id, l_warpInfo.room_info.room_id[0],

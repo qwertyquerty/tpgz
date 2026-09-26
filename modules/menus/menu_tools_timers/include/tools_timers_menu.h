@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef TPGZ_MODULES_MENUS_MENU_TOOLS_TIMERS_INCLUDE_TOOLS_TIMERS_MENU_H
+#define TPGZ_MODULES_MENUS_MENU_TOOLS_TIMERS_INCLUDE_TOOLS_TIMERS_MENU_H
 #include "menus/menu.h"
 #include "tools.h"
 
@@ -29,5 +29,6 @@ public:
 
 private:
 
-    Line lines[TOOLS_TIMERS_COUNT];
 };
+
+#endif

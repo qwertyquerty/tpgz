@@ -1,9 +1,11 @@
+#include "Z2AudioLib/Z2StatusMgr.h"
+#include "d/actor/d_a_alink.h"
 #include "utils/link.h"
 #include <cstdio>
 #include "pos_settings.h"
 #include "settings.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/m_Do/m_Do_audio.h"
+#include "d/d_com_inf_game.h"
+#include "m_Do/m_Do_audio.h"
 #include "tools.h"
 #include "rels/include/defines.h"
 #include "commands.h"
@@ -13,12 +15,12 @@ KEEP_FUNC void GZ_displayLinkInfo() {
         return;
     }
     char time[14] = {0};
-    snprintf(time, sizeof(time), "time: %02d:%02d", g_mDoAud_zelAudio.mAudioMgr.mStatusMgr.mHour,
-             g_mDoAud_zelAudio.mAudioMgr.mStatusMgr.mMinute);
+    snprintf(time, sizeof(time), "time: %02d:%02d", Z2GetStatusMgr()->mHour,
+             Z2GetStatusMgr()->mMinute);
     Vec2 spriteOffset = GZ_getSpriteOffset(STNG_SPRITES_DEBUG_INFO);
     Font::GZ_drawStr(time, spriteOffset.x, spriteOffset.y, 0xFFFFFFFF, GZ_checkDropShadows());
 
-    if (dComIfGp_getPlayer()) {
+    if (dComIfGp_getPlayer(0)) {
         char link_angle[22];
         char y_angle[22];
         char link_speed[22];
@@ -31,28 +33,28 @@ KEEP_FUNC void GZ_displayLinkInfo() {
         char demo_mode[22];
 
         snprintf(link_angle, sizeof(link_angle), "angle: %d",
-                 (uint16_t)dComIfGp_getPlayer()->shape_angle.y);
-        snprintf(y_angle, sizeof(y_angle), "y-angle: %d", dComIfGp_getPlayer()->mLookAngleY);
-        snprintf(link_speed, sizeof(link_speed), "speed: %.4f", dComIfGp_getPlayer()->speedF);
-        snprintf(link_x, sizeof(link_x), "x-pos: %.4f", dComIfGp_getPlayer()->current.pos.x);
-        snprintf(link_y, sizeof(link_y), "y-pos: %.4f", dComIfGp_getPlayer()->current.pos.y);
-        snprintf(link_z, sizeof(link_z), "z-pos: %.4f", dComIfGp_getPlayer()->current.pos.z);
-        snprintf(link_action, sizeof(link_action), "action: %d", dComIfGp_getPlayer()->mActionID);
+                 (uint16_t)dComIfGp_getPlayer(0)->shape_angle.y);
+        snprintf(y_angle, sizeof(y_angle), "y-angle: %d", ((daAlink_c*)dComIfGp_getPlayer(0))->mBodyAngle.x);
+        snprintf(link_speed, sizeof(link_speed), "speed: %.4f", dComIfGp_getPlayer(0)->speedF);
+        snprintf(link_x, sizeof(link_x), "x-pos: %.4f", dComIfGp_getPlayer(0)->current.pos.x);
+        snprintf(link_y, sizeof(link_y), "y-pos: %.4f", dComIfGp_getPlayer(0)->current.pos.y);
+        snprintf(link_z, sizeof(link_z), "z-pos: %.4f", dComIfGp_getPlayer(0)->current.pos.z);
+        snprintf(link_action, sizeof(link_action), "action: %d", ((daAlink_c*)dComIfGp_getPlayer(0))->mProcID);
 
         s16 slope;        
-        if (dComIfGp_getPlayer()->mLinkAcch.ChkGroundHit()) {
-            slope = daAlink_c__getGroundAngle(dComIfGp_getPlayer(), &(dComIfGp_getPlayer()->mLinkAcch.m_gnd.mPolyInfo), dComIfGp_getPlayer()->current.angle.y);
+        if (((daAlink_c*)dComIfGp_getPlayer(0))->mLinkAcch.ChkGroundHit()) {
+            slope = ((daAlink_c*)dComIfGp_getPlayer(0))->getGroundAngle(&((daAlink_c*)dComIfGp_getPlayer(0))->mLinkAcch.m_gnd, dComIfGp_getPlayer(0)->current.angle.y);
         } else {
             slope = 0;
         }
     
         snprintf(ground_angle, sizeof(ground_angle), "slope: %d", slope);
 
-        u32 acch_flags = dComIfGp_getPlayer()->mLinkAcch.m_flags;
-        snprintf(collision_flags, sizeof(collision_flags), "acch: %08X", acch_flags);
+        u32 acch_flags = *reinterpret_cast<u32*>(reinterpret_cast<u8*>(&((daAlink_c*)dComIfGp_getPlayer(0))->mLinkAcch) + 0x2C);
+        snprintf(collision_flags, sizeof(collision_flags), "acch: %08X", (unsigned int)acch_flags);
 
-        u32 mDemoMode = dComIfGp_getPlayer()->mDemo.mDemoMode;
-        snprintf(demo_mode, sizeof(demo_mode), "demo: %d", mDemoMode);
+        u32 mDemoMode = ((daAlink_c*)dComIfGp_getPlayer(0))->getDemoMode();
+        snprintf(demo_mode, sizeof(demo_mode), "demo: %d", (int)mDemoMode);
 
         Font::GZ_drawStr(link_angle, spriteOffset.x,
                          spriteOffset.y + 20.0f, 0xFFFFFFFF,
@@ -131,15 +133,15 @@ KEEP_FUNC void GZ_displayStageInfo() {
 
     Vec2 spriteOffset = GZ_getSpriteOffset(STNG_SPRITES_STAGE_INFO);
 
-    char cur_stage[15];
-    char cur_room[10];
-    char cur_point[11];
-    char cur_layer[10];
+    char cur_stage[32];
+    char cur_room[16];
+    char cur_point[16];
+    char cur_layer[16];
 
-    snprintf(cur_stage, sizeof(cur_stage), "Stage: %s", g_dComIfG_gameInfo.play.mStartStage.mStage);
-    snprintf(cur_room, sizeof(cur_room), "Room: %d", dStage_roomControl_c__mStayNo);
-    snprintf(cur_point, sizeof(cur_point), "Point: %d", g_dComIfG_gameInfo.play.mStartStage.mPoint);
-    snprintf(cur_layer, sizeof(cur_layer), "Layer: %d", dComIfG_play_c__getLayerNo(0));
+    snprintf(cur_stage, sizeof(cur_stage), "Stage: %s", g_dComIfG_gameInfo.play.getStartStageName());
+    snprintf(cur_room, sizeof(cur_room), "Room: %d", dComIfGp_roomControl_getStayNo());
+    snprintf(cur_point, sizeof(cur_point), "Point: %d", g_dComIfG_gameInfo.play.getStartStagePoint());
+    snprintf(cur_layer, sizeof(cur_layer), "Layer: %d", dComIfG_play_c::getLayerNo(0));
 
     Font::GZ_drawStr(cur_stage, spriteOffset.x,
                         spriteOffset.y + 20.0f, 0xFFFFFFFF,
@@ -155,13 +157,13 @@ KEEP_FUNC void GZ_displayStageInfo() {
                         GZ_checkDropShadows());
 
 
-    char save_stage[20];
-    char save_room[15];
-    char save_point[16];
+    char save_stage[32];
+    char save_room[24];
+    char save_point[24];
 
-    snprintf(save_stage, sizeof(save_stage), "Save Stage: %s", g_dComIfG_gameInfo.info.getPlayer().getPlayerReturnPlace().mName);
-    snprintf(save_room, sizeof(save_room), "Save Room: %d", g_dComIfG_gameInfo.info.getPlayer().getPlayerReturnPlace().mRoomNo);
-    snprintf(save_point, sizeof(save_point), "Save Point: %d", g_dComIfG_gameInfo.info.getPlayer().getPlayerReturnPlace().mPlayerStatus);
+    snprintf(save_stage, sizeof(save_stage), "Save Stage: %s", g_dComIfG_gameInfo.info.getPlayer().getPlayerReturnPlace().getName());
+    snprintf(save_room, sizeof(save_room), "Save Room: %d", g_dComIfG_gameInfo.info.getPlayer().getPlayerReturnPlace().getRoomNo());
+    snprintf(save_point, sizeof(save_point), "Save Point: %d", g_dComIfG_gameInfo.info.getPlayer().getPlayerReturnPlace().getPlayerStatus());
 
     Font::GZ_drawStr(save_stage, spriteOffset.x + 150.0f,
                         spriteOffset.y + 20.0f, 0xFFFFFFFF,
@@ -179,7 +181,7 @@ KEEP_FUNC void GZ_setTunicColor() {
     static int16_t cycle_g = 0;
     static int16_t cycle_b = 0;
 
-    if (dComIfGp_getPlayer()) {
+    if (dComIfGp_getPlayer(0)) {
         int16_t r = 0;
         int16_t g = 0;
         int16_t b = 0;
@@ -237,12 +239,12 @@ KEEP_FUNC void GZ_setTunicColor() {
             break;
         }
 
-        dComIfGp_getPlayer()->field_0x32a0[0].mColor.r = r - 0x10;
-        dComIfGp_getPlayer()->field_0x32a0[0].mColor.g = g - 0x10;
-        dComIfGp_getPlayer()->field_0x32a0[0].mColor.b = b - 0x10;
-        dComIfGp_getPlayer()->field_0x32a0[1].mColor.r = r - 0x10;
-        dComIfGp_getPlayer()->field_0x32a0[1].mColor.g = g - 0x10;
-        dComIfGp_getPlayer()->field_0x32a0[1].mColor.b = b - 0x10;
+        ((daAlink_c*)dComIfGp_getPlayer(0))->field_0x32a0[0].r = r - 0x10;
+        ((daAlink_c*)dComIfGp_getPlayer(0))->field_0x32a0[0].g = g - 0x10;
+        ((daAlink_c*)dComIfGp_getPlayer(0))->field_0x32a0[0].b = b - 0x10;
+        ((daAlink_c*)dComIfGp_getPlayer(0))->field_0x32a0[1].r = r - 0x10;
+        ((daAlink_c*)dComIfGp_getPlayer(0))->field_0x32a0[1].g = g - 0x10;
+        ((daAlink_c*)dComIfGp_getPlayer(0))->field_0x32a0[1].b = b - 0x10;
     }
 }
 
@@ -253,7 +255,7 @@ KEEP_FUNC void GZ_displayDisplacementInfo() {
 
     Vec2 spriteOffset = GZ_getSpriteOffset(STNG_SPRITES_DISPLACEMENT);
 
-    daAlink_c* player = dComIfGp_getPlayer();
+    daAlink_c* player = (daAlink_c*)dComIfGp_getPlayer(0);
 
     if (player) {
         char angle_disp[22];

@@ -1,5 +1,5 @@
 #include "menus/menu.h"
-#include "libtp_c/include/d/save/d_save.h"
+#include "d/d_save.h"
 
 #define ITEM_WHEEL_SLOTS 24
 
@@ -8,7 +8,7 @@ struct ItemWheelData {
 };
 
 struct ItemLookup {
-    enum ItemTable item_id;
+    int item_id;
     char name[40];
 };
 
@@ -23,5 +23,4 @@ public:
 private:
     unsigned int& l_listIdx;
 
-    Line lines[ITEM_WHEEL_SLOTS];
 };
