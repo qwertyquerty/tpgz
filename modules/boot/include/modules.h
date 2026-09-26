@@ -1,5 +1,6 @@
 #ifndef TPGZ_MODULES_BOOT_INCLUDE_MODULES_H
 #define TPGZ_MODULES_BOOT_INCLUDE_MODULES_H
+#include <stdint.h>
 #include "utils/rels.h"
 #include "utils/containers/deque.h"
 
@@ -30,6 +31,9 @@ bool lfc_active();
 bool ebmb_active();
 bool ee_active();
 bool mash_checker_active();
+#define GORGE_VOID_MODE_COUNT 3
+
+uint32_t GZ_getGorgeVoidMode();
 bool gorge_active();
 bool gorge_wolf_active();
 bool gorge_human_active();

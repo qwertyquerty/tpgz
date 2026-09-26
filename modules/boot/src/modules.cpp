@@ -105,16 +105,26 @@ KEEP_FUNC bool mash_checker_active() {
     return GZStng_getData(STNG_TOOLS_MASH_CHECKER, false);
 }
 
+KEEP_FUNC uint32_t GZ_getGorgeVoidMode() {
+    GZSettingEntry* stng = GZStng_get(STNG_TOOLS_GORGE);
+    if (stng == NULL || stng->data == NULL) {
+        return 0;
+    }
+    uint32_t mode = stng->size == sizeof(uint32_t) ? *static_cast<uint32_t*>(stng->data) :
+                                                     *static_cast<uint8_t*>(stng->data);
+    return mode < GORGE_VOID_MODE_COUNT ? mode : 0;
+}
+
 KEEP_FUNC bool gorge_active() {
-    return GZStng_getData<uint32_t>(STNG_TOOLS_GORGE, 0) != 0;
+    return GZ_getGorgeVoidMode() != 0;
 }
 
 KEEP_FUNC bool gorge_wolf_active() {
-    return GZStng_getData<uint32_t>(STNG_TOOLS_GORGE, 0) == 1;
+    return GZ_getGorgeVoidMode() == 1;
 }
 
 KEEP_FUNC bool gorge_human_active() {
-    return GZStng_getData<uint32_t>(STNG_TOOLS_GORGE, 0) == 2;
+    return GZ_getGorgeVoidMode() == 2;
 }
 
 KEEP_FUNC bool rollcheck_active() {

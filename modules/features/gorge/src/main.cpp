@@ -3,9 +3,10 @@
 #include "commands.h"
 #include "gorge.h"
 #include "settings.h"
+#include "modules.h"
 
 static bool gorgeVoidActive() {
-    return GZStng_getData<uint32_t>(STNG_TOOLS_GORGE, 0) != 0;
+    return GZ_getGorgeVoidMode() != 0;
 }
 
 namespace tpgz {
