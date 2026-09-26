@@ -21,6 +21,8 @@ enum HeapID {
     HEAP_HOST_IO,
 };
 
+#define TPGZ_HEAP_GROUP_ID 0xE7
+
 void* operator new(size_t size);
 void* operator new[](size_t size);
 void* operator new(size_t size, int alignment);

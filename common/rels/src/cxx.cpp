@@ -25,6 +25,7 @@ extern JKRExpHeap* gameHeap;
 extern JKRExpHeap* zeldaHeap;
 extern JKRExpHeap* archiveHeap;
 extern JKRExpHeap* j2dHeap;
+extern JKRHeap* g_tpgzMem2Heap;
 #ifndef WII_PLATFORM
 extern JKRExpHeap* HostIOHeap;
 #endif
@@ -62,7 +63,12 @@ void* allocateMemory(size_t size, JKRHeap* heap, int alignment) {
         return NULL;
     }
 
+    s32 prevGroupId = heap->changeGroupID(TPGZ_HEAP_GROUP_ID);
     void* ptr = JKRHeap::alloc(size, alignment, heap);
+    heap->changeGroupID(prevGroupId);
+    if (!ptr) {
+        return NULL;
+    }
     ptr = memset(ptr, 0, size);
     DCFlushRange(ptr, size);
     return ptr;
@@ -82,12 +88,19 @@ void* allocateMemoryFromHeapId(size_t size, int alignment, int id) {
     return allocateMemory(size, heapPtr, alignment);
 }
 
+void* allocateMemoryPreferMem2(size_t size, int alignment) {
+    if (g_tpgzMem2Heap) {
+        return allocateMemory(size, g_tpgzMem2Heap, alignment);
+    }
+    return allocateMemoryFromMainHeap(size, alignment);
+}
+
 void* operator new(size_t size) {
-    return allocateMemoryFromMainHeap(size, 0x20);
+    return allocateMemoryPreferMem2(size, 0x20);
 }
 
 void* operator new[](size_t size) {
-    return allocateMemoryFromMainHeap(size, 0x20);
+    return allocateMemoryPreferMem2(size, 0x20);
 }
 
 void* operator new(size_t size, int alignment) {

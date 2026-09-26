@@ -1,5 +1,6 @@
 #include "d/actor/d_a_alink.h"
 #include "utils/hook.h"
+#include "global_data.h"
 #include <cstdio>
 #include "cheats.h"
 #include "controller.h"
@@ -77,7 +78,9 @@ HOOK_DEF(void, dScnLogo_c__warningInDraw, (dScnLogo_c*));
 namespace Hook {
 void gameLoopHook(void) {
     game_loop();
-    fapGm_Execute__FvTrampoline();
+    if (!g_skipGameFrame) {
+        fapGm_Execute__FvTrampoline();
+    }
     post_game_loop();
 }
 

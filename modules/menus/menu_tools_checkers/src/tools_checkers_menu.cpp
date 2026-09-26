@@ -1,8 +1,9 @@
 #include "defines.h"
 #include "menus/menu_tools_checkers/include/tools_checkers_menu.h"
 #include "menus/utils/menu_mgr.h"
+#include "modules.h"
 
-#define MAX_GORGE_VOID_OPTIONS 3
+#define MAX_GORGE_VOID_OPTIONS GORGE_VOID_MODE_COUNT
 
 static Line lines[CHECKERS_COUNT] = {
     #ifdef WII_PLATFORM
@@ -148,7 +149,7 @@ void CheckersMenu::draw() {
     switch (cursor.y) {
         case GORGE_INDEX:
             stng = GZStng_get(STNG_TOOLS_GORGE);
-            cursor.x = stng ? *static_cast<uint32_t*>(stng->data) : 0;
+            cursor.x = GZ_getGorgeVoidMode();
             prev_x = cursor.x;
             cursor.move(MAX_GORGE_VOID_OPTIONS, MENU_LINE_NUM);
 
@@ -157,6 +158,10 @@ void CheckersMenu::draw() {
                     if (!stng) {
                         stng = new GZSettingEntry(STNG_TOOLS_GORGE, sizeof(uint32_t), new uint32_t(cursor.x));
                         g_settings.push_back(stng);
+                    } else if (stng->size != sizeof(uint32_t)) {
+                        delete[] static_cast<uint8_t*>(stng->data);
+                        stng->data = new uint32_t(cursor.x);
+                        stng->size = sizeof(uint32_t);
                     } else {
                         *static_cast<uint32_t*>(stng->data) = cursor.x;
                     }
@@ -168,6 +173,6 @@ void CheckersMenu::draw() {
             break;
     }
     
-    lines[GORGE_INDEX].printf(" <%s>", gorge_opt[GZStng_getData<uint32_t>(STNG_TOOLS_GORGE, 0)].member);
+    lines[GORGE_INDEX].printf(" <%s>", gorge_opt[GZ_getGorgeVoidMode()].member);
     GZ_drawMenuLines(lines, cursor.y, MENU_LINE_NUM);
 }

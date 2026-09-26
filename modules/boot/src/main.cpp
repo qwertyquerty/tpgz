@@ -25,6 +25,7 @@
 #include "rels/include/cxx.h"
 #include "utils/rels.h"
 #include "rels/include/defines.h"
+#include "utils/mem2.h"
 #include "events/draw_listener.h"
 #include "events/pre_loop_listener.h"
 #include "events/post_loop_listener.h"
@@ -59,6 +60,7 @@ namespace modules {
 void main() {
     OSReportEnable();
     OSReport("TPGZ is starting...\n");
+    GZ_initMem2();
     // Run the initialization module.
     tpgz::dyn::GZModule* initRel = new tpgz::dyn::GZModule("/tpgz/rels/init.rel");
     initRel->loadFixed(true);
@@ -188,7 +190,7 @@ KEEP_FUNC void GZ_handleTurbo() {
 KEEP_FUNC void GZ_renderMenuTitle() {
     if (g_menuMgr->isOpen()) {
         Vec2 spriteOffset = GZ_getSpriteOffset(STNG_SPRITES_MENU);
-        Font::GZ_drawStr("tpgz v" INTERNAL_GZ_VERSION "b", spriteOffset.x + 35.0f, 25.0f,
+        Font::GZ_drawStr("tpgz (MWCC) v" INTERNAL_GZ_VERSION, spriteOffset.x + 35.0f, 25.0f,
                          g_cursorColor, GZ_checkDropShadows());
         if (l_gzIconTex.loadCode == TEX_OK) {
             Draw::drawRect(0xFFFFFFFF, makeVec2(spriteOffset.x, 5.0f),

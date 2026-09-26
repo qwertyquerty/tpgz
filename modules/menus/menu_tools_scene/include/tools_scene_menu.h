@@ -22,6 +22,7 @@ enum ToolsSceneIndex {
     FRAME_ADVANCE_INDEX,
     FREE_CAM_INDEX,
     HEAP_DEBUG_INDEX,
+    SAVE_STATES_INDEX,
 
     // Entry used as a counter
     TOOLS_SCENE_COUNT
