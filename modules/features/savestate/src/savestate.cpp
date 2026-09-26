@@ -17,6 +17,7 @@
 #include "JSystem/JKernel/JKRExpHeap.h"
 #include "JSystem/JKernel/JKRThread.h"
 #include "JSystem/JKernel/JKRDisposer.h"
+#include "DynamicLink.h"
 #include "JSystem/JAudio2/JASAudioThread.h"
 #include "JSystem/JAudio2/JASTaskThread.h"
 #include "JSystem/JAudio2/JASDvdThread.h"
@@ -24,6 +25,7 @@
 #include "JSystem/JAudio2/JAISeMgr.h"
 #include "JSystem/JAudio2/JAISeqMgr.h"
 #include "JSystem/JAudio2/JASDriverIF.h"
+#include "JSystem/JAudio2/JASHeapCtrl.h"
 #include "Z2AudioLib/Z2SoundMgr.h"
 #include "Z2AudioLib/Z2SceneMgr.h"
 #include "os/OSCache.h"
@@ -49,12 +51,18 @@ extern JKRExpHeap* commandHeap;
 extern Texture l_framePauseTex;
 extern Texture l_framePlayTex;
 
-#define MEM2_MARGIN 0x100000
+#define MEM2_MARGIN 0x40000
 #define MAX_WAIT_FRAMES 120
 #define GP_IDLE_POLLS 100000
 #define MAX_AUDIO_DRAIN_SUBFRAMES 240
 #define MAX_OUTSIDE_MODULES 32
 #define JKRTHREAD_MESSAGE_QUEUE_OFFSET 0x30
+#define JKREXPHEAP_FREE_LIST_OFFSET 0x78
+#define JKRSOLIDHEAP_HEAD_OFFSET 0x70
+#define JKRSOLIDHEAP_TAIL_OFFSET 0x74
+#define MAX_HEAP_DEPTH 8
+#define MIN_ZERO_RUN 32
+#define ZERO_SEGMENT_FLAG 0x80000000
 #define DVD_THREAD_COMMAND_LIST_OFFSET 0x24
 #define Z2_SCENE_WAVES_OFFSET 0x0D
 #define Z2_SCENE_WAVES_SIZE 10
@@ -87,6 +95,7 @@ struct SaveStateHeader {
     u32 preservedCount;
     char stageName[8];
     u8 sceneWaves[Z2_SCENE_WAVES_SIZE];
+    u32 audioMemoryHash;
     u32 outsideModuleCount;
     ModuleLink outsideModules[MAX_OUTSIDE_MODULES];
 };
@@ -150,8 +159,19 @@ struct RangeList {
     u32 capacity;
 };
 
-static JKRExpHeap** const l_heaps[] = {&gameHeap, &zeldaHeap, &archiveHeap, &j2dHeap, &commandHeap};
-static const u32 HEAP_COUNT = sizeof(l_heaps) / sizeof(l_heaps[0]);
+#ifdef WII_PLATFORM
+static JKRHeap** const l_heapSources[] = {
+    (JKRHeap**)&gameHeap, (JKRHeap**)&zeldaHeap,   (JKRHeap**)&archiveHeap,
+    (JKRHeap**)&j2dHeap,  (JKRHeap**)&commandHeap, &DynamicModuleControlBase::m_heap,
+};
+#else
+static JKRHeap** const l_heapSources[] = {
+    (JKRHeap**)&gameHeap, (JKRHeap**)&zeldaHeap, (JKRHeap**)&archiveHeap, (JKRHeap**)&j2dHeap, (JKRHeap**)&commandHeap,
+};
+#endif
+static const u32 MAX_HEAPS = sizeof(l_heapSources) / sizeof(l_heapSources[0]);
+static JKRExpHeap* l_heaps[MAX_HEAPS];
+static u32 l_heapCount;
 static const u32 DOL_RANGE_COUNT = sizeof(l_dolRanges) / sizeof(l_dolRanges[0]);
 
 static const char* l_unavailableReason;
@@ -164,20 +184,41 @@ static int l_waitFrames;
 static u16 l_lastButtons;
 static const char* l_busyReason;
 
+static u32 hashWord(u32 hash, u32 value) {
+    for (int i = 0; i < 4; i++) {
+        hash = (hash ^ ((value >> (i * 8)) & 0xFF)) * 0x01000193;
+    }
+    return hash;
+}
+
+static u32 hashAudioHeap(u32 hash, JASHeap* heap, u32 depth) {
+    hash = hashWord(hashWord(hashWord(hash, (u32)heap), (u32)heap->getBase()), heap->getSize());
+    if (depth < MAX_HEAP_DEPTH) {
+        for (JSUTree<JASHeap>* child = heap->getFirstChild(); child != NULL; child = child->getNextChild()) {
+            hash = hashAudioHeap(hash, child->getObject(), depth + 1);
+        }
+    }
+    return hash;
+}
+
+static u32 audioMemoryHash() {
+    return hashAudioHeap(0x811C9DC5, JASKernel::getAramHeap(), 0);
+}
+
 static const u8* sceneWaves() {
     return reinterpret_cast<const u8*>(Z2GetSceneMgr()) + Z2_SCENE_WAVES_OFFSET;
 }
 
 static u32 heapStart(u32 i) {
-    return (u32)*l_heaps[i];
+    return (u32)l_heaps[i];
 }
 
 static u32 heapEnd(u32 i) {
-    return (u32)(*l_heaps[i])->getEndAddr();
+    return (u32)l_heaps[i]->getEndAddr();
 }
 
 static bool overlapsHeaps(u32 start, u32 end) {
-    for (u32 i = 0; i < HEAP_COUNT; i++) {
+    for (u32 i = 0; i < l_heapCount; i++) {
         if (start < heapEnd(i) && end > heapStart(i)) {
             return true;
         }
@@ -252,9 +293,36 @@ static u32 threadObjectSize(JKRThread* thread) {
     return sizeof(JKRThread);
 }
 
+static JKRExpHeap::CMemBlock* heapFreeFirst(JKRExpHeap* heap) {
+    return *reinterpret_cast<JKRExpHeap::CMemBlock**>(reinterpret_cast<u8*>(heap) + JKREXPHEAP_FREE_LIST_OFFSET);
+}
+
+static bool isBlockListValid(u32 start, u32 end, JKRExpHeap::CMemBlock* block, bool used) {
+    for (u32 count = 0; block != NULL; block = block->getNextBlock(), count++) {
+        u32 addr = (u32)block;
+        if (count > 0x10000 || addr < start || addr + sizeof(*block) > end || (used && !block->isValid()) ||
+            addr + sizeof(*block) + block->getSize() > end)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+static bool areHeapsValid() {
+    for (u32 i = 0; i < l_heapCount; i++) {
+        if (!isBlockListValid(heapStart(i), heapEnd(i), l_heaps[i]->getUsedFirst(), true) ||
+            !isBlockListValid(heapStart(i), heapEnd(i), heapFreeFirst(l_heaps[i]), false))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
 static bool collectPreserved(RangeList& list) {
-    for (u32 i = 0; i < HEAP_COUNT; i++) {
-        for (JKRExpHeap::CMemBlock* block = (*l_heaps[i])->getUsedFirst(); block != NULL; block = block->getNextBlock()) {
+    for (u32 i = 0; i < l_heapCount; i++) {
+        for (JKRExpHeap::CMemBlock* block = l_heaps[i]->getUsedFirst(); block != NULL; block = block->getNextBlock()) {
             u32 start = (u32)block->getContent();
             if (block->getGroupId() == TPGZ_HEAP_GROUP_ID && !list.push(start, start + block->getSize())) {
                 return false;
@@ -296,21 +364,52 @@ static bool collectPreserved(RangeList& list) {
     return true;
 }
 
+static bool pushFreeSpace(RangeList& list, JKRHeap* heap, u32 depth) {
+    u32 start = (u32)heap;
+    u32 end = (u32)heap->getEndAddr();
+    u32 type = heap->getHeapType();
+    if (type == 'EXPH') {
+        JKRExpHeap::CMemBlock* first = heapFreeFirst(static_cast<JKRExpHeap*>(heap));
+        if (!isBlockListValid(start, end, first, false)) {
+            first = NULL;
+        }
+        for (JKRExpHeap::CMemBlock* block = first; block != NULL; block = block->getNextBlock()) {
+            u32 content = (u32)block->getContent();
+            if (!list.push(content, content + block->getSize())) {
+                return false;
+            }
+        }
+    } else if (type == 'SLID') {
+        u32 head = *reinterpret_cast<u32*>(start + JKRSOLIDHEAP_HEAD_OFFSET);
+        u32 tail = *reinterpret_cast<u32*>(start + JKRSOLIDHEAP_TAIL_OFFSET);
+        if (start < head && head <= tail && tail <= end && !list.push(head, tail)) {
+            return false;
+        }
+    }
+    if (depth < MAX_HEAP_DEPTH) {
+        for (JSUTree<JKRHeap>* child = heap->getHeapTree().getFirstChild(); child != NULL;
+             child = child->getNextChild())
+        {
+            JKRHeap* childHeap = child->getObject();
+            if ((u32)childHeap >= start && (u32)childHeap->getEndAddr() <= end &&
+                !pushFreeSpace(list, childHeap, depth + 1))
+            {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 static bool collectSkipped(RangeList& list, const RangeList& preserved) {
     for (u32 i = 0; i < preserved.count; i++) {
         if (!list.push(preserved.items[i].start, preserved.items[i].end)) {
             return false;
         }
     }
-    for (u32 i = 0; i < HEAP_COUNT; i++) {
-        JKRExpHeap* heap = *l_heaps[i];
-        JKRExpHeap::CMemBlock* block =
-            *reinterpret_cast<JKRExpHeap::CMemBlock**>(reinterpret_cast<u8*>(&heap->mAllocMode) + 0xC);
-        for (; block != NULL; block = block->getNextBlock()) {
-            u32 start = (u32)block->getContent();
-            if (!list.push(start, start + block->getSize())) {
-                return false;
-            }
+    for (u32 i = 0; i < l_heapCount; i++) {
+        if (!pushFreeSpace(list, l_heaps[i], 0)) {
+            return false;
         }
     }
     list.sortMerge();
@@ -336,7 +435,7 @@ static bool collectSegments(RangeList& segments, const RangeList& skipped) {
             return false;
         }
     }
-    for (u32 i = 0; i < HEAP_COUNT; i++) {
+    for (u32 i = 0; i < l_heapCount; i++) {
         if (!pushSegments(segments, heapStart(i), heapEnd(i), skipped)) {
             return false;
         }
@@ -432,19 +531,85 @@ static void pushTimedMessage(const char* prefix, u32 bytes, OSTime ticks) {
     pushMessage(buf);
 }
 
+struct Encoder {
+    u8* out;
+    u8* limit;
+    u32 records;
+    bool write;
+    bool overflow;
+};
+
+static u32 recordSize(u32 size, bool zero) {
+    return zero ? sizeof(SaveStateSegment) : (sizeof(SaveStateSegment) + size + 3) & ~3;
+}
+
+static void emitRecord(Encoder& encoder, u32 addr, u32 size, bool zero) {
+    u32 bytes = recordSize(size, zero);
+    if (encoder.out + bytes > encoder.limit) {
+        encoder.overflow = true;
+        return;
+    }
+    if (encoder.write) {
+        SaveStateSegment* segment = reinterpret_cast<SaveStateSegment*>(encoder.out);
+        segment->addr = addr;
+        segment->size = size | (zero ? ZERO_SEGMENT_FLAG : 0);
+        if (!zero) {
+            memcpy(segment + 1, reinterpret_cast<void*>(addr), size);
+        }
+    }
+    encoder.out += bytes;
+    encoder.records++;
+}
+
+static u32 findZeroRun(u32 start, u32 end, u32* runEnd) {
+    u32 runStart = 0;
+    u32 words = 0;
+    u32 addr = (start + 3) & ~3;
+    for (; addr + 4 <= end; addr += 4) {
+        if (*reinterpret_cast<const u32*>(addr) == 0) {
+            runStart = words++ == 0 ? addr : runStart;
+        } else if (words * 4 >= MIN_ZERO_RUN) {
+            break;
+        } else {
+            words = 0;
+        }
+    }
+    if (words * 4 >= MIN_ZERO_RUN) {
+        *runEnd = runStart + words * 4;
+        return runStart;
+    }
+    *runEnd = end;
+    return end;
+}
+
+static void encodeSegments(Encoder& encoder, const RangeList& segments) {
+    for (u32 i = 0; i < segments.count && !encoder.overflow; i++) {
+        u32 cursor = segments.items[i].start;
+        u32 end = segments.items[i].end;
+        while (cursor < end && !encoder.overflow) {
+            u32 runEnd;
+            u32 runStart = findZeroRun(cursor, end, &runEnd);
+            if (runStart > cursor) {
+                emitRecord(encoder, cursor, runStart - cursor, false);
+            }
+            if (runStart < end) {
+                emitRecord(encoder, runStart, runEnd - runStart, true);
+            }
+            cursor = runEnd;
+        }
+    }
+}
+
 static void captureState() {
     RangeList preserved, skipped, segments;
     ModuleLink outsideModules[MAX_OUTSIDE_MODULES];
     u32 outsideModuleCount;
-    const char* failedList = !collectPreserved(preserved)             ? "preserved" :
-                             !collectSkipped(skipped, preserved)       ? "skipped" :
-                             !collectSegments(segments, skipped)       ? "segments" :
-                                                                         NULL;
-    if (failedList != NULL) {
-        char buf[64];
-        snprintf(buf, sizeof(buf), "save state failed: %s list, %d KB free", failedList,
-                 g_tpgzMem2Heap != NULL ? (int)(g_tpgzMem2Heap->getFreeSize() / 1024) : -1);
-        pushMessage(buf);
+    if (!areHeapsValid()) {
+        pushMessage("save state failed: unexpected heap layout");
+        return;
+    }
+    if (!collectPreserved(preserved) || !collectSkipped(skipped, preserved) || !collectSegments(segments, skipped)) {
+        pushMessage("save state failed: out of memory");
         return;
     }
     if (!collectOutsideModules(outsideModules, &outsideModuleCount, preserved)) {
@@ -452,41 +617,48 @@ static void captureState() {
         return;
     }
 
-    u32 size = alignUp(sizeof(SaveStateHeader) + preserved.count * sizeof(SaveStateRange));
-    for (u32 i = 0; i < segments.count; i++) {
-        size += alignUp(sizeof(SaveStateSegment) + segments.items[i].end - segments.items[i].start);
-    }
+    Encoder estimate = {NULL, reinterpret_cast<u8*>(0xFFFFFFFF), 0, false, false};
+    encodeSegments(estimate, segments);
+    u32 headerSize = alignUp(sizeof(SaveStateHeader) + preserved.count * sizeof(SaveStateRange));
+    u32 size = headerSize + (u32)estimate.out;
     if (!ensureStorage(size)) {
         char buf[64];
+#ifdef WII_PLATFORM
+        s32 usable = JKRHeap::getRootHeap2()->getFreeSize() - MEM2_MARGIN;
+        snprintf(buf, sizeof(buf), "save state failed: needs %d KB, %d KB usable", (int)(size / 1024),
+                 (int)((usable > 0 ? usable : 0) / 1024));
+#else
         snprintf(buf, sizeof(buf), "save state failed: needs %d KB", (int)(size / 1024));
+#endif
         pushMessage(buf);
         return;
     }
 
     SaveStateHeader* header = reinterpret_cast<SaveStateHeader*>(l_storage);
-    header->totalSize = size;
-    header->segmentCount = segments.count;
     header->preservedCount = preserved.count;
     strncpy(header->stageName, dComIfGp_getStartStageName(), sizeof(header->stageName));
     memcpy(header->sceneWaves, sceneWaves(), sizeof(header->sceneWaves));
+    header->audioMemoryHash = audioMemoryHash();
     header->outsideModuleCount = outsideModuleCount;
     memcpy(header->outsideModules, outsideModules, sizeof(outsideModules));
     memcpy(header + 1, preserved.items, preserved.count * sizeof(SaveStateRange));
 
-    u8* cursor = firstSegment(preserved.count);
+    Encoder encoder = {firstSegment(preserved.count), l_storage + l_storageSize, 0, true, false};
     OSTime startTime = OSGetTime();
     BOOL enabled = OSDisableInterrupts();
-    for (u32 i = 0; i < segments.count; i++) {
-        SaveStateSegment* segment = reinterpret_cast<SaveStateSegment*>(cursor);
-        segment->addr = segments.items[i].start;
-        segment->size = segments.items[i].end - segments.items[i].start;
-        memcpy(segment + 1, reinterpret_cast<void*>(segment->addr), segment->size);
-        cursor += alignUp(sizeof(SaveStateSegment) + segment->size);
-    }
+    encodeSegments(encoder, segments);
     OSRestoreInterrupts(enabled);
+    OSTime elapsed = OSGetTime() - startTime;
 
+    if (encoder.overflow) {
+        l_hasState = false;
+        pushMessage("save state failed: memory changed during save");
+        return;
+    }
+    header->totalSize = encoder.out - l_storage;
+    header->segmentCount = encoder.records;
     l_hasState = true;
-    pushTimedMessage("state saved", size, OSGetTime() - startTime);
+    pushTimedMessage("state saved", header->totalSize, elapsed);
 }
 
 static const char* validateState(SaveStateHeader* header) {
@@ -496,10 +668,16 @@ static const char* validateState(SaveStateHeader* header) {
     if (memcmp(header->sceneWaves, sceneWaves(), sizeof(header->sceneWaves)) != 0) {
         return "load state failed: different room audio";
     }
+    if (header->audioMemoryHash != audioMemoryHash()) {
+        return "load state failed: audio memory changed";
+    }
 
     ModuleLink outsideModules[MAX_OUTSIDE_MODULES];
     u32 outsideModuleCount;
     RangeList preserved;
+    if (!areHeapsValid()) {
+        return "load state failed: unexpected heap layout";
+    }
     if (!collectPreserved(preserved) || !collectOutsideModules(outsideModules, &outsideModuleCount, preserved)) {
         return "load state failed: out of memory";
     }
@@ -525,10 +703,16 @@ static void restoreState() {
     for (u32 i = 0; i < header->segmentCount; i++) {
         SaveStateSegment* segment = reinterpret_cast<SaveStateSegment*>(cursor);
         void* dst = reinterpret_cast<void*>(segment->addr);
-        memcpy(dst, segment + 1, segment->size);
-        DCFlushRange(dst, segment->size);
-        ICInvalidateRange(dst, segment->size);
-        cursor += alignUp(sizeof(SaveStateSegment) + segment->size);
+        bool zero = (segment->size & ZERO_SEGMENT_FLAG) != 0;
+        u32 size = segment->size & ~ZERO_SEGMENT_FLAG;
+        if (zero) {
+            memset(dst, 0, size);
+        } else {
+            memcpy(dst, segment + 1, size);
+        }
+        DCFlushRange(dst, size);
+        ICInvalidateRange(dst, size);
+        cursor += recordSize(size, zero);
     }
     for (u32 i = 0; i < header->outsideModuleCount; i++) {
         header->outsideModules[i].module->link.next = header->outsideModules[i].next;
@@ -567,11 +751,20 @@ static bool tryRunPendingAction() {
 }
 
 KEEP_FUNC void GZ_initSaveStates() {
+    l_heapCount = 0;
+    bool heapsValid = true;
+    for (u32 i = 0; i < MAX_HEAPS; i++) {
+        JKRHeap* heap = *l_heapSources[i];
+        if (heap != NULL) {
+            heapsValid &= heap->getHeapType() == 'EXPH';
+            l_heaps[l_heapCount++] = static_cast<JKRExpHeap*>(heap);
+        }
+    }
     l_bootModule = findBootModule();
     l_storage = g_mem2Storage;
     l_storageSize = g_mem2StorageSize;
     l_unavailableReason = g_mem2UnavailableReason;
-    if (l_unavailableReason == NULL && l_bootModule == NULL) {
+    if (l_unavailableReason == NULL && (l_bootModule == NULL || !heapsValid)) {
         l_unavailableReason = "save states unavailable";
     }
 }
@@ -611,6 +804,7 @@ KEEP_FUNC void GZ_handleSaveStates() {
         } else {
             l_pendingAction = pressedSave ? SS_ACTION_SAVE : SS_ACTION_LOAD;
             l_waitFrames = 0;
+
         }
         if (l_pendingAction == SS_ACTION_NONE) {
             return;

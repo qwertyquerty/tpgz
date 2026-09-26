@@ -3,7 +3,11 @@
 #include "rels/include/defines.h"
 #include "JSystem/JKernel/JKRExpHeap.h"
 
+#ifdef WII_PLATFORM
+#define MEM2_HEAP_SIZE 0x40000
+#else
 #define MEM2_HEAP_SIZE 0x100000
+#endif
 
 #ifdef GCN_PLATFORM
 #define NIN_CFG_ADDR 0x93004000
