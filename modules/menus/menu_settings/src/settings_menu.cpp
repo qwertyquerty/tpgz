@@ -32,7 +32,14 @@ static Line lines[SETTINGS_COUNT] = {
      "Change menu object positions (A to toggle selection, DPad to move)",
      false},
      {"credits", CREDITS_INDEX, "view credits", false},
+    {"crash test", CRASH_TEST_INDEX, "Crash the game on purpose to test the crash QR code", false},
 };
+
+static asm void crashTest() {
+    nofralloc
+    trap
+    blr
+}
 
 KEEP_FUNC SettingsMenu::SettingsMenu(Cursor& cursor)
     : Menu(cursor) {}
@@ -73,6 +80,9 @@ void SettingsMenu::draw() {
         case CREDITS_INDEX:
             g_menuMgr->push(MN_CREDITS_INDEX);
             return;
+        case CRASH_TEST_INDEX:
+            crashTest();
+            break;
         case COMBO_INDEX:
             g_menuMgr->push(MN_COMBO_INDEX);
             return;
