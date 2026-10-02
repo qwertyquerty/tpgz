@@ -23,13 +23,15 @@
 #include "m_Do/m_Do_printf.h"
 #include "d/d_s_logo.h"
 #include "tpgz_math.h"
+#include "crash_qr.h"
 
 #define HOOK_DEF(rettype, name, params)                                                            \
     typedef rettype(*tp_##name##_t) params;                                                        \
     tp_##name##_t name##Trampoline;
 
 HOOK_DEF(void, fapGm_Execute__Fv, (void));
-HOOK_DEF(void, ExceptionCallback, (void));
+HOOK_DEF(void, ExceptionCallback, (u16, OSContext*, u32, u32));
+HOOK_DEF(void, drawDirect, (void*, bool));
 HOOK_DEF(void, draw, (void*));
 
 #ifdef GCN_PLATFORM
@@ -90,14 +92,20 @@ void drawHook(void* p1) {
     draw();
 }
 
+void myExceptionCallbackHook(u16 error, OSContext* context, u32 dsisr, u32 dar) {
+    GZ_captureCrash(error, context, dsisr, dar);
+    ExceptionCallbackTrampoline(error, context, dsisr, dar);
 #ifdef PR_TEST
-void myExceptionCallbackHook(void) {
-    ExceptionCallbackTrampoline();
     developmentMode__7mDoMain = 1;
     DCFlushRange((void*)(&developmentMode__7mDoMain), sizeof(developmentMode__7mDoMain));
     ICInvalidateRange((void*)(&developmentMode__7mDoMain), sizeof(developmentMode__7mDoMain));
-}
 #endif  // PR_TEST
+}
+
+void drawDirectHook(void* manager, bool waitRetrace) {
+    drawDirectTrampoline(manager, waitRetrace);
+    GZ_drawCrashQr();
+}
 
 uint32_t readControllerHook(uint16_t* p1) {
     uint32_t returnValue = PADReadTrampoline(p1);
@@ -491,6 +499,7 @@ void f_onEventBit(void*, uint16_t);
 void f_offEventBit(void*, uint16_t);
 void f_putSave(void*, int);
 void f_myExceptionCallback();
+void drawDirect__17JUTConsoleManagerCFb(void*, bool);
 int f_dScnPly__phase_1(void*);
 int f_dScnPly__phase_4(void*);
 void f_dCcS__Draw(dCcS*);
@@ -544,9 +553,8 @@ KEEP_FUNC void applyHooks() {
 APPLY_HOOK(dScnLogo_c__warningInDraw, &f_dScnLogo_c__warningInDraw, dScnLogo_c__warningInDraw);
 #endif
 
-#ifdef PR_TEST
     APPLY_HOOK(ExceptionCallback, &f_myExceptionCallback, myExceptionCallbackHook);
-#endif
+    APPLY_HOOK(drawDirect, &drawDirect__17JUTConsoleManagerCFb, drawDirectHook);
 
 #undef APPLY_HOOK
 }
