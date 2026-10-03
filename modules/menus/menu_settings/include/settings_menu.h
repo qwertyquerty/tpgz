@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef TPGZ_MODULES_MENUS_MENU_SETTINGS_INCLUDE_SETTINGS_MENU_H
+#define TPGZ_MODULES_MENUS_MENU_SETTINGS_INCLUDE_SETTINGS_MENU_H
 #include "menus/menu.h"
 #include "settings.h"
 
@@ -14,6 +14,7 @@ enum SettingsIndex {
     LOAD_CARD_INDEX,
     DELETE_CARD_INDEX,
     COMBO_INDEX,
+    TIMER_SETTINGS_INDEX,
     POS_SETTINGS_MENU_INDEX,
     CREDITS_INDEX,
 
@@ -27,5 +28,6 @@ public:
     virtual void draw();
 
 private:
-    Line lines[SETTINGS_COUNT];
 };
+
+#endif

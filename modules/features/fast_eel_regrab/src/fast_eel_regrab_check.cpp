@@ -1,22 +1,24 @@
+#include "game_state.h"
+#include "defines.h"
 #include <cstdio>
 #include "fast_eel_regrab_check.h"
 #include "controller.h"
 #include "fifo_queue.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/SSystem/SComponent/c_counter.h"
-#include "libtp_c/include/f_op/f_op_scene_req.h"
+#include "d/d_com_inf_game.h"
+#include "SSystem/SComponent/c_counter.h"
+#include "f_op/f_op_scene_req.h"
 
 #ifdef GCN_PLATFORM
-#define X_HELD_CHECK !GZ_getButtonHold(GZPad::X)
-#define X_DOWN_CHECK GZ_getButtonPressed(GZPad::X)
-#define Y_HELD_CHECK !GZ_getButtonHold(GZPad::Y)
-#define Y_DOWN_CHECK GZ_getButtonPressed(GZPad::Y)
+#define X_HELD_CHECK !GZ_getButtonHold(X)
+#define X_DOWN_CHECK GZ_getButtonPressed(X)
+#define Y_HELD_CHECK !GZ_getButtonHold(Y)
+#define Y_DOWN_CHECK GZ_getButtonPressed(Y)
 
 #else
-#define X_HELD_CHECK !GZ_getButtonHold(GZPad::DPAD_DOWN)
-#define X_DOWN_CHECK GZ_getButtonPressed(GZPad::DPAD_DOWN)
-#define Y_HELD_CHECK !GZ_getButtonHold(GZPad::B)
-#define Y_DOWN_CHECK GZ_getButtonPressed(GZPad::B)
+#define X_HELD_CHECK !GZ_getButtonHold(DPAD_DOWN)
+#define X_DOWN_CHECK GZ_getButtonPressed(DPAD_DOWN)
+#define Y_HELD_CHECK !GZ_getButtonHold(B)
+#define Y_DOWN_CHECK GZ_getButtonPressed(B)
 #endif
 
 #define first_frame 9
@@ -29,7 +31,7 @@ KEEP_FUNC void FastEelRegrabChecker::execute() {
     static uint32_t sFrameCount = 0;
 
     // reset counters on load
-    if (fopScnRq.isLoading) {
+    if (l_fopScnRq_IsUsingOfOverlap) {
         sFrameCount = 0;
         sGoalHit = false;
         sTimerStarted = false;

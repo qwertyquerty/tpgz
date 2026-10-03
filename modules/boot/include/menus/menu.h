@@ -1,10 +1,14 @@
-#pragma once
+#ifndef TPGZ_MODULES_BOOT_INCLUDE_MENUS_MENU_H
+#define TPGZ_MODULES_BOOT_INCLUDE_MENUS_MENU_H
+#ifndef ARRAY_COUNT
+#define ARRAY_COUNT(array) (sizeof(array) / sizeof((array)[0]))
+#endif
 #include "cheats.h"
 #include "commands.h"
 #include "font.h"
-#include "libtp_c/include/JSystem/JUtility/JUTGamePad.h"
-#include "libtp_c/include/dolphin/mtx/vec.h"
-#include "libtp_c/include/defines.h"
+#include "JSystem/JUtility/JUTGamePad.h"
+#include "tpgz_vec.h"
+#include "rels/include/defines.h"
 #include "timer.h"
 #include "utils/cursor.h"
 #include "utils/lines.h"
@@ -12,12 +16,12 @@
 #define MAX_MENU_RENDER_FLAGS 30
 
 #ifdef GCN_PLATFORM
-#define SELECTION_BUTTON (GZPad::A)
-#define BACK_BUTTON (GZPad::B)
+#define SELECTION_BUTTON (A)
+#define BACK_BUTTON (B)
 #endif
 #ifdef WII_PLATFORM
-#define SELECTION_BUTTON (GZPad::A)
-#define BACK_BUTTON (GZPad::B)
+#define SELECTION_BUTTON (A)
+#define BACK_BUTTON (B)
 #endif
 
 // If you add a new menu to this list, you must also add the REL name to the g_menuPaths array in menu.cpp.
@@ -71,6 +75,7 @@ enum MenuIndex {
     MN_POS_SETTINGS_INDEX,
     MN_CREDITS_INDEX,
     MN_COMBO_INDEX,
+    MN_TIMER_SETTINGS_INDEX,
     // Tools menu's sub menus
     MN_TOOLS_CHECKERS_INDEX,
     MN_TOOLS_CONTROLLER_INDEX,
@@ -96,3 +101,5 @@ public:
 protected:
     Cursor& cursor;
 };
+
+#endif

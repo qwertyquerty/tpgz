@@ -56,6 +56,9 @@ struct MenuState {
 enum MenuCommandId { MC_NONE, MC_OPEN, MC_HIDE, MC_PUSH, MC_POP, MC_CLEAR };
 
 struct MenuCommand {
+    MenuCommand() {}
+    MenuCommand(MenuCommandId cmd_id_, int menu_id_) : cmd_id(cmd_id_), menu_id(menu_id_) {}
+
     MenuCommandId cmd_id;
     int menu_id;
 };
@@ -98,8 +101,7 @@ public:
      *
      * @param data Pointer to the data to keep between load/unload.
      */
-    template <typename T = void>
-    inline void setPersistentData(T* data) {
+    inline void setPersistentData(void* data) {
         if (!states.empty()) {
             (*states.begin())->data = data;
         }
@@ -109,12 +111,12 @@ public:
      *
      * @return void* Pointer to the data kept between load/unload.
      */
-    template <typename T = void>
+    template <typename T>
     inline T* getPersistentData() {
         if (!states.empty()) {
             return (T*)(*states.begin())->data;
         }
-        return nullptr;
+        return NULL;
     }
 
     /**
@@ -122,8 +124,7 @@ public:
      *
      * @param data Pointer to the data to keep all the time.
      */
-    template <typename T = void>
-    inline void setPermanentData(T* data) {
+    inline void setPermanentData(void* data) {
         if (!states.empty()) {
             permanentData[(*states.begin())->id] = data;
         }
@@ -133,12 +134,12 @@ public:
      *
      * @return void* Pointer to the data kept all the time.
      */
-    template <typename T = void>
+    template <typename T>
     inline T* getPermanentData() {
         if (!states.empty()) {
             return (T*)permanentData[(*states.begin())->id];
         }
-        return nullptr;
+        return NULL;
     }
 
     /**

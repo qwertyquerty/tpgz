@@ -1,5 +1,7 @@
 file(GLOB_RECURSE srcs CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 file(GLOB_RECURSE asms CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.s")
 list(APPEND srcs ${asms})
+list(APPEND srcs ${CMAKE_SOURCE_DIR}/tp/src/d/d_bg_s_capt_poly.cpp)
+set_source_files_properties(${CMAKE_SOURCE_DIR}/tp/src/d/d_bg_s_capt_poly.cpp PROPERTIES COMPILE_DEFINITIONS DECOMPCTX)
 get_filename_component(rel_name ${CMAKE_CURRENT_SOURCE_DIR} NAME)
 tpgz_add_main_module(${rel_name} "${srcs}" "${CMAKE_CURRENT_SOURCE_DIR}/include")

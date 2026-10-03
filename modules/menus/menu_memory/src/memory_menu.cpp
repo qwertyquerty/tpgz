@@ -3,12 +3,14 @@
 #include "rels/include/defines.h"
 #include "menus/utils/menu_mgr.h"
 
+static Line lines[3] = {
+    {"watches", 0, "Manage memory watches", false},
+    {"memory editor", 1, "View/edit memory", false},
+    {"mem files", 2, "Save/Load memory files", false},
+};
+
 KEEP_FUNC MemoryMenu::MemoryMenu(Cursor& cursor)
-    : Menu(cursor), lines{
-                        {"watches", 0, "Manage memory watches", false},
-                        {"memory editor", 1, "View/edit memory", false},
-                        {"mem files", 2, "Save/Load memory files", false},
-                    } {}
+    : Menu(cursor) {}
 
 MemoryMenu::~MemoryMenu() {}
 

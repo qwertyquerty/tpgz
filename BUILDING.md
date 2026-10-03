@@ -24,10 +24,13 @@ git submodule update --init --recursive
     | Wii USA 1.0  | RZDE01.iso |
     | Wii PAL      | RZDP01.iso |
 
-4.  Install devkitpro.
+4.  Install CMake and Python 3.
 
-    - Windows: Download [here](https://github.com/devkitPro/installer/releases)
-    - MacOS/Linux: Read [this guide](https://devkitpro.org/wiki/Getting_Started)
+    - TPGZ is compiled with the same Metrowerks (MWCC) compilers as the [decompilation](https://github.com/zeldaret/tp). CMake downloads them into your build directory the first time you configure.
+    - Windows: the compilers run natively.
+    - Linux (x86_64): CMake also downloads [wibo](https://github.com/decompals/wibo) to run them.
+    - MacOS/other: install [Wine](https://www.winehq.org/).
+    - To use compilers you already have, pass `-DTPGZ_COMPILERS_DIR=<path>` when configuring (and `-DTPGZ_MW_WRAPPER=<wibo or wine>` to pick the wrapper).
 
 5.  Download the latest [Romhack-Compiler](https://github.com/zsrtp/romhack-compiler/releases).
     

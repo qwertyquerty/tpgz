@@ -1,4 +1,7 @@
-#pragma once
+#ifndef TPGZ_MODULES_FEATURES_MASH_CHECKER_INCLUDE_MASH_CHECKER_H
+#define TPGZ_MODULES_FEATURES_MASH_CHECKER_INCLUDE_MASH_CHECKER_H
 #include "font.h"
 
 void GZ_displayButtonMashInfo();
+
+#endif

@@ -1,6 +1,6 @@
 #include "utils/disc.h"
 #include <cstring>
-#include "libtp_c/include/msl_c/math.h"
+#include "tpgz_math.h"
 #include "rels/include/cxx.h"
 
 #ifdef __cplusplus
@@ -8,7 +8,7 @@ extern "C" {
 #endif
 
 int32_t dvd_read(DVDFileInfo* file_info, void* data, int32_t size, int32_t offset) {
-    constexpr const uint32_t buf_size = 0x20;
+    const uint32_t buf_size = 0x20;
     uint8_t* buf = new (-32) uint8_t[buf_size];
     int32_t read_bytes = 0;
 

@@ -1,10 +1,10 @@
 #include "utils/texture.h"
 #include <cstring>
-#include "libtp_c/include/msl_c/math.h"
+#include "tpgz_math.h"
 #include "utils/disc.h"
-#include "gcn_c/include/dvd.h"
+#include <dvd.h>
 #include "rels/include/cxx.h"
-#include "libtp_c/include/m_Do/m_Do_printf.h"
+#include "m_Do/m_Do_printf.h"
 
 enum TexFmt {
     RGB8 = 0,
@@ -18,13 +18,13 @@ extern "C" {
 
 uint32_t get_size(uint32_t format, uint32_t width, uint32_t height) {
     switch (format) {
-    case TexFmt::CMPR: {
+    case CMPR: {
         return width * height / 2;
     }
-    case TexFmt::I8: {
+    case I8: {
         return width * height;
     }
-    case TexFmt::RGB8:
+    case RGB8:
     default: {
         return 4 * width * height;
     }
@@ -38,40 +38,40 @@ TexCode load_texture(const char* path, Texture* tex) {
 TexCode load_texture_offset(const char* path, Texture* tex, uint32_t offset) {
     DVDFileInfo fileInfo;
     int32_t readsize;
-    if (tex->loadCode == TexCode::TEX_OK) {
+    if (tex->loadCode == TEX_OK) {
         free_texture(tex);
     }
 
     if (!DVDOpen(path, &fileInfo)) {
-        tex->loadCode = TexCode::TEX_ERR_FILE;
+        tex->loadCode = TEX_ERR_FILE;
         OSReport_Warning("Texture not loaded \"%s\"; Couldn't open path [%d]\n", path, tex->loadCode);
         return tex->loadCode;
     }
     readsize = dvd_read(&fileInfo, &tex->header, sizeof(TexHeader), offset);
     if (readsize < (int32_t)sizeof(TexHeader)) {
         DVDClose(&fileInfo);
-        tex->loadCode = TexCode::TEX_ERR_READ;
+        tex->loadCode = TEX_ERR_READ;
         OSReport_Warning("Texture not loaded \"%s\"; Couldn't read file header [%d]\n", path, tex->loadCode);
         return tex->loadCode;
     }
 
     uint8_t fmt = GX_TF_I8;
     switch (tex->header.format) {
-    case TexFmt::RGB8: {
+    case RGB8: {
         fmt = GX_TF_RGBA8;
         break;
     }
-    case TexFmt::CMPR: {
+    case CMPR: {
         fmt = GX_TF_CMPR;
         break;
     }
-    case TexFmt::I8: {
+    case I8: {
         fmt = GX_TF_I8;
         break;
     }
     default: {
         DVDClose(&fileInfo);
-        tex->loadCode = TexCode::TEX_ERR_INVALID_FORMAT;
+        tex->loadCode = TEX_ERR_INVALID_FORMAT;
         OSReport_Warning("Texture not loaded \"%s\"; Invalid texture format id (%d) [%d]\n", path, tex->header.format, tex->loadCode);
         return tex->loadCode;
     }
@@ -79,9 +79,9 @@ TexCode load_texture_offset(const char* path, Texture* tex, uint32_t offset) {
 
     uint32_t size = get_size(tex->header.format, tex->header.width, tex->header.height);
     tex->data = new (-32) uint8_t[size];
-    if (tex->data == nullptr) {
+    if (tex->data == NULL) {
         DVDClose(&fileInfo);
-        tex->loadCode = TexCode::TEX_ERR_MEM;
+        tex->loadCode = TEX_ERR_MEM;
         OSReport_Warning("Texture not loaded \"%s\"; Couldn't allocate 0x%x bytes for data [%d]\n", path, size, tex->loadCode);
         return tex->loadCode;
     }
@@ -89,7 +89,7 @@ TexCode load_texture_offset(const char* path, Texture* tex, uint32_t offset) {
     if (DVDReadPrio(&fileInfo, tex->data, size, offset + sizeof(tex->header), 2) < (int32_t)size) {
         delete tex->data;
         DVDClose(&fileInfo);
-        tex->loadCode = TexCode::TEX_ERR_READ;
+        tex->loadCode = TEX_ERR_READ;
         OSReport_Warning("Texture not loaded \"%s\"; Couldn't read texture data [%d]\n", path, tex->loadCode);
         return tex->loadCode;
     }
@@ -98,22 +98,22 @@ TexCode load_texture_offset(const char* path, Texture* tex, uint32_t offset) {
     memset(&tex->_texObj, 0, sizeof(GXTexObj));
     GXInitTexObj(&tex->_texObj, tex->data, tex->header.width, tex->header.height, (GXTexFmt)fmt, GX_CLAMP,
                  GX_CLAMP, GX_FALSE);
-    tex->loadCode = TexCode::TEX_OK;
+    tex->loadCode = TEX_OK;
     return tex->loadCode;
 }
 
 void free_texture(Texture* tex) {
-    if (tex->data != nullptr) {
+    if (tex->data != NULL) {
         delete tex->data;
         tex->data = 0;
     }
     memset(tex, 0, sizeof(Texture));
     // The next line is redundant, but is still there for good measure
-    tex->loadCode = TexCode::TEX_UNLOADED;
+    tex->loadCode = TEX_UNLOADED;
 }
 
 void setupRendering() {
-    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRC_ALPHA, GX_BL_INV_SRC_ALPHA, GX_LO_SET);
+    GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_INVSRCALPHA, GX_LO_SET);
 
     GXClearVtxDesc();
     GXSetVtxDesc(GX_VA_POS, GX_DIRECT);

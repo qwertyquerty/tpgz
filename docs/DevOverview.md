@@ -31,8 +31,7 @@ The repository structure is separated like so:
 - `/common/`: Contains the code samples that are reused between modules.
 - `/docs/`: Contains useful documentation files.
 - `/external/`: Contains libraries that the project links against, as well as scripts useful during development.
-- `/external/gcn_c/`: Contains DolphinOS bindings that can be used to interface with the game's code.
-- `/external/libtp_c/`: Contains bindings that are specific for Twilight Princess that can be used to interface with the game's code.
+- `/tp/`: Twilight Princess decomp submodule. Its headers provide the game declarations used by TPGZ; CMake selects the matching game revision through `VERSION`.
 - `/external/misc/`: Contains scripts useful during development (for example, generating save files metadata, or converting an image/font into our custom file format).
 - `/isos/`: **User created**. Contains the dump of each version of the game provided by the user. They must comply with the folling mapping depending on the version of the game:
   - `GCN_NTSCU` -> `GZ2E01.iso`
@@ -51,7 +50,7 @@ The repository structure is separated like so:
 - `/res/bin/`: Binary data which is injected into the game.
 - `/res/fonts/`: The fonts used to display text in **TPGZ**. They were made from TrueType fonts converted into a custom font format using the script found at `external/misc/font2fnt.py`.
 - `/res/icons/`: The original pictures that were used to generate the textures in `res/tex`.
-- `/res/map/`: The files that contain the mapping between the symbols name and their address in the game. They are used in the compilation pipeline to link the modules against the game.
+- `/res/map/rel_ids/`: REL module id overrides for versions where the decomp's module order differs from the game's. The symbol map itself is generated from the decomp (`tp/config/<version>/`) at build time by `bin/merge_lst.py`.
 - `/res/proc_info/`: Metadata containing information on friendly name mappings for Proc IDs. Used by the actor list menu.
 - `/res/save_files/`: The files that contains the data to load into the questlog of the game, as well as some metadata on how to load them.
 - `/res/save_files_wii/`: Wii specific save files. Although GC's questlog data and Wii's are intercompatible, Wii any% saves were made using a different route, requiring a different set of saves.
@@ -72,10 +71,11 @@ We will first review the big picture of how the Compilation Pipeline works befor
 **TPGZ** uses **CMake** as a project configurator. This allows for the choice between two different generators: *Ninja* and *Makefile*.
 
 The first step of the pipeline is to import all the external libraries and cmake configuration files for the required tools. Based on the values of `PLATFORM` and `REGION` provided when configuring the build folder, cmake imports the data from the corresponding script under `cmake/`.<br>
-We also import the various executables needed during compilation. For instance, we import the toolchain file `cmake/CheckDevkitPro.cmake` which defines how to compile the code into ELF and static libraries. This takes care of the compilation part of the pipeline.<br>
+We also import the various executables needed during compilation. For instance, `cmake/mwcc.cmake` sets up the same Metrowerks compilers (MWCC) that the decomp uses, downloading them if needed, which takes care of the compilation part of the pipeline.<br>
 We also import scripts like `bin/elf2rel` (from the repo [**spm-rel-loader**](https://github.com/SeekyCt/spm-rel-loader/releases/tag/elf2rel-13-6-2022)) and `bin/relmapper.py` (from [**TP Rando**](https://github.com/lunarsoap5/Randomizer/tree/master/GameCube)) which are used to link the generated ELF files against the game and between themselves to produce REL modules.<br>
 - `relmapper.py` takes in the compiled ELF modules and extract the address/offset mapping of the symbols into a list of those mappings (`.lst` file), which is then used to link other ELF modules against that module.<br>
-- `elf2rel` takes an ELF module and a `.lst` mapping file and links the module against the file to produce a REL module.
+- `elf2rel` takes an ELF module and a `.lst` mapping file and links the module against the file to produce a REL module. The build fails if any symbol is left unresolved.
+- `merge_lst.py` generates the game's `.lst` mapping from the decomp's symbol files, including the game's REL modules.
 
 The next step is to configure the files used by the patcher. There are two of them: `RomHack.toml` and `patch.asm`.
 

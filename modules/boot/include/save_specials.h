@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef TPGZ_MODULES_BOOT_INCLUDE_SAVE_SPECIALS_H
+#define TPGZ_MODULES_BOOT_INCLUDE_SAVE_SPECIALS_H
 void SaveMngSpecial_OrdonRock();
 
 void SaveMngSpecial_BossFlags();
@@ -114,3 +114,5 @@ void SaveMngSpecial_DMTPoe();
 
 void SaveMngSpecial_RemoveAreaBannerBefore_ZorasDomain();
 void SaveMngSpecial_RemoveAreaBannerBefore_Snowpeak();
+
+#endif

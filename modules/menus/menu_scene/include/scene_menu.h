@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef TPGZ_MODULES_MENUS_MENU_SCENE_INCLUDE_SCENE_MENU_H
+#define TPGZ_MODULES_MENUS_MENU_SCENE_INCLUDE_SCENE_MENU_H
 #include "menus/menu.h"
 #include "scene.h"
 
@@ -10,5 +10,6 @@ public:
     virtual void draw();
 
 private:
-    Line lines[SCENE_MENU_MAX];
 };
+
+#endif

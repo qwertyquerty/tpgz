@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef TPGZ_MODULES_BOOT_INCLUDE_UTILS_HOOK_H
+#define TPGZ_MODULES_BOOT_INCLUDE_UTILS_HOOK_H
 #define HOOK_AMNT 18
 enum HookIndex {
     HK_LIB_INIT_INDEX = 0,
@@ -25,3 +25,5 @@ extern int preset_r2;
 namespace Hook {
 void applyHooks();
 }  // namespace Hook
+
+#endif

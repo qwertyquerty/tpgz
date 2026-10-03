@@ -68,5 +68,4 @@ private:
     uint8_t getBugIdx(u8 bug, u16 flag);
     void setBugIdx(u8 bug, u8 idx, u16 flag);
     void setBugs();
-    Line lines[GB_INDEX_COUNT];
 };

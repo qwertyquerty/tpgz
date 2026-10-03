@@ -2,21 +2,25 @@
 #include <cstdio>
 #include "memfiles.h"
 #include "utils/card.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/f_op/f_op_draw_tag.h"
-#include "libtp_c/include/f_op/f_op_scene_req.h"
+#include "d/d_com_inf_game.h"
+#include "d/d_com_inf_game.h"
+#include "f_op/f_op_camera_mng.h"
+#include "f_op/f_op_scene_req.h"
 #include "gz_flags.h"
 #include "rels/include/defines.h"
 #include "menus/utils/menu_mgr.h"
 
 #define MAX_SAVE_SLOTS 100
 
-KEEP_FUNC MemfilesMenu::MemfilesMenu(MemfilesData& data)
-    : Menu(data.cursor), l_fileNo(data.l_fileNo), lines{
+static Line lines[4] = {
     {"file slot:", MEMFILE_SLOT_INDEX, "Select memfile slot"},
     {"save", MEMFILE_SAVE_INDEX, "Save memfile to slot", false},
     {"load", MEMFILE_LOAD_INDEX, "Load memfile from slot", false},
-    {"delete", MEMFILE_DELETE_INDEX, "Delete memfile from slot", false}} {}
+    {"delete", MEMFILE_DELETE_INDEX, "Delete memfile from slot", false}
+};
+
+KEEP_FUNC MemfilesMenu::MemfilesMenu(MemfilesData& data)
+    : Menu(data.cursor), l_fileNo(data.l_fileNo) {}
 
 MemfilesMenu::~MemfilesMenu() {}
 
@@ -30,13 +34,13 @@ void MemfilesMenu::draw() {
 
     switch (cursor.y) {
     case MEMFILE_SLOT_INDEX:
-        if (GZ_getButtonRepeat(GZPad::DPAD_LEFT)) {
+        if (GZ_getButtonRepeat(DPAD_LEFT)) {
             if (l_fileNo > 1) {
                 l_fileNo--;
             } else {
                 l_fileNo = MAX_SAVE_SLOTS;
             }
-        } else if (GZ_getButtonRepeat(GZPad::DPAD_RIGHT)) {
+        } else if (GZ_getButtonRepeat(DPAD_RIGHT)) {
             if (l_fileNo < MAX_SAVE_SLOTS) {
                 l_fileNo++;
             } else {
@@ -58,7 +62,7 @@ void MemfilesMenu::draw() {
         switch (cursor.y) {
         case MEMFILE_SAVE_INDEX:
 #ifndef WII_PLATFORM
-            card.result = CARDProbeEx(0, nullptr, &card.sector_size);
+            card.result = CARDProbeEx(0, NULL, &card.sector_size);
             if (card.result == Ready) {
                 GZ_storeMemfile(card);
             }
@@ -78,7 +82,7 @@ void MemfilesMenu::draw() {
             break;
         case MEMFILE_DELETE_INDEX:
 #ifndef WII_PLATFORM
-            card.result = CARDProbeEx(0, nullptr, &card.sector_size);
+            card.result = CARDProbeEx(0, NULL, &card.sector_size);
             if (card.result == Ready) {
                 GZ_deleteMemfile(card);
             }

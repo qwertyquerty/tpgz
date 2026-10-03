@@ -1,8 +1,9 @@
-#pragma once
+#ifndef TPGZ_MODULES_MENUS_MENU_DUNGEON_FLAGS_INCLUDE_DUNGEON_FLAGS_MENU_H
+#define TPGZ_MODULES_MENUS_MENU_DUNGEON_FLAGS_INCLUDE_DUNGEON_FLAGS_MENU_H
 #include "menus/menu.h"
 
 struct DungeonFlagsData {
-    bool init_once = false;
+    bool init_once;
     // bool l_introFlag;
     bool l_mapFlag;
     bool l_compassFlag;
@@ -37,5 +38,6 @@ public:
 
 private:
 
-    Line lines[DUNGEON_FLAGS_COUNT];
 };
+
+#endif

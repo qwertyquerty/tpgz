@@ -1,6 +1,6 @@
-#pragma once
-
-#include "libtp_c/include/dolphin/types.h"
+#ifndef TPGZ_MODULES_BOOT_INCLUDE_TRIGGER_VIEW_H
+#define TPGZ_MODULES_BOOT_INCLUDE_TRIGGER_VIEW_H
+#include "types.h"
 
 enum TriggerViewIndex {
     VIEW_ATTN_DISTS,
@@ -24,3 +24,5 @@ struct TriggerViewItem {
 };
 
 extern TriggerViewItem g_triggerViewFlags[TRIGGER_VIEW_MAX];
+
+#endif

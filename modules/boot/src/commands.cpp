@@ -1,3 +1,4 @@
+#include "defines.h"
 #include "commands.h"
 
 #include <cstring>
@@ -6,12 +7,13 @@
 #include "global_data.h"
 #include "fs.h"
 #include "boot.h"
-#include "libtp_c/include/JSystem/JUtility/JUTGamePad.h"
-#include "libtp_c/include/utils.h"
+#include "JSystem/JUtility/JUTGamePad.h"
+#include "tpgz_utils.h"
 #include "practice.h"
 #include "settings.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/f_op/f_op_draw_tag.h"
+#include "d/d_com_inf_game.h"
+#include "d/d_com_inf_game.h"
+#include "f_op/f_op_camera_mng.h"
 #include "timer.h"
 #include "utils/loading.h"
 #include "gz_flags.h"
@@ -43,26 +45,26 @@ KEEP_FUNC void GZCmd_pauseFrame() {
 }
 
 KEEP_FUNC void GZCmd_storePosition() {
-    if (dComIfGp_getPlayer()) {
-        sSavePlayerPos = dComIfGp_getPlayer()->current.pos;
-        sSavePlayerAngle = dComIfGp_getPlayer()->shape_angle.y;
+    if (dComIfGp_getPlayer(0)) {
+        sSavePlayerPos = dComIfGp_getPlayer(0)->current.pos;
+        sSavePlayerAngle = dComIfGp_getPlayer(0)->shape_angle.y;
     }
 
-    if (matrixInfo.matrix_info) {
-        sSaveCamPos = matrixInfo.matrix_info->pos;
-        sSaveCamTarget = matrixInfo.matrix_info->target;
+    if (dComIfGp_getCamera(0)) {
+        sSaveCamPos = dComIfGp_getCamera(0)->mCamera.mViewCache.mEye;
+        sSaveCamTarget = dComIfGp_getCamera(0)->mCamera.mViewCache.mCenter;
     }
 }
 
 KEEP_FUNC void GZCmd_loadPosition() {
-    if (dComIfGp_getPlayer()) {
-        dComIfGp_getPlayer()->current.pos = sSavePlayerPos;
-        dComIfGp_getPlayer()->shape_angle.y = sSavePlayerAngle;
+    if (dComIfGp_getPlayer(0)) {
+        dComIfGp_getPlayer(0)->current.pos = sSavePlayerPos;
+        dComIfGp_getPlayer(0)->shape_angle.y = sSavePlayerAngle;
     }
 
-    if (matrixInfo.matrix_info) {
-        matrixInfo.matrix_info->pos = sSaveCamPos;
-        matrixInfo.matrix_info->target = sSaveCamTarget;
+    if (dComIfGp_getCamera(0)) {
+        dComIfGp_getCamera(0)->mCamera.mViewCache.mEye = sSaveCamPos;
+        dComIfGp_getCamera(0)->mCamera.mViewCache.mCenter = sSaveCamTarget;
     }
 }
 
@@ -79,7 +81,7 @@ KEEP_FUNC void GZCmd_resetTimer() {
 KEEP_FUNC void GZCmd_reloadArea() {
     uint32_t reloadType = GZStng_getData(STNG_AREA_RELOAD_BEHAVIOUR, LOAD_AREA);
     if (reloadType == LOAD_AREA) {
-        g_dComIfG_gameInfo.play.mNextStage.enabled = true;
+        enableNextStage();
 
         // restore last set of saved temp flags
         memcpy(&g_dComIfG_gameInfo.info.mMemory, gSaveManager.mAreaReloadOpts.temp_flags,
@@ -92,8 +94,8 @@ KEEP_FUNC void GZCmd_reloadArea() {
 
         gSaveManager.mPracticeFileOpts.inject_options_before_load =
             SaveManager::injectDefault_before;
-        gSaveManager.mPracticeFileOpts.inject_options_during_load = nullptr;
-        gSaveManager.mPracticeFileOpts.inject_options_after_load = nullptr;
+        gSaveManager.mPracticeFileOpts.inject_options_during_load = NULL;
+        gSaveManager.mPracticeFileOpts.inject_options_after_load = NULL;
     } else {
         if (last_save_index != -1) {
             SaveManager::triggerLoad(last_save_index, last_category, &last_special, 1);
@@ -120,36 +122,37 @@ KEEP_FUNC void GZCmd_addCmd(Command* cmd) {
 }
 
 KEEP_FUNC Command* GZCmd_removeCmd(Commands cmdId) {
-    auto it = g_commands.begin();
+    tpgz::containers::deque<Command*>::iterator it = g_commands.begin();
     for (; it != g_commands.end(); ++it) {
         if ((*it)->id == cmdId) {
             break;
         }
     }
-    auto* cmd = *it;
+    Command* cmd = *it;
     g_commands.erase(it);
     return cmd;
 }
 
 KEEP_FUNC Command* GZCmd_getCmd(int id) {
-    auto it = g_commands.begin();
+    tpgz::containers::deque<Command*>::iterator it = g_commands.begin();
     for (; it != g_commands.end(); ++it) {
         if ((*it)->id == id) {
             return *it;
         }
     }
-    return nullptr;
+    return NULL;
 }
 
 KEEP_FUNC void GZCmd_processInputs() {
     sCurInputs = GZ_getButtonStatus();
-    for (auto c : g_commands) {
+    for (tpgz::containers::deque<Command*>::iterator cIt = g_commands.begin(); cIt != g_commands.end(); ++cIt) {
+        Command* c = *cIt;
         if (sCurInputs == c->buttons) {
             c->command();
             setGamepadButtons(0x0);
             setGamepadTrig(0x0);
-            mPadButton.mRepeat = 0x0;
-            mPadStatus.button = 0x0;
+            JUTGamePad::mPadButton[0].mRepeat = 0x0;
+            JUTGamePad::mPadStatus[0].button = 0x0;
         }
     }
     sLastInputs = sCurInputs;

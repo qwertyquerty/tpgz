@@ -1,5 +1,7 @@
-#pragma once
-
+#ifndef TPGZ_MODULES_FEATURES_LFC_CHECKER_INCLUDE_LFC_CHECKER_H
+#define TPGZ_MODULES_FEATURES_LFC_CHECKER_INCLUDE_LFC_CHECKER_H
 namespace LFCChecker {
 void execute();
 }  // namespace LFCChecker
+
+#endif

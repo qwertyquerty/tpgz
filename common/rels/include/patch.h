@@ -1,8 +1,8 @@
 // Taken from https://github.com/zsrtp/GC-Randomizer/blob/stable/include/patch.h
-#pragma once
-
+#ifndef TPGZ_COMMON_RELS_INCLUDE_PATCH_H
+#define TPGZ_COMMON_RELS_INCLUDE_PATCH_H
 #include <stdint.h>
-#include "libtp_c/include/dolphin/os/OSCache.h"
+#include "os/OSCache.h"
 #include "rels/include/cxx.h"
 
 void writeBranch(void* ptr, void* destination);
@@ -31,11 +31,7 @@ Func hookFunction(Func function, Dest destination, bool absoluteBranch) {
         trampoline = new (sizeof(uint32_t)) uint32_t[instructionCount];
     } else {
         instructionCount = 2;
-#ifdef PLATFORM_WII
-        trampoline = new (sizeof(uint32_t), HEAP_ZELDA) uint32_t[instructionCount];
-#else
         trampoline = new (sizeof(uint32_t)) uint32_t[instructionCount];
-#endif
     }
 
     // Original instruction
@@ -72,7 +68,7 @@ Func hookFunctionAbsolute(Func function, Dest destination) {
 template <typename Func>
 Func unhookFunction(Func trampoline) {
     if (!trampoline) {
-        return nullptr;
+        return NULL;
     }
 
     uint32_t* instructions = reinterpret_cast<uint32_t*>(trampoline);
@@ -111,5 +107,7 @@ Func unhookFunction(Func trampoline) {
 
     // Free the memory used by the trampoline
     delete[] instructions;
-    return nullptr;
+    return NULL;
 }
+
+#endif

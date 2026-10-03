@@ -3,7 +3,8 @@
 #include "rels/include/cxx.h"
 #include "events/pre_loop_listener.h"
 
-namespace tpgz::modules {
+namespace tpgz {
+namespace modules {
 void main() {
     g_PreLoopListener->addListener(ActorViewer::execute);
 }
@@ -11,4 +12,5 @@ void exit() {
     g_PreLoopListener->removeListener(ActorViewer::execute);
 }
 
+}
 }  // namespace tpgz::modules

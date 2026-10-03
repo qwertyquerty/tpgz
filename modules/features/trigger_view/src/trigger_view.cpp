@@ -1,13 +1,16 @@
+#include "d/d_path.h"
+#include "f_op/f_op_actor_tag.h"
+#include "d/actor/d_a_alink.h"
 #include "features/trigger_view/include/trigger_view.h"
 #include "collision_view.h"
 #include "trigger_view.h"
-#include "libtp_c/include/msl_c/math.h"
+#include "tpgz_math.h"
 #include "settings.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/m_Do/m_Do_printf.h"
-#include "libtp_c/include/d/d_procname.h"
-#include "libtp_c/include/f_op/f_op_actor_mng.h"
-#include "libtp_c/include/JSystem/JMath.h"
+#include "d/d_com_inf_game.h"
+#include "m_Do/m_Do_printf.h"
+#include "f_pc/f_pc_name.h"
+#include "f_op/f_op_actor_mng.h"
+#include "JSystem/JMath/JMath.h"
 #include "rels/include/defines.h"
 #include "global_data.h"
 
@@ -26,7 +29,7 @@ void searchActorForCallback(s16 actorName, drawCallback callback) {
             // special check to run the callback on all valid actors if name is -1
             bool check_all_actors = actorName == -1;
 
-            if (actorData != NULL && (actorData->mBase.mProcName == actorName || check_all_actors) && callback != NULL) {
+            if (actorData != NULL && (actorData->base.base.name == actorName || check_all_actors) && callback != NULL) {
                 callback(actorData);
             }
             node = node->mpNextNode;
@@ -41,14 +44,14 @@ void drawSceneExit(fopAc_ac_c* actor) {
     daScex_c* scex = (daScex_c*)actor;
 
     cXyz points[8];
-    points[0].set(-actor->mScale.x, actor->mScale.y, -actor->mScale.z);
-    points[1].set(actor->mScale.x, actor->mScale.y, -actor->mScale.z);
-    points[2].set(-actor->mScale.x, actor->mScale.y, actor->mScale.z);
-    points[3].set(actor->mScale.x, actor->mScale.y, actor->mScale.z);
-    points[4].set(-actor->mScale.x, 0.0f, -actor->mScale.z);
-    points[5].set(actor->mScale.x, 0.0f, -actor->mScale.z);
-    points[6].set(-actor->mScale.x, 0.0f, actor->mScale.z);
-    points[7].set(actor->mScale.x, 0.0f, actor->mScale.z);
+    points[0].set(-actor->scale.x, actor->scale.y, -actor->scale.z);
+    points[1].set(actor->scale.x, actor->scale.y, -actor->scale.z);
+    points[2].set(-actor->scale.x, actor->scale.y, actor->scale.z);
+    points[3].set(actor->scale.x, actor->scale.y, actor->scale.z);
+    points[4].set(-actor->scale.x, 0.0f, -actor->scale.z);
+    points[5].set(actor->scale.x, 0.0f, -actor->scale.z);
+    points[6].set(-actor->scale.x, 0.0f, actor->scale.z);
+    points[7].set(actor->scale.x, 0.0f, actor->scale.z);
 
     mDoMtx_inverse(scex->mMatrix, mDoMtx_stack_c::get());
     mDoMtx_multVecArray(mDoMtx_stack_c::get(), points, points, 8);
@@ -69,14 +72,14 @@ void drawNoChangeRoomTrigger(fopAc_ac_c* actor) {
     daNocrm_c* nocrm = (daNocrm_c*)actor;
 
     cXyz points[8];
-    points[0].set(-actor->mScale.x, actor->mScale.y, -actor->mScale.z);
-    points[1].set(actor->mScale.x, actor->mScale.y, -actor->mScale.z);
-    points[2].set(-actor->mScale.x, actor->mScale.y, actor->mScale.z);
-    points[3].set(actor->mScale.x, actor->mScale.y, actor->mScale.z);
-    points[4].set(-actor->mScale.x, 0.0f, -actor->mScale.z);
-    points[5].set(actor->mScale.x, 0.0f, -actor->mScale.z);
-    points[6].set(-actor->mScale.x, 0.0f, actor->mScale.z);
-    points[7].set(actor->mScale.x, 0.0f, actor->mScale.z);
+    points[0].set(-actor->scale.x, actor->scale.y, -actor->scale.z);
+    points[1].set(actor->scale.x, actor->scale.y, -actor->scale.z);
+    points[2].set(-actor->scale.x, actor->scale.y, actor->scale.z);
+    points[3].set(actor->scale.x, actor->scale.y, actor->scale.z);
+    points[4].set(-actor->scale.x, 0.0f, -actor->scale.z);
+    points[5].set(actor->scale.x, 0.0f, -actor->scale.z);
+    points[6].set(-actor->scale.x, 0.0f, actor->scale.z);
+    points[7].set(actor->scale.x, 0.0f, actor->scale.z);
 
     mDoMtx_inverse(nocrm->mInvMtx, mDoMtx_stack_c::get());
     mDoMtx_multVecArray(mDoMtx_stack_c::get(), points, points, 8);
@@ -95,7 +98,7 @@ void drawMidnaStop(fopAc_ac_c* actor) {
     daMidnaStop_c* mstop = (daMidnaStop_c*)actor;
 
     GXColor color = {0x4A, 0x36, 0xBA, g_geometryOpacity};
-    dDbVw_drawCylinderXlu(mstop->current.pos, mstop->mScale.x * 100.0f, mstop->mScale.y, color, 1);
+    dDbVw_drawCylinderXlu(mstop->current.pos, mstop->scale.x * 100.0f, mstop->scale.y, color, 1);
 }
 
 // used a large cylinder height to represent the xz check as accurately as possible
@@ -105,7 +108,7 @@ void drawPlumTag(fopAc_ac_c* actor) {
     daTagMyna2_c* plum_tag = (daTagMyna2_c*)actor;
 
     GXColor color = {0x00, 0xFF, 0x00, g_geometryOpacity};
-    dDbVw_drawCylinderXlu(plum_tag->current.pos, plum_tag->mScale.x * 100.0f, 1000000.0f, color, 1);
+    dDbVw_drawCylinderXlu(plum_tag->current.pos, plum_tag->scale.x * 100.0f, 1000000.0f, color, 1);
 }
 
 void drawPlummSearch(fopAc_ac_c* actor) {
@@ -113,7 +116,7 @@ void drawPlummSearch(fopAc_ac_c* actor) {
 
     GXColor color = {0xFF, 0x00, 0x00, g_geometryOpacity};
     const f32 search_dist = 500.0f;  // this is normally from HIO data
-    dDbVw_drawCircleXlu(actor->mAttentionInfo.position, search_dist + 160.0f, color, 1, 12);
+    dDbVw_drawCircleXlu(actor->attention_info.position, search_dist + 160.0f, color, 1, 12);
 }
 
 // this one might need to be improved? it matches the debug rom tho so idk
@@ -129,7 +132,7 @@ void drawSwitchArea(fopAc_ac_c* actor) {
 
     GXColor color = {0x00, 0x00, 0xFF, g_geometryOpacity};
     if (shape_type == 3) {
-        dDbVw_drawCylinderXlu(swc->current.pos, JMAFastSqrt(swc->mScale.x) - 30.0f, swc->mScale.y,
+        dDbVw_drawCylinderXlu(swc->current.pos, JMAFastSqrt(swc->scale.x) - 30.0f, swc->scale.y,
                               color, 1);
     } else if (shape_type == 0) {
         cXyz size = swc->mEnd - swc->mStart;  // diameter
@@ -155,16 +158,16 @@ void drawEventArea(fopAc_ac_c* actor) {
     if (type == 15 || type == 16) {
         GXColor color = {0xFF, 0xFF, 0x00, g_geometryOpacity};
         cXyz points[8];
-        points[0].set(-actor->mScale.x, actor->mScale.y, -actor->mScale.z);
-        points[1].set(actor->mScale.x, actor->mScale.y, -actor->mScale.z);
-        points[2].set(-actor->mScale.x, actor->mScale.y, actor->mScale.z);
-        points[3].set(actor->mScale.x, actor->mScale.y, actor->mScale.z);
-        points[4].set(-actor->mScale.x, 0.0f, -actor->mScale.z);
-        points[5].set(actor->mScale.x, 0.0f, -actor->mScale.z);
-        points[6].set(-actor->mScale.x, 0.0f, actor->mScale.z);
-        points[7].set(actor->mScale.x, 0.0f, actor->mScale.z);
+        points[0].set(-actor->scale.x, actor->scale.y, -actor->scale.z);
+        points[1].set(actor->scale.x, actor->scale.y, -actor->scale.z);
+        points[2].set(-actor->scale.x, actor->scale.y, actor->scale.z);
+        points[3].set(actor->scale.x, actor->scale.y, actor->scale.z);
+        points[4].set(-actor->scale.x, 0.0f, -actor->scale.z);
+        points[5].set(actor->scale.x, 0.0f, -actor->scale.z);
+        points[6].set(-actor->scale.x, 0.0f, actor->scale.z);
+        points[7].set(actor->scale.x, 0.0f, actor->scale.z);
 
-        mDoMtx_stack_c::transS(actor->orig.pos.x, actor->orig.pos.y, actor->orig.pos.z);
+        mDoMtx_stack_c::transS(actor->home.pos.x, actor->home.pos.y, actor->home.pos.z);
         mDoMtx_stack_c::YrotS(actor->current.angle.y);
         mDoMtx_multVecArray(mDoMtx_stack_c::get(), points, points, 8);
 
@@ -174,8 +177,8 @@ void drawEventArea(fopAc_ac_c* actor) {
         GXColor inner_color = {0x00, 0xFF, 0x00, g_geometryOpacity};
         cXyz pos = actor->current.pos;
         // no good way to draw on the ground, so just keep height around player level
-        if (pos.y < dComIfGp_getPlayer()->mLinkAcch.GetGroundH()) {
-            pos.y = dComIfGp_getPlayer()->mLinkAcch.GetGroundH() + 100.0f;
+        if (pos.y < ((daAlink_c*)dComIfGp_getPlayer(0))->mLinkAcch.GetGroundH()) {
+            pos.y = ((daAlink_c*)dComIfGp_getPlayer(0))->mLinkAcch.GetGroundH() + 100.0f;
         }
 
         // idk the exact way the inner check is handled, so this is a rough approximation
@@ -184,24 +187,24 @@ void drawEventArea(fopAc_ac_c* actor) {
         inner_scale = 0.98f;
 #endif
 
-        dDbVw_drawCircleXlu(pos, actor->mScale.x * inner_scale, inner_color, 1, 20);
-        dDbVw_drawCircleXlu(pos, actor->mScale.x, outer_color, 1, 20);
+        dDbVw_drawCircleXlu(pos, actor->scale.x * inner_scale, inner_color, 1, 20);
+        dDbVw_drawCircleXlu(pos, actor->scale.x, outer_color, 1, 20);
     }
 }
 
 void drawEventTag(fopAc_ac_c* actor) {
     GXColor color = {0x00, 0xC8, 0xFF, g_geometryOpacity};
-    u16 area_type = actor->orig.angle.x & 0x8000;
+    u16 area_type = actor->home.angle.x & 0x8000;
 
     if (area_type == -0x8000) {
         cXyz points[8];
 
-        cXyz start(actor->current.pos.x - (actor->mScale.x * 0.5f), actor->current.pos.y,
-                   actor->current.pos.z - (actor->mScale.z * 0.5f));
+        cXyz start(actor->current.pos.x - (actor->scale.x * 0.5f), actor->current.pos.y,
+                   actor->current.pos.z - (actor->scale.z * 0.5f));
 
-        cXyz end(actor->current.pos.x + (actor->mScale.x * 0.5f),
-                 actor->current.pos.y + actor->mScale.y,
-                 actor->current.pos.z + (actor->mScale.z * 0.5f));
+        cXyz end(actor->current.pos.x + (actor->scale.x * 0.5f),
+                 actor->current.pos.y + actor->scale.y,
+                 actor->current.pos.z + (actor->scale.z * 0.5f));
 
         points[0].set(start.x, start.y, start.z);
         points[1].set(start.x, start.y, end.z);
@@ -215,15 +218,15 @@ void drawEventTag(fopAc_ac_c* actor) {
         dDbVw_drawCube8pXlu(points, color);
     } else {
         cXyz pos = actor->current.pos;
-        pos.y -= actor->mScale.y;
+        pos.y -= actor->scale.y;
 
-        dDbVw_drawCylinderXlu(pos, actor->mScale.x, actor->mScale.y * 2, color, 1);
+        dDbVw_drawCylinderXlu(pos, actor->scale.x, actor->scale.y * 2, color, 1);
     }
 }
 
 void drawTWGate(fopAc_ac_c* actor) {
     GXColor color = {0xFF, 0xFF, 0xFF, g_geometryOpacity};
-    dDbVw_drawCylinderXlu(actor->current.pos, actor->mScale.x * 100.0f, actor->mScale.y * 100.0f,
+    dDbVw_drawCylinderXlu(actor->current.pos, actor->scale.x * 100.0f, actor->scale.y * 100.0f,
                           color, 1);
 }
 
@@ -235,10 +238,10 @@ void drawPaths(dStage_dPath_c* paths) {
         {0x00, 0x00, 0xFF}, {0xFF, 0xFF, 0x00}, {0xFF, 0x00, 0xFF}, {0x00, 0xFF, 0xFF},
     };
 
-    cXyz cubeSize = {30.0f, 30.0f, 30.0f};
-    csXyz cubeAngle = {0, 0, 0};
+    cXyz cubeSize(30.0f, 30.0f, 30.0f);
+    csXyz cubeAngle(0, 0, 0);
 
-    for (int i = 0; i < paths->m_num; i++) {
+    for (int i = 0; i < paths->num; i++) {
         dPath* path = &paths->m_path[i];
         GXColor color = colors[(pathColorIndex++) & 7];
         color.a = g_geometryOpacity;
@@ -270,7 +273,7 @@ void drawStagePaths() {
 }
 
 void drawCurrentRoomPaths() {
-    daAlink_c* player = dComIfGp_getPlayer();
+    daAlink_c* player = (daAlink_c*)dComIfGp_getPlayer(0);
     if (player == NULL) {
         return;
     }
@@ -280,7 +283,7 @@ void drawCurrentRoomPaths() {
         return;
     }
 
-    dStage_dPath_c* roomPaths = dStage_roomControl_c__mStatus[roomNo].mPath2Info;
+    dStage_dPath_c* roomPaths = g_dComIfG_gameInfo.play.getRoomControl()->getStatusRoomDt(roomNo)->getPath2Inf();
     if (roomPaths) {
         drawPaths(roomPaths);
     }
@@ -310,7 +313,7 @@ void drawCheckpointTag(fopAc_ac_c* actor) {
     mDoMtx_multVecArray(mDoMtx_stack_c::get(), points, points, 8);
     // actor only checks XZ axis', so copy player y to keep it more accurate
     for (int i = 0; i < 8; i++) {
-        points[i].y = dComIfGp_getPlayer()->current.pos.y;
+        points[i].y = dComIfGp_getPlayer(0)->current.pos.y;
     }
 
     for (int i = 0; i < 4; i++) {
@@ -321,15 +324,15 @@ void drawCheckpointTag(fopAc_ac_c* actor) {
 }
 
 void drawTransformDists(fopAc_ac_c* actor) {
-    if (fopAcM_GetGroup(actor) == 4 && !fopAcM_checkStatus(actor, 0x8000000)) {
+    if (fopAcM_GetGroup(actor) == 4 && !fopAcM_CheckStatus(actor, 0x8000000)) {
         GXColor near_color = {0x00, 0xFF, 0x00, g_geometryOpacity};
         GXColor far_color = {0xFF, 0x00, 0x00, g_geometryOpacity};
 
         const f32 near_dist = 400.0f;
         const f32 far_dist = 5000.0f;
         
-        dDbVw_drawCircleXlu(actor->mEyePos, near_dist, near_color, 1, 20);
-        dDbVw_drawCircleXlu(actor->mEyePos, far_dist, far_color, 1, 20);
+        dDbVw_drawCircleXlu(actor->eyePos, near_dist, near_color, 1, 20);
+        dDbVw_drawCircleXlu(actor->eyePos, far_dist, far_color, 1, 20);
 
         const s16 view_range = 0x4000;
 
@@ -337,24 +340,24 @@ void drawTransformDists(fopAc_ac_c* actor) {
         cXyz endpos;
 
         // draw one view range edge
-        mDoMtx_stack_c::transS(actor->mEyePos.x, actor->mEyePos.y, actor->mEyePos.z);
+        mDoMtx_stack_c::transS(actor->eyePos.x, actor->eyePos.y, actor->eyePos.z);
         mDoMtx_stack_c::YrotM(actor->shape_angle.y);
         mDoMtx_stack_c::YrotM(-view_range);
         mDoMtx_stack_c::multVec(&offset, &endpos);
-        dDbVw_drawLineXlu(actor->mEyePos, endpos, far_color, 1, 10);
+        dDbVw_drawLineXlu(actor->eyePos, endpos, far_color, 1, 10);
 
         // draw other view range edge
-        mDoMtx_stack_c::transS(actor->mEyePos.x, actor->mEyePos.y, actor->mEyePos.z);
+        mDoMtx_stack_c::transS(actor->eyePos.x, actor->eyePos.y, actor->eyePos.z);
         mDoMtx_stack_c::YrotM(actor->shape_angle.y);
         mDoMtx_stack_c::YrotM(view_range);
         mDoMtx_stack_c::multVec(&offset, &endpos);
-        dDbVw_drawLineXlu(actor->mEyePos, endpos, far_color, 1, 10);
+        dDbVw_drawLineXlu(actor->eyePos, endpos, far_color, 1, 10);
 
         // draw facing direction
-        mDoMtx_stack_c::transS(actor->mEyePos.x, actor->mEyePos.y, actor->mEyePos.z);
+        mDoMtx_stack_c::transS(actor->eyePos.x, actor->eyePos.y, actor->eyePos.z);
         mDoMtx_stack_c::YrotM(actor->shape_angle.y);
         mDoMtx_stack_c::multVec(&offset, &endpos);
-        dDbVw_drawLineXlu(actor->mEyePos, endpos, far_color, 1, 10);
+        dDbVw_drawLineXlu(actor->eyePos, endpos, far_color, 1, 10);
     }
 }
 
@@ -362,13 +365,13 @@ void drawAttentionDists(fopAc_ac_c* actor) {
     GXColor lock_color = {0x00, 0x00, 0xFF, g_geometryOpacity};
     GXColor talk_color = {0x00, 0xFF, 0x00, g_geometryOpacity};
 
-    dAttention_dist_tbl* lock_inf = dAttention_c__getDistTable(actor->mAttentionInfo.distances[fopAc_attn_LOCK_e]);
-    dAttention_dist_tbl* talk_inf = dAttention_c__getDistTable(actor->mAttentionInfo.distances[fopAc_attn_TALK_e]);
-    cXyz& pos = actor->mAttentionInfo.position;
+    dist_entry* lock_inf = &dAttention_c::getDistTable(actor->attention_info.distances[fopAc_attn_LOCK_e]);
+    dist_entry* talk_inf = &dAttention_c::getDistTable(actor->attention_info.distances[fopAc_attn_TALK_e]);
+    cXyz& pos = actor->attention_info.position;
 
     if (fopAcM_GetGroup(actor) == 4) {
-        dDbVw_drawCircleXlu(pos, lock_inf->mDistXZMax, lock_color, 1, 20);
-        dDbVw_drawCircleXlu(pos, talk_inf->mDistXZMax, talk_color, 1, 20);
+        dDbVw_drawCircleXlu(pos, lock_inf->mDistMax, lock_color, 1, 20);
+        dDbVw_drawCircleXlu(pos, talk_inf->mDistMax, talk_color, 1, 20);
     }
 }
 
@@ -411,8 +414,8 @@ void drawLeeverData(fopAc_ac_c* actor) {
         GXColor color2 = {0x00, 0x00, 0xFF, g_geometryOpacity};
 
         cXyz pos(leever->current.pos);
-        if (pos.y < dComIfGp_getPlayer()->mLinkAcch.GetGroundH()) {
-            pos.y = dComIfGp_getPlayer()->mLinkAcch.GetGroundH() + 100.0f;
+        if (pos.y < ((daAlink_c*)dComIfGp_getPlayer(0))->mLinkAcch.GetGroundH()) {
+            pos.y = ((daAlink_c*)dComIfGp_getPlayer(0))->mLinkAcch.GetGroundH() + 100.0f;
         }
 
         dDbVw_drawCircleXlu(pos, leever->mAppearRange * 100.0f, color, 1, 20);
@@ -431,7 +434,7 @@ void drawShadowbeastDetect(fopAc_ac_c* actor) {
     f32 posy = s1->current.pos.y + 30.0f;
     
     // home position circle
-    cXyz home = {actor->orig.pos.x, posy, s1->orig.pos.z};
+    cXyz home(actor->home.pos.x, posy, s1->home.pos.z);
     GXColor circleColor = {0x00, 0x00, 0xFF, g_geometryOpacity};
     dDbVw_drawCircleXlu(home, s1->mSearchRange, circleColor, 1, 20);
 
@@ -459,27 +462,27 @@ void drawShadowbeastDetect(fopAc_ac_c* actor) {
 
 KEEP_FUNC void execute() {
     if (g_triggerViewFlags[VIEW_LOAD_ZONES].active) {
-        searchActorForCallback(PROC_SCENE_EXIT, drawSceneExit);
-        searchActorForCallback(PROC_NO_CHG_ROOM, drawNoChangeRoomTrigger);
+        searchActorForCallback(fpcNm_SCENE_EXIT_e, drawSceneExit);
+        searchActorForCallback(fpcNm_NO_CHG_ROOM_e, drawNoChangeRoomTrigger);
     }
 
     if (g_triggerViewFlags[VIEW_MIDNA_STOPS].active) {
-        searchActorForCallback(PROC_Tag_Mstop, drawMidnaStop);
+        searchActorForCallback(fpcNm_Tag_Mstop_e, drawMidnaStop);
     }
 
     if (g_triggerViewFlags[VIEW_SWITCH_AREAS].active) {
-        searchActorForCallback(PROC_SWC00, drawSwitchArea);
+        searchActorForCallback(fpcNm_SWC00_e, drawSwitchArea);
     }
 
     if (g_triggerViewFlags[VIEW_EVENT_AREAS].active) {
-        searchActorForCallback(PROC_TAG_EVENT, drawEventTag);
-        searchActorForCallback(PROC_TAG_EVTAREA, drawEventArea);
-        searchActorForCallback(PROC_TAG_MYNA2, drawPlumTag);
-        searchActorForCallback(PROC_MYNA2, drawPlummSearch);
+        searchActorForCallback(fpcNm_TAG_EVENT_e, drawEventTag);
+        searchActorForCallback(fpcNm_TAG_EVTAREA_e, drawEventArea);
+        searchActorForCallback(fpcNm_TAG_MYNA2_e, drawPlumTag);
+        searchActorForCallback(fpcNm_MYNA2_e, drawPlummSearch);
     }
 
     if (g_triggerViewFlags[VIEW_TW_GATES].active) {
-        searchActorForCallback(PROC_Tag_TWGate, drawTWGate);
+        searchActorForCallback(fpcNm_Tag_TWGate_e, drawTWGate);
     }
 
     if (g_triggerViewFlags[VIEW_PATHS].active) {
@@ -489,7 +492,7 @@ KEEP_FUNC void execute() {
     }
 
     if (g_triggerViewFlags[VIEW_CHG_RESTARTS].active) {
-        searchActorForCallback(PROC_Tag_ChgRestart, drawCheckpointTag);
+        searchActorForCallback(fpcNm_Tag_ChgRestart_e, drawCheckpointTag);
     }
 
     if (g_triggerViewFlags[VIEW_TRANSFORM_DISTS].active) {
@@ -498,15 +501,15 @@ KEEP_FUNC void execute() {
 
     if (g_triggerViewFlags[VIEW_ATTN_DISTS].active) {
         searchActorForCallback(-1, drawAttentionDists);
-        searchActorForCallback(PROC_E_S1, drawShadowbeastDetect);
+        searchActorForCallback(fpcNm_E_S1_e, drawShadowbeastDetect);
     }
 
     if (g_triggerViewFlags[VIEW_MIST_AVOID].active) {
-        searchActorForCallback(PROC_KYTAG08, drawPurpleMistAvoid);
+        searchActorForCallback(fpcNm_KYTAG08_e, drawPurpleMistAvoid);
     }
 
     if (g_triggerViewFlags[VIEW_LEEVER_RANGE].active) {
-        searchActorForCallback(PROC_E_RB, drawLeeverData);
+        searchActorForCallback(fpcNm_E_RB_e, drawLeeverData);
     }
 }
 }  // namespace TriggerViewer

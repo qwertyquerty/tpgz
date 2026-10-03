@@ -1,4 +1,4 @@
-﻿#include "transform_indicator.h"
+#include "transform_indicator.h"
 #include <cstdio>
 #include "pos_settings.h"
 #include "tools.h"
@@ -7,18 +7,13 @@
 #include "utils/draw.h"
 #include "settings.h"
 #include "global_data.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/f_op/f_op_actor_iter.h"
-#include "libtp_c/include/d/a/d_a_alink.h"
+#include "d/d_com_inf_game.h"
+#include "f_op/f_op_actor_iter.h"
+#include "d/actor/d_a_alink.h"
 
-extern daMidna_c m_midnaActor;
+extern daMidna_c m_midnaActor__9daPy_py_c;
 
-#ifdef WII_PLATFORM
-extern bool isWidescreen;
-#define IS_WIDESCREEN isWidescreen
-#else
-#define IS_WIDESCREEN (false)
-#endif
+#include "game_state.h"
 
 namespace TransformIndicator {
 Texture l_humanTex;
@@ -27,20 +22,20 @@ Texture l_wolfTex;
 
 void drawTexture(GXTexObj tex, bool greyed) {
     Draw::drawRect(greyed ? 0x3f3f3f7f : 0xFFFFFFFF, GZ_getSpriteOffset(STNG_SPRITES_TRANSFORM_IND),
-                   {30 * (IS_WIDESCREEN ? 0.75f : 1.0f), 30}, &tex);
+                   makeVec2(30 * (isWidescreen ? 0.75f : 1.0f), 30), &tex);
 }
 
 KEEP_FUNC void TransformIndicator::draw() {
     bool cantTransform = !((*(uint8_t*)g_dComIfG_gameInfo.play.mPlayerPtr + 0x570) & 4) ||
-        (g_env_light.field_0x1050 & 0x80) ||
-        (dSv_event_c__isEventBit(&g_dComIfG_gameInfo.info.mSavedata.mEvent, 0xD04U) == 0);
+        (g_env_light.mEvilInitialized & 0x80) ||
+        (!g_dComIfG_gameInfo.info.getEvent().isEventBit(0xD04U));
         // TODO Add a the implementation of fopAcIt_Judge and daMidna_searchNpc for the last check.
     if (dComIfGs_getTransformStatus() == 0) {
-        if (l_wolfTex.loadCode == TexCode::TEX_OK) {
+        if (l_wolfTex.loadCode == TEX_OK) {
             drawTexture(l_wolfTex._texObj, !cantTransform);
         }
     } else {
-        if (l_humanTex.loadCode == TexCode::TEX_OK) {
+        if (l_humanTex.loadCode == TEX_OK) {
             drawTexture(l_humanTex._texObj, !cantTransform);
         }
     }

@@ -4,12 +4,13 @@
 #include "events/draw_listener.h"
 #include "utils/texture.h"
 
-namespace tpgz::modules {
+namespace tpgz {
+namespace modules {
 void main() {
-    if (TransformIndicator::l_humanTex.loadCode == TexCode::TEX_UNLOADED) {
+    if (TransformIndicator::l_humanTex.loadCode == TEX_UNLOADED) {
         load_texture("/tpgz/tex/hand.tex", &TransformIndicator::l_humanTex);
     }
-    if (TransformIndicator::l_wolfTex.loadCode == TexCode::TEX_UNLOADED) {
+    if (TransformIndicator::l_wolfTex.loadCode == TEX_UNLOADED) {
         load_texture("/tpgz/tex/wolf.tex", &TransformIndicator::l_wolfTex);
     }
 
@@ -18,12 +19,13 @@ void main() {
 void exit() {
     g_drawListener->removeListener(TransformIndicator::draw);
 
-    if (TransformIndicator::l_humanTex.loadCode == TexCode::TEX_OK) {
+    if (TransformIndicator::l_humanTex.loadCode == TEX_OK) {
         free_texture(&TransformIndicator::l_humanTex);
     }
-    if (TransformIndicator::l_wolfTex.loadCode == TexCode::TEX_OK) {
+    if (TransformIndicator::l_wolfTex.loadCode == TEX_OK) {
         free_texture(&TransformIndicator::l_wolfTex);
     }
 }
 
+}
 }  // namespace tpgz::modules

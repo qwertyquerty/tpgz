@@ -1,8 +1,12 @@
-#pragma once
+#ifndef TPGZ_MODULES_BOOT_INCLUDE_MODULES_H
+#define TPGZ_MODULES_BOOT_INCLUDE_MODULES_H
+#include <stdint.h>
 #include "utils/rels.h"
 #include "utils/containers/deque.h"
 
 struct Module {
+    Module(bool (*active_)(), const char* path) : active(active_), rel(path) {}
+
     bool (*active)();
     tpgz::dyn::GZModule rel;
 };
@@ -27,12 +31,22 @@ bool lfc_active();
 bool ebmb_active();
 bool ee_active();
 bool mash_checker_active();
+#define GORGE_VOID_MODE_COUNT 3
+
+uint32_t GZ_getGorgeVoidMode();
 bool gorge_active();
 bool gorge_wolf_active();
 bool gorge_human_active();
 bool rollcheck_active();
 bool moon_jump_active();
+bool saveStates_active();
 bool freeze_actor_active();
 bool hide_actor_active();
 bool freeze_camera_active();
 bool fast_eel_regrab_active();
+
+#ifdef GCN_PLATFORM
+bool stallord_l_slide_active();
+#endif
+
+#endif

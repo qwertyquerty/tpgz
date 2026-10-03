@@ -1,4 +1,5 @@
-#pragma once
+#ifndef TPGZ_MODULES_FEATURES_TRANSFORM_INDICATOR_INCLUDE_TRANSFORM_INDICATOR_H
+#define TPGZ_MODULES_FEATURES_TRANSFORM_INDICATOR_INCLUDE_TRANSFORM_INDICATOR_H
 #include "utils/texture.h"
 
 namespace TransformIndicator {
@@ -7,3 +8,5 @@ namespace TransformIndicator {
 
     void draw();
 }  // namespace TransformIndicator
+
+#endif

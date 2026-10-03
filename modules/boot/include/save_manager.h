@@ -1,8 +1,8 @@
-#pragma once
-
+#ifndef TPGZ_MODULES_BOOT_INCLUDE_SAVE_MANAGER_H
+#define TPGZ_MODULES_BOOT_INCLUDE_SAVE_MANAGER_H
 #include "utils/containers/deque.h"
-#include "libtp_c/include/dolphin/mtx/vec.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
+#include "tpgz_vec.h"
+#include "d/d_com_inf_game.h"
 
 #ifdef GCN_NTSCU
 #define sTmpBuf 0x803ecf40
@@ -38,8 +38,8 @@ class special {
 public:
     special() {
         idx = 0;
-        CallbackDuring = nullptr;
-        CallbackAfter = nullptr;
+        CallbackDuring = NULL;
+        CallbackAfter = NULL;
         extraDelay = 0;
     }
 
@@ -69,7 +69,7 @@ struct PracticeFileOpts {
     void (*inject_options_before_load)();
     void (*inject_options_during_load)();
     void (*inject_options_after_load)();
-    int inject_options_after_counter = 0;
+    int inject_options_after_counter;
 };
 
 struct PracticeSaveInfo {
@@ -82,7 +82,7 @@ struct PracticeSaveInfo {
     uint32_t counter;
     char filename[32];
     uint8_t _p1[4];
-} __attribute__((packed));
+};
 
 class SaveManager {
 public:
@@ -90,7 +90,7 @@ public:
     PracticeSaveInfo mPracticeSaveInfo __attribute__((aligned(32)));
     AreaReload mAreaReloadOpts;
     special* mSpecials;
-    bool loading_initiated = false;
+    bool loading_initiated;
 
     static bool s_injectSave;
     static bool s_injectMemfile;
@@ -102,7 +102,7 @@ public:
     static void injectDefault_during();
     static void injectMemfile_during();
     static void injectDefault_after();
-    static void loadSave(uint32_t id, const char* category, special* i_specials = nullptr,
+    static void loadSave(uint32_t id, const char* category, special* i_specials = NULL,
                          int size = 0);
     static void loadSavefile(const char* fileName);
     static void triggerLoad(uint32_t id, const char* category, special i_specials[], int size);
@@ -135,3 +135,5 @@ public:
 };
 
 extern SaveManager gSaveManager;
+
+#endif

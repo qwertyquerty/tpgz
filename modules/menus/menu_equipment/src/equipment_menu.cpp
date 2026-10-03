@@ -1,7 +1,7 @@
 #include "menus/menu_equipment/include/equipment_menu.h"
 #include <cstdio>
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/utils.h"
+#include "d/d_com_inf_game.h"
+#include "tpgz_utils.h"
 #include "gz_flags.h"
 #include "rels/include/defines.h"
 #include "menus/utils/menu_mgr.h"
@@ -19,24 +19,27 @@
 
 KEEP_VAR EquipmentData* equipmentData;
 
+static Line lines[EQUIPMENT_INDEX_COUNT] = {
+    {"ordon sword:", ORDON_SWORD_INDEX, "Wooden Sword / Ordon Sword", false, NULL,
+                 MAX_ORDON_SWORD_OPT},
+                {"master sword:", MASTER_SWORD_INDEX, "Master Sword / Light Sword", false, NULL,
+                 MAX_MASTER_SWORD_OPT},
+                {"wooden shield:", WOOD_SHIELD_INDEX, "Ordon Shield / Wooden Shield", false, NULL,
+                 MAX_WOOD_SHIELD_OPT},
+                {"hylian shield:", HYLIAN_SHIELD_INDEX, "Hylian Shield", false, NULL,
+                 MAX_HYLIAN_SHIELD_OPT},
+                {"hero's tunic:", HERO_TUNIC_INDEX, "Hero's Tunic", false, NULL, MAX_HERO_TUNIC_OPT},
+                {"zora armor:", ZORA_ARMOR_INDEX, "Zora Armor", false, NULL, MAX_ZORA_ARMOR_OPT},
+                {"magic armor:", MAGIC_ARMOR_INDEX, "Magic Armor", false, NULL, MAX_MAGIC_ARMOR_OPT},
+                {"bomb capacity:", BOMB_CAPACITY_INDEX, "Bomb Bag Capacity", false, NULL,
+                 MAX_BOMB_CAPACITY_OPT},
+                {"wallet upgrade:", WALLET_INDEX, "Wallet Capacity", false, NULL, MAX_WALLET_OPT},
+                {"arrow capacity:", ARROW_CAPACITY_INDEX, "Arrow Quiver Capacity", false, NULL,
+                 MAX_ARROW_CAPACITY_OPT}
+};
+
 KEEP_FUNC EquipmentMenu::EquipmentMenu(Cursor& cursor)
-    : Menu(cursor),
-      lines{{"ordon sword:", ORDON_SWORD_INDEX, "Wooden Sword / Ordon Sword", false, nullptr,
-             MAX_ORDON_SWORD_OPT},
-            {"master sword:", MASTER_SWORD_INDEX, "Master Sword / Light Sword", false, nullptr,
-             MAX_MASTER_SWORD_OPT},
-            {"wooden shield:", WOOD_SHIELD_INDEX, "Ordon Shield / Wooden Shield", false, nullptr,
-             MAX_WOOD_SHIELD_OPT},
-            {"hylian shield:", HYLIAN_SHIELD_INDEX, "Hylian Shield", false, nullptr,
-             MAX_HYLIAN_SHIELD_OPT},
-            {"hero's tunic:", HERO_TUNIC_INDEX, "Hero's Tunic", false, nullptr, MAX_HERO_TUNIC_OPT},
-            {"zora armor:", ZORA_ARMOR_INDEX, "Zora Armor", false, nullptr, MAX_ZORA_ARMOR_OPT},
-            {"magic armor:", MAGIC_ARMOR_INDEX, "Magic Armor", false, nullptr, MAX_MAGIC_ARMOR_OPT},
-            {"bomb capacity:", BOMB_CAPACITY_INDEX, "Bomb Bag Capacity", false, nullptr,
-             MAX_BOMB_CAPACITY_OPT},
-            {"wallet upgrade:", WALLET_INDEX, "Wallet Capacity", false, nullptr, MAX_WALLET_OPT},
-            {"arrow capacity:", ARROW_CAPACITY_INDEX, "Arrow Quiver Capacity", false, nullptr,
-             MAX_ARROW_CAPACITY_OPT}} {}
+    : Menu(cursor) {}
 
 EquipmentMenu::~EquipmentMenu() {}
 
@@ -54,41 +57,41 @@ void EquipmentMenu::resetIndex() {
 }
 
 void EquipmentMenu::getEquipment() {
-    if (dComIfGs_isItemFirstBit(SWORD)) {
+    if (dComIfGs_isItemFirstBit(dItemNo_SWORD_e)) {
         equipmentData->l_ordonSword_idx = 2;
-    } else if (dComIfGs_isItemFirstBit(WOOD_STICK)) {
+    } else if (dComIfGs_isItemFirstBit(dItemNo_WOOD_STICK_e)) {
         equipmentData->l_ordonSword_idx = 1;
     }
 
-    if (dComIfGs_isItemFirstBit(LIGHT_SWORD)) {
+    if (dComIfGs_isItemFirstBit(dItemNo_LIGHT_SWORD_e)) {
         equipmentData->l_masterSword_idx = 2;
-    } else if (dComIfGs_isItemFirstBit(MASTER_SWORD)) {
+    } else if (dComIfGs_isItemFirstBit(dItemNo_MASTER_SWORD_e)) {
         equipmentData->l_masterSword_idx = 1;
     }
 
-    if (dComIfGs_isItemFirstBit(SHIELD)) {
+    if (dComIfGs_isItemFirstBit(dItemNo_SHIELD_e)) {
         equipmentData->l_woodShield_idx = 2;
-    } else if (dComIfGs_isItemFirstBit(WOOD_SHIELD)) {
+    } else if (dComIfGs_isItemFirstBit(dItemNo_WOOD_SHIELD_e)) {
         equipmentData->l_woodShield_idx = 1;
     }
 
-    if (dComIfGs_isItemFirstBit(HYLIA_SHIELD)) {
+    if (dComIfGs_isItemFirstBit(dItemNo_HYLIA_SHIELD_e)) {
         equipmentData->l_hyShield_idx = 1;
     }
 
-    if (dComIfGs_isItemFirstBit(WEAR_KOKIRI)) {
+    if (dComIfGs_isItemFirstBit(dItemNo_WEAR_KOKIRI_e)) {
         equipmentData->l_tunic_idx = 1;
     }
 
-    if (dComIfGs_isItemFirstBit(WEAR_ZORA)) {
+    if (dComIfGs_isItemFirstBit(dItemNo_WEAR_ZORA_e)) {
         equipmentData->l_zoraArmor_idx = 1;
     }
 
-    if (dComIfGs_isItemFirstBit(ARMOR)) {
+    if (dComIfGs_isItemFirstBit(dItemNo_ARMOR_e)) {
         equipmentData->l_magicArmor_idx = 1;
     }
 
-    if (dComIfGs_isItemFirstBit(BOMB_BAG_LV2)) {
+    if (dComIfGs_isItemFirstBit(dItemNo_BOMB_BAG_LV2_e)) {
         equipmentData->l_bombCap_idx = 1;
     }
 
@@ -111,88 +114,88 @@ void EquipmentMenu::getEquipment() {
 void EquipmentMenu::setEquipment() {
     switch (equipmentData->l_ordonSword_idx) {
     case 0:
-        dComIfGs_offItemFirstBit(WOOD_STICK);
-        dComIfGs_offItemFirstBit(SWORD);
+        dComIfGs_offItemFirstBit(dItemNo_WOOD_STICK_e);
+        dComIfGs_offItemFirstBit(dItemNo_SWORD_e);
         break;
     case 1:
-        dComIfGs_onItemFirstBit(WOOD_STICK);
-        dComIfGs_offItemFirstBit(SWORD);
+        dComIfGs_onItemFirstBit(dItemNo_WOOD_STICK_e);
+        dComIfGs_offItemFirstBit(dItemNo_SWORD_e);
         break;
     case 2:
-        dComIfGs_onItemFirstBit(SWORD);
-        dComIfGs_offItemFirstBit(WOOD_STICK);
+        dComIfGs_onItemFirstBit(dItemNo_SWORD_e);
+        dComIfGs_offItemFirstBit(dItemNo_WOOD_STICK_e);
         break;
     }
 
     switch (equipmentData->l_masterSword_idx) {
     case 0:
-        dComIfGs_offItemFirstBit(MASTER_SWORD);
-        dComIfGs_offItemFirstBit(LIGHT_SWORD);
+        dComIfGs_offItemFirstBit(dItemNo_MASTER_SWORD_e);
+        dComIfGs_offItemFirstBit(dItemNo_LIGHT_SWORD_e);
         break;
     case 1:
-        dComIfGs_onItemFirstBit(MASTER_SWORD);
-        dComIfGs_offItemFirstBit(LIGHT_SWORD);
+        dComIfGs_onItemFirstBit(dItemNo_MASTER_SWORD_e);
+        dComIfGs_offItemFirstBit(dItemNo_LIGHT_SWORD_e);
         break;
     case 2:
-        dComIfGs_onItemFirstBit(LIGHT_SWORD);
+        dComIfGs_onItemFirstBit(dItemNo_LIGHT_SWORD_e);
         break;
     }
 
     switch (equipmentData->l_woodShield_idx) {
     case 0:
-        dComIfGs_offItemFirstBit(SHIELD);
-        dComIfGs_offItemFirstBit(WOOD_SHIELD);
+        dComIfGs_offItemFirstBit(dItemNo_SHIELD_e);
+        dComIfGs_offItemFirstBit(dItemNo_WOOD_SHIELD_e);
         break;
     case 1:
-        dComIfGs_onItemFirstBit(WOOD_SHIELD);
+        dComIfGs_onItemFirstBit(dItemNo_WOOD_SHIELD_e);
         break;
     case 2:
-        dComIfGs_onItemFirstBit(SHIELD);
+        dComIfGs_onItemFirstBit(dItemNo_SHIELD_e);
         break;
     }
 
     switch (equipmentData->l_hyShield_idx) {
     case 0:
-        dComIfGs_offItemFirstBit(HYLIA_SHIELD);
+        dComIfGs_offItemFirstBit(dItemNo_HYLIA_SHIELD_e);
         break;
     case 1:
-        dComIfGs_onItemFirstBit(HYLIA_SHIELD);
+        dComIfGs_onItemFirstBit(dItemNo_HYLIA_SHIELD_e);
         break;
     }
 
     switch (equipmentData->l_tunic_idx) {
     case 0:
-        dComIfGs_offItemFirstBit(WEAR_KOKIRI);
+        dComIfGs_offItemFirstBit(dItemNo_WEAR_KOKIRI_e);
         break;
     case 1:
-        dComIfGs_onItemFirstBit(WEAR_KOKIRI);
+        dComIfGs_onItemFirstBit(dItemNo_WEAR_KOKIRI_e);
         break;
     }
 
     switch (equipmentData->l_zoraArmor_idx) {
     case 0:
-        dComIfGs_offItemFirstBit(WEAR_ZORA);
+        dComIfGs_offItemFirstBit(dItemNo_WEAR_ZORA_e);
         break;
     case 1:
-        dComIfGs_onItemFirstBit(WEAR_ZORA);
+        dComIfGs_onItemFirstBit(dItemNo_WEAR_ZORA_e);
         break;
     }
 
     switch (equipmentData->l_magicArmor_idx) {
     case 0:
-        dComIfGs_offItemFirstBit(ARMOR);
+        dComIfGs_offItemFirstBit(dItemNo_ARMOR_e);
         break;
     case 1:
-        dComIfGs_onItemFirstBit(ARMOR);
+        dComIfGs_onItemFirstBit(dItemNo_ARMOR_e);
         break;
     }
 
     switch (equipmentData->l_bombCap_idx) {
     case 0:
-        dComIfGs_offItemFirstBit(BOMB_BAG_LV2);
+        dComIfGs_offItemFirstBit(dItemNo_BOMB_BAG_LV2_e);
         break;
     case 1:
-        dComIfGs_onItemFirstBit(BOMB_BAG_LV2);
+        dComIfGs_onItemFirstBit(dItemNo_BOMB_BAG_LV2_e);
         break;
     }
 

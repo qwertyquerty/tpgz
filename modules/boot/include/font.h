@@ -1,9 +1,9 @@
-#pragma once
-
+#ifndef TPGZ_MODULES_BOOT_INCLUDE_FONT_H
+#define TPGZ_MODULES_BOOT_INCLUDE_FONT_H
 #include <cstring>
 #include <cstdarg>
-#include "libtp_c/include/dolphin/gx/gx.h"
-#include "libtp_c/include/dolphin/mtx/vec.h"
+#include "gx.h"
+#include "tpgz_vec.h"
 #include "utils/texture.h"
 
 #define MAX_GLYPHS 94
@@ -91,3 +91,5 @@ inline void GZ_drawText(const char* str, float x, float y, uint32_t color, bool 
 inline float GZ_getTextWidth(const char* str, float size = FONT_DEFAULT_SIZE) {
     return Font::getStrWidth(str, size);
 }
+
+#endif

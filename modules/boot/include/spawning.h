@@ -1,8 +1,8 @@
-#pragma once
-
+#ifndef TPGZ_MODULES_BOOT_INCLUDE_SPAWNING_H
+#define TPGZ_MODULES_BOOT_INCLUDE_SPAWNING_H
 #include <cstdint>
 #include <cstring>
-#include "libtp_c/include/d/com/d_com_inf_game.h"
+#include "d/d_com_inf_game.h"
 
 struct ActorMemory {
     uint32_t params;
@@ -72,3 +72,5 @@ void spawn(const char* name) {
         createActor(name, link->position, link->facing);
     }
 } */
+
+#endif

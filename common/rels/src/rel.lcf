@@ -1,0 +1,22 @@
+SECTIONS
+{
+    GROUP:
+    {
+        .init :{}
+        .text :{}
+        .ctors :{}
+        .dtors :{}
+        .rodata :{}
+        .data :{}
+        .bss :{}
+        extab :{}
+        extabindex :{}
+    }
+}
+
+FORCEACTIVE
+{
+    _unresolved
+    _prolog
+    _epilog
+}

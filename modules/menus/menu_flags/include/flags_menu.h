@@ -1,4 +1,5 @@
-#pragma once
+#ifndef TPGZ_MODULES_MENUS_MENU_FLAGS_INCLUDE_FLAGS_MENU_H
+#define TPGZ_MODULES_MENUS_MENU_FLAGS_INCLUDE_FLAGS_MENU_H
 #include "menus/menu.h"
 
 enum FlagsIndex {
@@ -19,5 +20,6 @@ public:
     virtual void draw();
 
 private:
-    Line lines[FLAGS_COUNT];
 };
+
+#endif

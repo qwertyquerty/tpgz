@@ -1,7 +1,7 @@
 #include "menus/menu_pause/include/pause_menu.h"
 #include <cstdio>
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/utils.h"
+#include "d/d_com_inf_game.h"
+#include "tpgz_utils.h"
 #include "gz_flags.h"
 #include "rels/include/defines.h"
 #include "menus/utils/menu_mgr.h"
@@ -10,12 +10,15 @@
 
 KEEP_VAR PauseData* pauseData;
 
+static Line lines[PAUSE_INDEX_COUNT] = {
+    {"equipment", EQUIPMENT_INDEX, "Equipment", false, NULL},
+                {"golden bugs", GOLDEN_BUG_INDEX, "Golden Bugs", false, NULL},
+                {"hidden skills", HIDDEN_SKILL_INDEX, "Hidden Skills", false, NULL},
+                {"scent:", SCENT_INDEX, "Current Scent", false, NULL}
+};
+
 KEEP_FUNC PauseMenu::PauseMenu(Cursor& cursor)
-    : Menu(cursor),
-      lines{{"equipment", EQUIPMENT_INDEX, "Equipment", false, nullptr},
-            {"golden bugs", GOLDEN_BUG_INDEX, "Golden Bugs", false, nullptr},
-            {"hidden skills", HIDDEN_SKILL_INDEX, "Hidden Skills", false, nullptr},
-            {"scent:", SCENT_INDEX, "Current Scent", false, nullptr}} {}
+    : Menu(cursor) {}
 
 PauseMenu::~PauseMenu() {}
 

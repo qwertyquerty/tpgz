@@ -1,10 +1,10 @@
 #include "menus/menu_flag_records/include/flag_records_menu.h"
 #include <cstdio>
-#include "libtp_c/include/m_Do/m_Do_printf.h"
+#include "m_Do/m_Do_printf.h"
 #include "settings.h"
 #include "utils/draw.h"
 #include "utils/texture.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
+#include "d/d_com_inf_game.h"
 #include "gz_flags.h"
 #include "rels/include/defines.h"
 #include "menus/utils/menu_mgr.h"
@@ -21,28 +21,28 @@ KEEP_FUNC FlagRecordsMenu::FlagRecordsMenu(Cursor& cursor, FlagRecordsData& data
 FlagRecordsMenu::~FlagRecordsMenu() {}
 
 #ifdef GCN_PLATFORM
-#define SCRL_FORW_BUTTON (GZPad::X)
-#define SCRL_BACK_BUTTON (GZPad::Y)
+#define SCRL_FORW_BUTTON (X)
+#define SCRL_BACK_BUTTON (Y)
 #define SCRL_FORW_TEXT "X"
 #define SCRL_BACK_TEXT "Y"
 #endif
 #ifdef WII_PLATFORM
-#define SCRL_FORW_BUTTON (GZPad::TWO)
-#define SCRL_BACK_BUTTON (GZPad::ONE)
+#define SCRL_FORW_BUTTON (TWO)
+#define SCRL_BACK_BUTTON (ONE)
 #define SCRL_FORW_TEXT "2"
 #define SCRL_BACK_TEXT "1"
 #endif
 
 void FlagRecordsMenu::drawFlagRecord(uint8_t* record) {
     if (cursor.y > 0) {
-        if (GZ_getButtonRepeat(GZPad::DPAD_RIGHT)) {
+        if (GZ_getButtonRepeat(DPAD_RIGHT)) {
             if (l_bitIdx == 0) {
                 l_bitIdx = 7;
             } else if (l_bitIdx >= 0 && l_bitIdx < 8) {
                 l_bitIdx--;
             }
         }
-        if (GZ_getButtonRepeat(GZPad::DPAD_LEFT)) {
+        if (GZ_getButtonRepeat(DPAD_LEFT)) {
             if (l_bitIdx == 7) {
                 l_bitIdx = 0;
             } else if (l_bitIdx >= 0 && l_bitIdx < 8) {
@@ -68,19 +68,19 @@ void FlagRecordsMenu::drawFlagRecord(uint8_t* record) {
         float flag_x_offset = x_offset + Font::getStrWidth(offset);
         for (int bit = 0; bit < 8; bit++) {
             if (*(record + idx_num) & (1 << bit)) {
-                Draw::drawRect(0xFFFFFFFF, {flag_x_offset + ((7 - bit) * 20.0f), y_offset - 13.0f},
-                               {16, 16}, &l_flagOnTex._texObj);
+                Draw::drawRect(0xFFFFFFFF, makeVec2(flag_x_offset + ((7 - bit) * 20.0f), y_offset - 13.0f),
+                               makeVec2(16, 16), &l_flagOnTex._texObj);
             } else {
-                Draw::drawRect(0xFFFFFFFF, {flag_x_offset + ((7 - bit) * 20.0f), y_offset - 13.0f},
-                               {16, 16}, &l_flagOffTex._texObj);
+                Draw::drawRect(0xFFFFFFFF, makeVec2(flag_x_offset + ((7 - bit) * 20.0f), y_offset - 13.0f),
+                               makeVec2(16, 16), &l_flagOffTex._texObj);
             }
         }
 
         // Draw Flag cursor
         if (cursor.y == (idx_num + 1)) {
             Draw::drawRect(0x0080FF77,
-                           {(flag_x_offset + ((7 - l_bitIdx) * 20.0f)), y_offset - 13.0f},
-                           {16, 16});
+                           makeVec2((flag_x_offset + ((7 - l_bitIdx) * 20.0f)), y_offset - 13.0f),
+                           makeVec2(16, 16));
         }
 
         if (GZ_getButtonTrig(SELECTION_BUTTON)) {
@@ -97,11 +97,11 @@ void FlagRecordsMenu::drawFlagRecord(uint8_t* record) {
 void FlagRecordsMenu::draw() {
     cursor.setMode(Cursor::MODE_UNRESTRICTED);
 
-    if (l_flagOnTex.loadCode == TexCode::TEX_UNLOADED) {
+    if (l_flagOnTex.loadCode == TEX_UNLOADED) {
         load_texture("tpgz/tex/flagOn.tex", &l_flagOnTex);
     }
 
-    if (l_flagOffTex.loadCode == TexCode::TEX_UNLOADED) {
+    if (l_flagOffTex.loadCode == TEX_UNLOADED) {
         load_texture("tpgz/tex/flagOff.tex", &l_flagOffTex);
     }
 
@@ -112,7 +112,7 @@ void FlagRecordsMenu::draw() {
         return;
     }
 
-    if (GZ_getButtonTrig(GZPad::Z)) {
+    if (GZ_getButtonTrig(Z)) {
         cursor.y = 0;
     }
 
@@ -120,19 +120,19 @@ void FlagRecordsMenu::draw() {
     switch (l_recIdx) {
     case 0:
         max_flags = 0x20;
-        drawFlagRecord((uint8_t*)&g_dComIfG_gameInfo.info.mMemory.mBit.mTbox);
+        drawFlagRecord(reinterpret_cast<uint8_t*>(&g_dComIfG_gameInfo.info.getMemory().getBit()));
         break;
     case 1:
         max_flags = 0x100;
-        drawFlagRecord((uint8_t*)&g_dComIfG_gameInfo.info.mSavedata.mEvent.mEvent);
+        drawFlagRecord(reinterpret_cast<uint8_t*>(g_dComIfG_gameInfo.info.getSavedata().getEvent().getPEventBit()));
         break;
     case 2:
         max_flags = 0x18;
-        drawFlagRecord((uint8_t*)&g_dComIfG_gameInfo.info.mSavedata.mMiniGame);
+        drawFlagRecord(reinterpret_cast<uint8_t*>(&g_dComIfG_gameInfo.info.getSavedata().getMiniGame()));
         break;
     case 3:
         max_flags = 0x18;
-        drawFlagRecord((uint8_t*)&g_dComIfG_gameInfo.info.mDan.mSwitch);
+        drawFlagRecord(reinterpret_cast<uint8_t*>(&g_dComIfG_gameInfo.info.getDan()) + 4);
         break;
     }
 

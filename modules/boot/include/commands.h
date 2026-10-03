@@ -1,7 +1,8 @@
-#pragma once
+#ifndef TPGZ_MODULES_BOOT_INCLUDE_COMMANDS_H
+#define TPGZ_MODULES_BOOT_INCLUDE_COMMANDS_H
 #include <stdint.h>
-#include "libtp_c/include/JSystem/JUtility/JUTGamePad.h"
-#include "libtp_c/include/m_Do/m_Re_controller_pad.h"
+#include "controller.h"
+#include "JSystem/JUtility/JUTGamePad.h"
 #include "utils/containers/deque.h"
 
 #ifdef GCN_PLATFORM
@@ -59,6 +60,8 @@ enum Commands {
 };
 
 struct Command {
+    Command(Commands id_, uint16_t buttons_, void (*command_)()) : id(id_), buttons(buttons_), command(command_) {}
+
     Commands id;
     uint16_t buttons;
     void (*command)();
@@ -89,3 +92,5 @@ void GZCmd_processInputs();
 
 size_t GZCmd_getComboLen(uint16_t combo);
 void GZCmd_comboToStr(uint16_t combo, char* str);
+
+#endif

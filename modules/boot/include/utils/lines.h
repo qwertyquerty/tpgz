@@ -1,6 +1,8 @@
-#pragma once
+#ifndef TPGZ_MODULES_BOOT_INCLUDE_UTILS_LINES_H
+#define TPGZ_MODULES_BOOT_INCLUDE_UTILS_LINES_H
 #include "font.h"
 #include <cstdio>
+#include <cstdarg>
 
 #define MAX_RENDER_LINES 15
 
@@ -26,15 +28,18 @@ struct Line {
     char line[50];
     uint32_t idx;
     char description[MAX_DESCRIPTION_LENGTH];
-    bool toggleable = false;
+    bool toggleable;
     bool (*active)();
     uint8_t max_y_cursor_options;
-    char value[sizeof(Line::line)] = {0};
-    bool disabled = false;
+    char value[50];
+    bool disabled;
 
-    template <typename... Args>
-    inline int printf(const char* fmt, Args... args) {
-        return snprintf(value, sizeof(value), fmt, args...);
+    int printf(const char* fmt, ...) {
+        va_list args;
+        va_start(args, fmt);
+        int ret = vsnprintf(value, sizeof(value), fmt, args);
+        va_end(args);
+        return ret;
     }
 };
 
@@ -43,3 +48,5 @@ float minF(float a, float b);
 void menu_anim(int idx);
 void GZ_drawMenuLines(Line input_lines[], uint32_t cursor, uint32_t LINES);
 void GZ_drawRngLines(Line input_lines[], uint32_t cursor, uint32_t LINES);
+
+#endif

@@ -1,7 +1,7 @@
-#pragma once
-
+#ifndef TPGZ_MODULES_BOOT_INCLUDE_UTILS_TEXTURE_H
+#define TPGZ_MODULES_BOOT_INCLUDE_UTILS_TEXTURE_H
 #include <stdint.h>
-#include "libtp_c/include/dolphin/gx/gx.h"
+#include "gx.h"
 
 enum TexCode {
     TEX_OK = 1,                  /*<@brief Texture loaded successfully */
@@ -17,7 +17,7 @@ struct TexHeader {
     uint32_t format;
     uint32_t width;
     uint32_t height;
-} __attribute__((packed));
+};
 
 struct Texture {
     TexHeader header;
@@ -53,4 +53,6 @@ void setupRendering();
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif

@@ -2,32 +2,62 @@
 #include "collision_view.h"
 #include "menus/menu_collision_view/include/collision_view_menu.h"
 #include "settings.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/f_op/f_op_actor_mng.h"
+#include "d/d_com_inf_game.h"
+#include "f_op/f_op_actor_mng.h"
 #include "gz_flags.h"
 #include "rels/include/defines.h"
 #include "menus/utils/menu_mgr.h"
 
+static bool viewAtCcActive() {
+    return g_collisionFlags[VIEW_AT_CC].active;
+}
+
+static bool viewTgCcActive() {
+    return g_collisionFlags[VIEW_TG_CC].active;
+}
+
+static bool viewCoCcActive() {
+    return g_collisionFlags[VIEW_CO_CC].active;
+}
+
+static bool viewPolygonGroundActive() {
+    return g_collisionFlags[VIEW_POLYGON_GROUND].active;
+}
+
+static bool viewPolygonRoofActive() {
+    return g_collisionFlags[VIEW_POLYGON_ROOF].active;
+}
+
+static bool viewPolygonWallActive() {
+    return g_collisionFlags[VIEW_POLYGON_WALL].active;
+}
+
+static bool viewPolygonEdgesActive() {
+    return g_collisionFlags[VIEW_POLYGON_EDGES].active;
+}
+
+static Line lines[10] = {
+    {"attack colliders", VIEW_AT_CC, "view hitbox colliders", true,
+     viewAtCcActive},
+    {"target colliders", VIEW_TG_CC, "view hurtbox colliders", true,
+     viewTgCcActive},
+    {"push colliders", VIEW_CO_CC, "view push colliders", true,
+     viewCoCcActive},
+    {"ground polys", VIEW_POLYGON_GROUND, "view ground polygons", true,
+     viewPolygonGroundActive},
+    {"roof polys", VIEW_POLYGON_ROOF, "view roof polygons", true,
+     viewPolygonRoofActive},
+    {"wall polys", VIEW_POLYGON_WALL, "view wall polygons", true,
+     viewPolygonWallActive},
+    {"poly edges", VIEW_POLYGON_EDGES, "view polygon edges", true,
+     viewPolygonEdgesActive},                         
+    {"poly draw range:", 7, "max range for polygons to draw"},
+    {"poly draw raise:", 8, "amount to raise the drawn polygon by"},
+    {"opacity:", 9, "opacity of drawn geometry"},
+};
+
 KEEP_FUNC CollisionViewMenu::CollisionViewMenu(Cursor& cursor)
-    : Menu(cursor), lines{
-                        {"attack colliders", VIEW_AT_CC, "view hitbox colliders", true,
-                         [](){return g_collisionFlags[VIEW_AT_CC].active;}},
-                        {"target colliders", VIEW_TG_CC, "view hurtbox colliders", true,
-                         [](){return g_collisionFlags[VIEW_TG_CC].active;}},
-                        {"push colliders", VIEW_CO_CC, "view push colliders", true,
-                         [](){return g_collisionFlags[VIEW_CO_CC].active;}},
-                        {"ground polys", VIEW_POLYGON_GROUND, "view ground polygons", true,
-                         [](){return g_collisionFlags[VIEW_POLYGON_GROUND].active;}},
-                        {"roof polys", VIEW_POLYGON_ROOF, "view roof polygons", true,
-                         [](){return g_collisionFlags[VIEW_POLYGON_ROOF].active;}},
-                        {"wall polys", VIEW_POLYGON_WALL, "view wall polygons", true,
-                         [](){return g_collisionFlags[VIEW_POLYGON_WALL].active;}},
-                        {"poly edges", VIEW_POLYGON_EDGES, "view polygon edges", true,
-                         [](){return g_collisionFlags[VIEW_POLYGON_EDGES].active;}},                         
-                        {"poly draw range:", 7, "max range for polygons to draw"},
-                        {"poly draw raise:", 8, "amount to raise the drawn polygon by"},
-                        {"opacity:", 9, "opacity of drawn geometry"},
-                    } {}
+    : Menu(cursor) {}
 
 CollisionViewMenu::~CollisionViewMenu() {}
 

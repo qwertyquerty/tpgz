@@ -1,69 +1,90 @@
 #include "menus/menu_dungeon_flags/include/dungeon_flags_menu.h"
 #include <cstdio>
-#include "libtp_c/include/d/com/d_com_inf_game.h"
+#include "d/d_com_inf_game.h"
 #include "gz_flags.h"
 #include "rels/include/defines.h"
 #include "menus/utils/menu_mgr.h"
-#include "libtp_c/include/utils.h"
+#include "tpgz_utils.h"
 
 #define MAX_DUNGEON_OPTIONS 9
 
-KEEP_VAR DungeonFlagsData* dungeonFlagsData = nullptr;
+KEEP_VAR DungeonFlagsData* dungeonFlagsData = NULL;
+
+static bool mapFlagActive() {
+    return dungeonFlagsData->l_mapFlag;
+}
+
+static bool compassFlagActive() {
+    return dungeonFlagsData->l_compassFlag;
+}
+
+static bool bossKeyFlagActive() {
+    return dungeonFlagsData->l_bosskeyFlag;
+}
+
+static bool defeatMinibossFlagActive() {
+    return dungeonFlagsData->l_minibossFlag;
+}
+
+static bool defeatBossFlagActive() {
+    return dungeonFlagsData->l_bossFlag;
+}
+
+static Line lines[DUNGEON_FLAGS_COUNT] = {
+      {"dungeon:", SELECT_DUNGEON_INDEX, "Selected dungeon flags", false, NULL,
+       MAX_DUNGEON_OPTIONS},
+      {"small keys", SMALL_KEY_FLAG_INDEX, "Selected dungeon small keys", false, NULL, 5},
+    //   {"intro cutscene", INTRO_CS_FLAG_INDEX, "Toggle selected dungeon intro cutscene", true,
+    //      [](){return dungeonFlagsData->l_introFlag;}},
+      {"have map", MAP_FLAG_INDEX, "Give selected dungeon map", true, mapFlagActive},
+      {"have compass", COMPASS_FLAG_INDEX, "Give selected dungeon compass", true,
+       compassFlagActive},
+      {"have boss key", BOSS_KEY_FLAG_INDEX, "Give selected dungeon boss key", true,
+       bossKeyFlagActive},
+      {"miniboss dead", DEFEAT_MINIBOSS_FLAG_INDEX, "Selected dungeon miniboss is defeated",
+       true, defeatMinibossFlagActive},
+      {"boss dead", DEFEAT_BOSS_FLAG_INDEX, "Selected dungeon boss is defeated", true,
+       defeatBossFlagActive},
+      {"clear flags", CLEAR_DUNGEON_FLAGS_INDEX, "Clear all selected dungeon flags"},
+};
 
 KEEP_FUNC DungeonFlagsMenu::DungeonFlagsMenu(Cursor& cursor)
-    : Menu(cursor),
-      lines{
-          {"dungeon:", SELECT_DUNGEON_INDEX, "Selected dungeon flags", false, nullptr,
-           MAX_DUNGEON_OPTIONS},
-          {"small keys", SMALL_KEY_FLAG_INDEX, "Selected dungeon small keys", false, nullptr, 5},
-        //   {"intro cutscene", INTRO_CS_FLAG_INDEX, "Toggle selected dungeon intro cutscene", true,
-        //      [](){return dungeonFlagsData->l_introFlag;}},
-          {"have map", MAP_FLAG_INDEX, "Give selected dungeon map", true, [](){return dungeonFlagsData->l_mapFlag;}},
-          {"have compass", COMPASS_FLAG_INDEX, "Give selected dungeon compass", true,
-           [](){return dungeonFlagsData->l_compassFlag;}},
-          {"have boss key", BOSS_KEY_FLAG_INDEX, "Give selected dungeon boss key", true,
-           [](){return dungeonFlagsData->l_bosskeyFlag;}},
-          {"miniboss dead", DEFEAT_MINIBOSS_FLAG_INDEX, "Selected dungeon miniboss is defeated",
-           true, [](){return dungeonFlagsData->l_minibossFlag;}},
-          {"boss dead", DEFEAT_BOSS_FLAG_INDEX, "Selected dungeon boss is defeated", true,
-           [](){return dungeonFlagsData->l_bossFlag;}},
-          {"clear flags", CLEAR_DUNGEON_FLAGS_INDEX, "Clear all selected dungeon flags"},
-      } {}
+    : Menu(cursor) {}
 
 DungeonFlagsMenu::~DungeonFlagsMenu() {}
 
 bool getSaveDungeonItem(int32_t stage, int32_t flag) {
-    return dSv_memBit_c__isDungeonItem(&dComIfGs_getSavedata().mSave[stage].mBit, flag);
+    return g_dComIfG_gameInfo.info.getSavedata().getSave(stage).getBit().isDungeonItem(flag);
 }
 
 void setSaveDungeonItem(int32_t stage, int32_t flag) {
     if (getSaveDungeonItem(stage, flag)) {
-        dComIfGs_getSavedata().mSave[stage].mBit.offDungeonItem(flag);
+        g_dComIfG_gameInfo.info.getSavedata().getSave(stage).getBit().offDungeonItem(flag);
     } else {
-        dSv_memBit_c__onDungeonItem(&dComIfGs_getSavedata().mSave[stage].mBit, flag);
+        g_dComIfG_gameInfo.info.getSavedata().getSave(stage).getBit().onDungeonItem(flag);
     }
 }
 
-#include "libtp_c/include/m_Do/m_Do_printf.h" // OSReport
+#include "m_Do/m_Do_printf.h" // OSReport
 
 bool getDungeonMemSwitch(int32_t stage, int32_t flag) {
-    return dSv_memBit_c__isSwitch(&dComIfGs_getSavedata().mSave[stage].mBit, flag);
+    return g_dComIfG_gameInfo.info.getSavedata().getSave(stage).getBit().isSwitch(flag);
 }
 
 void setDungeonMemSwitch(int32_t stage, int32_t flag) {
     if (getDungeonMemSwitch(stage, flag)) {
-        dSv_memBit_c__onSwitch(&dComIfGs_getSavedata().mSave[stage].mBit, flag);
+        g_dComIfG_gameInfo.info.getSavedata().getSave(stage).getBit().onSwitch(flag);
     } else {
-        dSv_memBit_c__offSwitch(&dComIfGs_getSavedata().mSave[stage].mBit, flag);
+        g_dComIfG_gameInfo.info.getSavedata().getSave(stage).getBit().offSwitch(flag);
     }
 }
 
 uint8_t getSaveDungeonKeys(int32_t stage) {
-    return dComIfGs_getSavedata().mSave[stage].mBit.getKeyNum();
+    return g_dComIfG_gameInfo.info.getSavedata().getSave(stage).getBit().getKeyNum();
 }
 
 void setSaveDungeonKeys(int32_t stage, uint8_t num) {
-    dComIfGs_getSavedata().mSave[stage].mBit.setKeyNum(num);
+    g_dComIfG_gameInfo.info.getSavedata().getSave(stage).getBit().setKeyNum(num);
 }
 
 void DungeonFlagsMenu::draw() {
@@ -81,31 +102,31 @@ void DungeonFlagsMenu::draw() {
     uint8_t area_id = 0;
     switch (dungeonFlagsData->l_selDun) {
     case 0:
-        area_id = dSv_memory_c::FOREST_TEMPLE;
+        area_id = 16;
         break;
     case 1:
-        area_id = dSv_memory_c::GORON_MINES;
+        area_id = 17;
         break;
     case 2:
-        area_id = dSv_memory_c::LAKEBED;
+        area_id = 18;
         break;
     case 3:
-        area_id = dSv_memory_c::ARBITERS;
+        area_id = 19;
         break;
     case 4:
-        area_id = dSv_memory_c::SNOWPEAK_RUINS;
+        area_id = 20;
         break;
     case 5:
-        area_id = dSv_memory_c::TEMPLE_OF_TIME;
+        area_id = 21;
         break;
     case 6:
-        area_id = dSv_memory_c::CITY;
+        area_id = 22;
         break;
     case 7:
-        area_id = dSv_memory_c::PALACE;
+        area_id = 23;
         break;
     case 8:
-        area_id = dSv_memory_c::HYRULE_CASTLE;
+        area_id = 24;
         break;
     }
 
@@ -131,7 +152,7 @@ void DungeonFlagsMenu::draw() {
         if (cursor.y == SMALL_KEY_FLAG_INDEX) {
             dungeonFlagsData->l_keyNum = cursor.x;
             setSaveDungeonKeys(area_id, dungeonFlagsData->l_keyNum);
-            dComIfGs_getSave(g_dComIfG_gameInfo.info.mDan.mStageNo);
+            dComIfGs_getSave(*reinterpret_cast<s8*>(&g_dComIfG_gameInfo.info.getDan()));
         }
         break;
     default:
@@ -141,31 +162,31 @@ void DungeonFlagsMenu::draw() {
 
     // update flags
     // switch (area_id) {
-    //     case dSv_memory_c::FOREST_TEMPLE:
+    //     case 16:
     //         dungeonFlagsData->l_introFlag = getDungeonMemSwitch(area_id, 105);
     //         break;
-    //     case dSv_memory_c::GORON_MINES:
+    //     case 17:
     //         dungeonFlagsData->l_introFlag = getDungeonMemSwitch(area_id, 85);
     //         break;
-    //     case dSv_memory_c::LAKEBED:
+    //     case 18:
     //         dungeonFlagsData->l_introFlag = getDungeonMemSwitch(area_id, 120);
     //         break;
-    //     case dSv_memory_c::ARBITERS:
+    //     case 19:
     //         dungeonFlagsData->l_introFlag = getDungeonMemSwitch(area_id, 124);
     //         break;
-    //     case dSv_memory_c::SNOWPEAK_RUINS:
+    //     case 20:
     //         dungeonFlagsData->l_introFlag = getDungeonMemSwitch(area_id, 120);
     //         break;
-    //     case dSv_memory_c::TEMPLE_OF_TIME:
+    //     case 21:
     //         dungeonFlagsData->l_introFlag = getDungeonMemSwitch(area_id, 21);
     //         break;
-    //     case dSv_memory_c::CITY:
+    //     case 22:
     //         dungeonFlagsData->l_introFlag = getDungeonMemSwitch(area_id, 111);
     //         break;
-    //     case dSv_memory_c::PALACE:
+    //     case 23:
     //         dungeonFlagsData->l_introFlag = getDungeonMemSwitch(area_id, 1);
     //         break;
-    //     case dSv_memory_c::HYRULE_CASTLE:
+    //     case 24:
     //         dungeonFlagsData->l_introFlag = getDungeonMemSwitch(area_id, 98);
     //         break;
     // }
@@ -180,31 +201,31 @@ void DungeonFlagsMenu::draw() {
         switch (cursor.y) {
         // case INTRO_CS_FLAG_INDEX:
         //     switch (area_id) {
-        //     case dSv_memory_c::FOREST_TEMPLE:
+        //     case 16:
         //         setDungeonMemSwitch(area_id, 105);
         //         break;
-        //     case dSv_memory_c::GORON_MINES:
+        //     case 17:
         //         setDungeonMemSwitch(area_id, 85);
         //         break;
-        //     case dSv_memory_c::LAKEBED:
+        //     case 18:
         //         setDungeonMemSwitch(area_id, 120);
         //         break;
-        //     case dSv_memory_c::ARBITERS:
+        //     case 19:
         //         setDungeonMemSwitch(area_id, 124);
         //         break;
-        //     case dSv_memory_c::SNOWPEAK_RUINS:
+        //     case 20:
         //         setDungeonMemSwitch(area_id, 120);
         //         break;
-        //     case dSv_memory_c::TEMPLE_OF_TIME:
+        //     case 21:
         //         setDungeonMemSwitch(area_id, 21);
         //         break;
-        //     case dSv_memory_c::CITY:
+        //     case 22:
         //         setDungeonMemSwitch(area_id, 111);
         //         break;
-        //     case dSv_memory_c::PALACE:
+        //     case 23:
         //         setDungeonMemSwitch(area_id, 1);
         //         break;
-        //     case dSv_memory_c::HYRULE_CASTLE:
+        //     case 24:
         //         setDungeonMemSwitch(area_id, 98);
         //         break;
         //     }
@@ -225,12 +246,12 @@ void DungeonFlagsMenu::draw() {
             setSaveDungeonItem(area_id, dSv_memBit_c::STAGE_BOSS_ENEMY);
             break;
         case CLEAR_DUNGEON_FLAGS_INDEX:
-            memset(&dComIfGs_getSavedata().mSave[area_id].mBit, 0, sizeof(dSv_memBit_c));
+            g_dComIfG_gameInfo.info.getSavedata().getSave(area_id).getBit().init();
             dungeonFlagsData->l_keyNum = 0;
             break;
         }
         // copy current stage save flags over temp flags
-        dComIfGs_getSave(g_dComIfG_gameInfo.info.mDan.mStageNo);
+        dComIfGs_getSave(*reinterpret_cast<s8*>(&g_dComIfG_gameInfo.info.getDan()));
     }
 
     ListMember dun_opt[MAX_DUNGEON_OPTIONS] = {

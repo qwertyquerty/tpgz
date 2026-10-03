@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef TPGZ_MODULES_MENUS_MENU_COLLISION_VIEW_INCLUDE_COLLISION_VIEW_MENU_H
+#define TPGZ_MODULES_MENUS_MENU_COLLISION_VIEW_INCLUDE_COLLISION_VIEW_MENU_H
 #include "menus/menu.h"
 
 class CollisionViewMenu : public Menu {
@@ -9,5 +9,6 @@ public:
     virtual void draw();
 
 private:
-    Line lines[10];
 };
+
+#endif

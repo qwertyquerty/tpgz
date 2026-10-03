@@ -1,22 +1,53 @@
 #include "menus/menu_hidden_skills/include/hidden_skills_menu.h"
 #include <cstdio>
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/utils.h"
+#include "d/d_com_inf_game.h"
+#include "tpgz_utils.h"
 #include "gz_flags.h"
 #include "rels/include/defines.h"
 #include "menus/utils/menu_mgr.h"
 
 KEEP_VAR HiddenSkillsData* hiddenSkillsData;
 
+static bool endingBlowActive() {
+    return hiddenSkillsData->l_ebFlag;
+}
+
+static bool shieldBashActive() {
+    return hiddenSkillsData->l_sbFlag;
+}
+
+static bool backsliceActive() {
+    return hiddenSkillsData->l_bsFlag;
+}
+
+static bool helmSplitterActive() {
+    return hiddenSkillsData->l_hsFlag;
+}
+
+static bool mortalDrawActive() {
+    return hiddenSkillsData->l_mdFlag;
+}
+
+static bool jumpStrikeActive() {
+    return hiddenSkillsData->l_jsFlag;
+}
+
+static bool greatSpinActive() {
+    return hiddenSkillsData->l_gsFlag;
+}
+
+static Line lines[HIDDEN_SKILLS_INDEX_COUNT] = {
+    {"ending blow:", ENDING_BLOW_INDEX, "Ending Blow", true, endingBlowActive},
+                {"shield bash:", SHIELD_BASH_INDEX, "Shield Bash", true, shieldBashActive},
+                {"backslice:", BACKSLICE_INDEX, "Backslice", true, backsliceActive},
+                {"helm splitter:", HELM_SPLITTER_INDEX, "Helm Splitter", true, helmSplitterActive},
+                {"mortal draw:", MORTAL_DRAW_INDEX, "Mortal Draw", true, mortalDrawActive},
+                {"jump strike:", JUMP_STRIKE_INDEX, "Jump Strike", true, jumpStrikeActive},
+                {"greatspin:", GREAT_SPIN_INDEX, "Greatspin", true, greatSpinActive}
+};
+
 KEEP_FUNC HiddenSkillsMenu::HiddenSkillsMenu(Cursor& cursor)
-    : Menu(cursor),
-      lines{{"ending blow:", ENDING_BLOW_INDEX, "Ending Blow", true, [](){return hiddenSkillsData->l_ebFlag;}},
-            {"shield bash:", SHIELD_BASH_INDEX, "Shield Bash", true, [](){return hiddenSkillsData->l_sbFlag;}},
-            {"backslice:", BACKSLICE_INDEX, "Backslice", true, [](){return hiddenSkillsData->l_bsFlag;}},
-            {"helm splitter:", HELM_SPLITTER_INDEX, "Helm Splitter", true, [](){return hiddenSkillsData->l_hsFlag;}},
-            {"mortal draw:", MORTAL_DRAW_INDEX, "Mortal Draw", true, [](){return hiddenSkillsData->l_mdFlag;}},
-            {"jump strike:", JUMP_STRIKE_INDEX, "Jump Strike", true, [](){return hiddenSkillsData->l_jsFlag;}},
-            {"greatspin:", GREAT_SPIN_INDEX, "Greatspin", true, [](){return hiddenSkillsData->l_gsFlag;}}} {}
+    : Menu(cursor) {}
 
 HiddenSkillsMenu::~HiddenSkillsMenu() {}
 

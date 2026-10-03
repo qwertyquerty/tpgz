@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef TPGZ_MODULES_MENUS_MENU_TOOLS_RNG_INCLUDE_TOOLS_RNG_MENU_H
+#define TPGZ_MODULES_MENUS_MENU_TOOLS_RNG_INCLUDE_TOOLS_RNG_MENU_H
 #include "menus/menu.h"
 #include "tools.h"
 
@@ -25,7 +25,8 @@ public:
     virtual void draw();
 
 private:
-    Line lines[TOOLS_RNG_COUNT];
 };
 
 void store_frozen_rng_values(int r0, int r1, int r2);
+
+#endif

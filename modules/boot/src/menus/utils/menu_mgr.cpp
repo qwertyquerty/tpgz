@@ -89,24 +89,24 @@ void MenuMgr::handleCommands() {
     case menus::MC_NONE:
         break;
     }
-    command = {menus::MC_NONE, MN_NONE_INDEX};
+    command = menus::MenuCommand(menus::MC_NONE, MN_NONE_INDEX);
 }
 
 KEEP_FUNC void MenuMgr::open() {
-    command = {menus::MC_OPEN, MN_NONE_INDEX};
+    command = menus::MenuCommand(menus::MC_OPEN, MN_NONE_INDEX);
 }
 KEEP_FUNC void MenuMgr::hide() {
-    command = {menus::MC_HIDE, MN_NONE_INDEX};
+    command = menus::MenuCommand(menus::MC_HIDE, MN_NONE_INDEX);
 }
 
 KEEP_FUNC void MenuMgr::push(int menu_id) {
-    command = {menus::MC_PUSH, menu_id};
+    command = menus::MenuCommand(menus::MC_PUSH, menu_id);
 }
 KEEP_FUNC void MenuMgr::pop() {
-    command = {menus::MC_POP, MN_NONE_INDEX};
+    command = menus::MenuCommand(menus::MC_POP, MN_NONE_INDEX);
 }
 KEEP_FUNC void MenuMgr::clear() {
-    command = {menus::MC_CLEAR, MN_NONE_INDEX};
+    command = menus::MenuCommand(menus::MC_CLEAR, MN_NONE_INDEX);
 }
 
 KEEP_FUNC void MenuMgr::handleOpen() {
@@ -117,7 +117,7 @@ KEEP_FUNC void MenuMgr::handleOpen() {
     if (is_open) {
         return;
     }
-    auto state = *states.begin();
+    menus::MenuState* state = *states.begin();
     state->load(false);
     is_open = true;
     GZ_setFifoVisible(false);
@@ -129,7 +129,7 @@ KEEP_FUNC void MenuMgr::handleHide() {
     if (!is_open) {
         return;
     }
-    auto state = *states.begin();
+    menus::MenuState* state = *states.begin();
     state->unload(false);
     is_open = false;
     GZ_setFifoVisible(true);
@@ -147,7 +147,7 @@ KEEP_FUNC void MenuMgr::handlePush(int menu_id) {
     }
     char buf[45];
     snprintf(buf, sizeof(buf), "/tpgz/rels/menus/menu_%s.rel", g_menuPaths[menu_id]);
-    auto* state = new menus::MenuState(menu_id, buf);
+    menus::MenuState* state = new menus::MenuState(menu_id, buf);
     states.push(state);
     state->load(true);
     is_open = true;

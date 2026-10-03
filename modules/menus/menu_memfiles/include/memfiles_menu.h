@@ -1,6 +1,6 @@
 #include "menus/menu.h"
-#include "libtp_c/include/dolphin/mtx/vec.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
+#include "tpgz_vec.h"
+#include "d/d_com_inf_game.h"
 
 #define MEMFILE_SLOT_INDEX 0
 #define MEMFILE_SAVE_INDEX 1
@@ -8,8 +8,10 @@
 #define MEMFILE_DELETE_INDEX 3
 
 struct MemfilesData {
+    MemfilesData() : l_fileNo(1) {}
+
     Cursor cursor;
-    uint8_t l_fileNo = 1;
+    uint8_t l_fileNo;
 };
 
 class MemfilesMenu : public Menu {
@@ -21,5 +23,4 @@ public:
 private:
     uint8_t& l_fileNo;
 
-    Line lines[4];
 };

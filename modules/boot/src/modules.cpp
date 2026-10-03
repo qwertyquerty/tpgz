@@ -1,5 +1,5 @@
 #include "modules.h"
-#include "libtp_c/include/defines.h"
+#include "rels/include/defines.h"
 
 #include "commands.h"
 #include "global_data.h"
@@ -14,13 +14,19 @@ KEEP_VAR tpgz::containers::deque<Module*> g_modules;
  *          Registered to run before the main loop.
  */
 KEEP_FUNC void GZ_handleModules() {
-    for (auto mod : g_modules) {
+    for (tpgz::containers::deque<Module*>::iterator modIt = g_modules.begin(); modIt != g_modules.end(); ++modIt) {
+        Module* mod = *modIt;
         if (!mod->active() && mod->rel.isLoaded()) {
             mod->rel.close();
         }
     }
 
-    for (auto mod : g_modules) {
+    if (g_skipGameFrame) {
+        return;
+    }
+
+    for (tpgz::containers::deque<Module*>::iterator modIt = g_modules.begin(); modIt != g_modules.end(); ++modIt) {
+        Module* mod = *modIt;
         if (mod->active() && !mod->rel.isLoaded()) {
             mod->rel.load(true);
         }
@@ -83,6 +89,12 @@ KEEP_FUNC bool fast_eel_regrab_active() {
     return GZStng_getData(STNG_TOOLS_FAST_EEL_REGRAB, false);
 }
 
+#ifdef GCN_PLATFORM
+KEEP_FUNC bool stallord_l_slide_active() {
+    return GZStng_getData(STNG_TOOLS_STALLORD_L_SLIDE, false);
+}
+#endif
+
 KEEP_FUNC bool lfc_active() {
     return GZStng_getData(STNG_TOOLS_LFC, false);
 }
@@ -99,20 +111,34 @@ KEEP_FUNC bool mash_checker_active() {
     return GZStng_getData(STNG_TOOLS_MASH_CHECKER, false);
 }
 
+KEEP_FUNC uint32_t GZ_getGorgeVoidMode() {
+    GZSettingEntry* stng = GZStng_get(STNG_TOOLS_GORGE);
+    if (stng == NULL || stng->data == NULL) {
+        return 0;
+    }
+    uint32_t mode = stng->size == sizeof(uint32_t) ? *static_cast<uint32_t*>(stng->data) :
+                                                     *static_cast<uint8_t*>(stng->data);
+    return mode < GORGE_VOID_MODE_COUNT ? mode : 0;
+}
+
 KEEP_FUNC bool gorge_active() {
-    return GZStng_getData<uint32_t>(STNG_TOOLS_GORGE, 0) != 0;
+    return GZ_getGorgeVoidMode() != 0;
 }
 
 KEEP_FUNC bool gorge_wolf_active() {
-    return GZStng_getData<uint32_t>(STNG_TOOLS_GORGE, 0) == 1;
+    return GZ_getGorgeVoidMode() == 1;
 }
 
 KEEP_FUNC bool gorge_human_active() {
-    return GZStng_getData<uint32_t>(STNG_TOOLS_GORGE, 0) == 2;
+    return GZ_getGorgeVoidMode() == 2;
 }
 
 KEEP_FUNC bool rollcheck_active() {
     return GZStng_getData(STNG_TOOLS_ROLL, false);
+}
+
+KEEP_FUNC bool saveStates_active() {
+    return GZStng_getData(STNG_TOOLS_SAVE_STATES, false);
 }
 
 KEEP_FUNC bool moon_jump_active() {
