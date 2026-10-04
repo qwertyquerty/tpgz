@@ -72,6 +72,9 @@ void main() {
 #endif
     g_modules.push_back(new Module(corotd_active, "/tpgz/rels/features/corotd.rel"));
     g_modules.push_back(new Module(fast_eel_regrab_active, "/tpgz/rels/features/fast_eel_regrab.rel"));
+#ifdef GCN_PLATFORM
+    g_modules.push_back(new Module(stallord_l_slide_active, "/tpgz/rels/features/stallord_l_slide.rel"));
+#endif
     g_modules.push_back(new Module(lfc_active, "/tpgz/rels/features/lfc_checker.rel"));
     g_modules.push_back(new Module(ebmb_active, "/tpgz/rels/features/ebmb_checker.rel"));
     g_modules.push_back(new Module(ee_active, "/tpgz/rels/features/ee_checker.rel"));

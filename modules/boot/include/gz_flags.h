@@ -37,6 +37,7 @@ enum GZFlags {
     GZFLG_EBMB,
     GZFLG_EE,
     GZFLG_FAST_EEL_REGRAB,
+    GZFLG_STALLORD_L_SLIDE,
 };
 
 struct GZFlag {

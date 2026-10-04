@@ -27,6 +27,9 @@ static Line lines[CHECKERS_COUNT] = {
                 {"universal map delay", UMD_INDEX, "practice snowpeak universal map delay timing", true,
                  ACTIVE_FUNC(STNG_TOOLS_UMD)},
                 {"fast eel regrab", FAST_EEL_REGRAB_INDEX, "show frame info when fast morpheel regrab (claw before boots)", true, ACTIVE_FUNC(STNG_TOOLS_FAST_EEL_REGRAB)},
+    #ifdef GCN_PLATFORM
+                {"stallord skip L-slide", STALLORD_L_SLIDE_INDEX, "show frame info for cardinal left L-slide for stallord skip", true, ACTIVE_FUNC(STNG_TOOLS_STALLORD_L_SLIDE)},
+    #endif
                 {
                     "gorge void", 
                     GORGE_INDEX, 
@@ -138,6 +141,16 @@ void CheckersMenu::draw() {
                 }
                 *static_cast<bool*>(stng->data) = !*static_cast<bool*>(stng->data);
                 break;
+            #ifdef GCN_PLATFORM
+            case STALLORD_L_SLIDE_INDEX:
+                stng = GZStng_get(STNG_TOOLS_STALLORD_L_SLIDE);
+                if (!stng) {
+                    stng = new GZSettingEntry(STNG_TOOLS_STALLORD_L_SLIDE, sizeof(bool), new bool(false));
+                    g_settings.push_back(stng);
+                }
+                *static_cast<bool*>(stng->data) = !*static_cast<bool*>(stng->data);
+                break;
+            #endif
         }
     }
 

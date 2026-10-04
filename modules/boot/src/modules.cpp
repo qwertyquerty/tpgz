@@ -89,6 +89,12 @@ KEEP_FUNC bool fast_eel_regrab_active() {
     return GZStng_getData(STNG_TOOLS_FAST_EEL_REGRAB, false);
 }
 
+#ifdef GCN_PLATFORM
+KEEP_FUNC bool stallord_l_slide_active() {
+    return GZStng_getData(STNG_TOOLS_STALLORD_L_SLIDE, false);
+}
+#endif
+
 KEEP_FUNC bool lfc_active() {
     return GZStng_getData(STNG_TOOLS_LFC, false);
 }

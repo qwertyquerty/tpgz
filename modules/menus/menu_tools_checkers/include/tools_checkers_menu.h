@@ -35,6 +35,9 @@ enum CheckersIndex {
     ROLL_INDEX,
     UMD_INDEX,
     FAST_EEL_REGRAB_INDEX,
+#ifdef GCN_PLATFORM
+    STALLORD_L_SLIDE_INDEX,
+#endif
     GORGE_INDEX,
 
     CHECKERS_COUNT,
