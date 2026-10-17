@@ -222,13 +222,23 @@
 
 - filename: argorok
 
+- filename: cannon_exit
+
 - filename: palace1
 
-- filename: palace2
+- filename: after_light_sword
 
 - filename: zant
 
 - filename: hc
+
+- filename: hc_inside
+
+- filename: hc_dynalfos
+
+- filename: hc_aeralfos
+
+- filename: hc_tower_climb
 
 - filename: beast_ganon
 
