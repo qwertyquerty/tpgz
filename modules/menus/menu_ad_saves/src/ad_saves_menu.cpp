@@ -81,7 +81,7 @@ static Line lines[AD_SAVES_COUNT] = {
     {"after light sword", AD_AFTER_LIGHT_SWORD_INDEX, "The Palace of Twilight segment after getting Light Sword"},
     {"zant", AD_ZANT_INDEX, "Palace of Twilight boss"},
     {"hyrule castle", AD_HC_INDEX, "The Hyrule Castle segment"},
-    {"hc inside", AD_HC_INSIDE_INDEX, "Interior chandelier room of Hyrule Castle"},
+    {"hc inside", AD_HC_INSIDE_INDEX, "Interior chandelier room of Hyrule Castle "},
     {"hc dynalfos", AD_HC_DYNALFOS_INDEX, "Hyrule Castle double dynalfos in east wing 2"},
     {"hc aeralfos", AD_HC_AERALFOS_INDEX, "The aeralfos fight before the Hyrule Castle boss key"},
     {"hc tower climb", AD_HC_TOWER_CLIMB_INDEX, "The tower climb before Ganondorf"},
