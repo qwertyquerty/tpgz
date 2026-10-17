@@ -1,15 +1,17 @@
+#include "d/actor/d_a_alink.h"
+#include "controller.h"
 #include "features/moveactor/include/moveactor.h"
 #include <cstdio>
 #include "font.h"
 #include "global_data.h"
-#include "libtp_c/include/msl_c/math.h"
+#include "tpgz_math.h"
 #include "settings.h"
-#include "libtp_c/include/JSystem/JUtility/JUTGamePad.h"
-#include "libtp_c/include/f_op/f_op_draw_tag.h"
-#include "libtp_c/include/m_Do/m_Re_controller_pad.h"
+#include "JSystem/JUtility/JUTGamePad.h"
+#include "d/d_com_inf_game.h"
+#include "f_op/f_op_camera_mng.h"
 #include "rels/include/defines.h"
-#include "libtp_c/include/d/meter/d_meter_HIO.h"
-#include "libtp_c/include/d/d_procname.h"
+#include "d/d_meter_HIO.h"
+#include "f_pc/f_pc_name.h"
 
 #define ROTATION_SPEED (30)
 #define ROTATION_FAST_SPEED (80)
@@ -20,23 +22,23 @@
 #define DIST_FROM_ACTOR (600)
 
 #ifdef GCN_PLATFORM
-#define CONTROL_Y (mPadStatus.stick_y)
-#define CONTROL_X (mPadStatus.stick_x)
-#define VERTICAL_DISPLACEMENT (mPadStatus.substick_y)
-#define HORIZONTAL_DISPLACEMENT -(mPadStatus.substick_x)
-#define SPEED_PREDICATE_1 (mPadButton.mButton & CButton::Z)
-#define SPEED_PREDICATE_2 (mPadButton.mButton & CButton::R)
-#define LOCK_CAMERA (mPadButton.mButton & CButton::L)
+#define CONTROL_Y (JUTGamePad::mPadStatus[0].stickY)
+#define CONTROL_X (JUTGamePad::mPadStatus[0].stickX)
+#define VERTICAL_DISPLACEMENT (JUTGamePad::mPadStatus[0].substickY)
+#define HORIZONTAL_DISPLACEMENT -(JUTGamePad::mPadStatus[0].substickX)
+#define SPEED_PREDICATE_1 (JUTGamePad::mPadButton[0].mButton & CButton::Z)
+#define SPEED_PREDICATE_2 (JUTGamePad::mPadButton[0].mButton & CButton::R)
+#define LOCK_CAMERA (JUTGamePad::mPadButton[0].mButton & CButton::L)
 #endif
 
 #ifdef WII_PLATFORM
-#define CONTROL_Y ((mPad.mHoldButton & CButton::C) == 0 ? mPad.stick.y * 72 : 0)
-#define CONTROL_X ((mPad.mHoldButton & CButton::C) == 0 ? -mPad.stick.x * 72 : 0)
-#define VERTICAL_DISPLACEMENT ((mPad.mHoldButton & CButton::C) != 0 ? mPad.stick.y * 59 : 0)
-#define HORIZONTAL_DISPLACEMENT ((mPad.mHoldButton & CButton::C) != 0 ? -mPad.stick.x * 59 : 0)
-#define SPEED_PREDICATE_1 (mPad.mHoldButton & CButton::Z)
-#define SPEED_PREDICATE_2 (mPad.mHoldButton & CButton::MINUS)
-#define LOCK_CAMERA (mPad.mHoldButton & CButton::A)
+#define CONTROL_Y ((GZ_getWiiPadStatus().hold & CButton::C) == 0 ? GZ_getWiiPadStatus().ex_status.fs.stick.y * 72 : 0)
+#define CONTROL_X ((GZ_getWiiPadStatus().hold & CButton::C) == 0 ? -GZ_getWiiPadStatus().ex_status.fs.stick.x * 72 : 0)
+#define VERTICAL_DISPLACEMENT ((GZ_getWiiPadStatus().hold & CButton::C) != 0 ? GZ_getWiiPadStatus().ex_status.fs.stick.y * 59 : 0)
+#define HORIZONTAL_DISPLACEMENT ((GZ_getWiiPadStatus().hold & CButton::C) != 0 ? -GZ_getWiiPadStatus().ex_status.fs.stick.x * 59 : 0)
+#define SPEED_PREDICATE_1 (GZ_getWiiPadStatus().hold & CButton::Z)
+#define SPEED_PREDICATE_2 (GZ_getWiiPadStatus().hold & CButton::MINUS)
+#define LOCK_CAMERA (GZ_getWiiPadStatus().hold & CButton::A)
 #endif
 
 #define WHITE_RGBA 0xFFFFFFFF
@@ -51,8 +53,8 @@ bool event_halt = false;
 
 void move(fopAc_ac_c* actor) {
     // Fetch the camera position and target
-    Vec& cam_target = matrixInfo.matrix_info->target;
-    Vec& cam_pos = matrixInfo.matrix_info->pos;
+    Vec& cam_target = dComIfGp_getCamera(0)->mCamera.mViewCache.mCenter;
+    Vec& cam_pos = dComIfGp_getCamera(0)->mCamera.mViewCache.mEye;
 
     // Fetch the actor position and angles
     cXyz& actor_pos = actor->current.pos;
@@ -61,7 +63,7 @@ void move(fopAc_ac_c* actor) {
 
     // Set Link momentum to 0
     cXyz tmp(0.0f, 0.0f, 0.0f);
-    dComIfGp_getPlayer()->speed = tmp;
+    dComIfGp_getPlayer(0)->speed = tmp;
 
     if (!LOCK_CAMERA) {
         angle = (float)actor_horizontal_angle / 65536.f * (2 * M_PI);
@@ -86,8 +88,8 @@ void move(fopAc_ac_c* actor) {
     double dx = CONTROL_Y * cos(yaw) * cos(pitch) - CONTROL_X * sin(yaw);
     double dz = CONTROL_Y * sin(yaw) * cos(pitch) + CONTROL_X * cos(yaw);
 
-    auto move_speed = SPEED_PREDICATE_1 != 0 ? SPEED_PREDICATE_2 != 0 ? CAM_VERY_FAST_SPEED : CAM_FAST_SPEED : CAM_SPEED;
-    auto cam_speed = SPEED_PREDICATE_1 != 0 ? SPEED_PREDICATE_2 != 0 ? ROTATION_VERY_FAST_SPEED : ROTATION_FAST_SPEED : ROTATION_SPEED;
+    double move_speed = SPEED_PREDICATE_1 != 0 ? SPEED_PREDICATE_2 != 0 ? CAM_VERY_FAST_SPEED : CAM_FAST_SPEED : CAM_SPEED;
+    int cam_speed = SPEED_PREDICATE_1 != 0 ? SPEED_PREDICATE_2 != 0 ? ROTATION_VERY_FAST_SPEED : ROTATION_FAST_SPEED : ROTATION_SPEED;
 
     // Apply the translation with a speed factor
     actor_pos.x += move_speed * dx;
@@ -107,42 +109,42 @@ void move(fopAc_ac_c* actor) {
 KEEP_FUNC void execute() {
     if (g_actorViewEnabled || g_moveLinkEnabled) {
         // Hide HUD
-        g_drawHIO.mHUDAlpha = 0.0f;
+        g_drawHIO.mParentAlpha = 0.0f;
 
         // Lock the camera to allow for its movement
-        dComIfGp_getEventManager().mCameraPlay = 1;
+        dComIfGp_getPEvtManager()->setCameraPlay(1);
 
         // Special case for Link (this needs to be refactored to be more generic)
-        if (dComIfGp_getPlayer() && (g_moveLinkEnabled || g_currentActor->mBase.mProcName == PROC_ALINK )) {
-            dComIfGp_getPlayer()->mLinkAcch.SetGrndNone();
-            dComIfGp_getPlayer()->mLinkAcch.SetWallNone();
-            dComIfGp_getPlayer()->mLinkAcch.SetRoofNone();
-            dComIfGp_getPlayer()->mLinkAcch.OnLineCheckNone();
+        if (dComIfGp_getPlayer(0) && (g_moveLinkEnabled || g_currentActor->base.base.name == fpcNm_ALINK_e )) {
+            ((daAlink_c*)dComIfGp_getPlayer(0))->mLinkAcch.SetGrndNone();
+            ((daAlink_c*)dComIfGp_getPlayer(0))->mLinkAcch.SetWallNone();
+            ((daAlink_c*)dComIfGp_getPlayer(0))->mLinkAcch.SetRoofNone();
+            ((daAlink_c*)dComIfGp_getPlayer(0))->mLinkAcch.OnLineCheckNone();
 
-            dComIfGp_getEvent().mHalt = true;
+            dComIfGp_getEvent()->mEventStatus = true;
             event_halt = true;
 
-            move(dComIfGp_getPlayer());
+            move(dComIfGp_getPlayer(0));
         } else {
-            dComIfGp_getEvent().mHalt = false;
+            dComIfGp_getEvent()->mEventStatus = false;
             event_halt = false;
 
             move(g_currentActor);
         }
     } else {
         if (event_halt) {
-            if (dComIfGp_getPlayer()) {
-                dComIfGp_getPlayer()->mLinkAcch.ClrGrndNone();
-                dComIfGp_getPlayer()->mLinkAcch.ClrWallNone();
-                dComIfGp_getPlayer()->mLinkAcch.ClrRoofNone();
-                dComIfGp_getPlayer()->mLinkAcch.OffLineCheckNone();
+            if (dComIfGp_getPlayer(0)) {
+                ((daAlink_c*)dComIfGp_getPlayer(0))->mLinkAcch.ClrGrndNone();
+                ((daAlink_c*)dComIfGp_getPlayer(0))->mLinkAcch.ClrWallNone();
+                ((daAlink_c*)dComIfGp_getPlayer(0))->mLinkAcch.ClrRoofNone();
+                ((daAlink_c*)dComIfGp_getPlayer(0))->mLinkAcch.OffLineCheckNone();
             }
 
-            dComIfGp_getEvent().mHalt = false;
+            dComIfGp_getEvent()->mEventStatus = false;
             event_halt = false;
 
-            dComIfGp_getEventManager().mCameraPlay = 0;
-            g_drawHIO.mHUDAlpha = 1.0f;
+            dComIfGp_getPEvtManager()->setCameraPlay(0);
+            g_drawHIO.mParentAlpha = 1.0f;
         }
 
 

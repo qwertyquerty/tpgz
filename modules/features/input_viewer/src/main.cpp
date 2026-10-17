@@ -3,7 +3,8 @@
 #include "rels/include/cxx.h"
 #include "events/draw_listener.h"
 
-namespace tpgz::modules {
+namespace tpgz {
+namespace modules {
 void main() {
     g_drawListener->addListener(InputViewer::draw);
 }
@@ -11,4 +12,5 @@ void exit() {
     g_drawListener->removeListener(InputViewer::draw);
 }
 
+}
 }  // namespace tpgz::modules

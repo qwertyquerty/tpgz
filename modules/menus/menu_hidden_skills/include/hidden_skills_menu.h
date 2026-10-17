@@ -31,5 +31,4 @@ public:
     virtual void draw();
 
 private:
-    Line lines[HIDDEN_SKILLS_INDEX_COUNT];
 };

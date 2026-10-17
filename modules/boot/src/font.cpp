@@ -1,3 +1,4 @@
+#include "tpgz_math.h"
 #include "font.h"
 #include "utils/disc.h"
 #include "utils/draw.h"
@@ -6,66 +7,62 @@
 #include "rels/include/cxx.h"
 
 _Font Font::font;
-#ifdef WII_PLATFORM
-extern bool isWidescreen;
-#else
-#define isWidescreen (false)
-#endif
+#include "game_state.h"
 
 KEEP_FUNC FontCode Font::loadFont(const char* path) {
     DVDFileInfo fileInfo;
     int32_t readsize;
-    if (font.loadCode == FontCode::FNT_OK) {
+    if (font.loadCode == FNT_OK) {
         free_font();
     }
 
     if (!DVDOpen(path, &fileInfo)) {
-        font.loadCode = FontCode::FNT_ERR_FILE;
+        font.loadCode = FNT_ERR_FILE;
         return font.loadCode;
     }
     readsize = dvd_read(&fileInfo, &font.header, sizeof(_FontHeader), 0);
     if (readsize < (int32_t)sizeof(_FontHeader)) {
         DVDClose(&fileInfo);
-        font.loadCode = FontCode::FNT_ERR_READ;
+        font.loadCode = FNT_ERR_READ;
         return font.loadCode;
     }
 
     uint32_t size = font.header.glyph_count * sizeof(_Glyph);
     font.glyphs = new (-32, HEAP_ARCHIVE) _Glyph[font.header.glyph_count];
-    if (font.glyphs == nullptr) {
+    if (font.glyphs == NULL) {
         DVDClose(&fileInfo);
-        font.loadCode = FontCode::FNT_ERR_MEM;
+        font.loadCode = FNT_ERR_MEM;
         return font.loadCode;
     }
 
     if (DVDReadPrio(&fileInfo, font.glyphs, size, sizeof(font.header), 2) < (int32_t)size) {
         delete font.glyphs;
         DVDClose(&fileInfo);
-        font.loadCode = FontCode::FNT_ERR_READ;
+        font.loadCode = FNT_ERR_READ;
         return font.loadCode;
     }
 
-    if (load_texture_offset(path, &font.texture, sizeof(font.header) + size) != TexCode::TEX_OK) {
+    if (load_texture_offset(path, &font.texture, sizeof(font.header) + size) != TEX_OK) {
         delete font.glyphs;
         DVDClose(&fileInfo);
-        font.loadCode = FontCode::FNT_ERR_TEXTURE;
+        font.loadCode = FNT_ERR_TEXTURE;
         return font.loadCode;
     }
     DVDClose(&fileInfo);
 
-    font.loadCode = FontCode::FNT_OK;
+    font.loadCode = FNT_OK;
     return font.loadCode;
 }
 
 KEEP_FUNC void Font::free_font() {
-    if (font.glyphs != nullptr) {
+    if (font.glyphs != NULL) {
         delete font.glyphs;
         font.glyphs = 0;
     }
     free_texture(&font.texture);
     memset(&font, 0, sizeof(_Font));
     // The next line is redundant, but is still there for good measure
-    font.loadCode = FontCode::FNT_UNLOADED;
+    font.loadCode = FNT_UNLOADED;
 }
 
 void PositionedGlyph::render(uint32_t color, Texture* texture) {
@@ -83,9 +80,17 @@ PositionedGlyph DecodedGlyph::position(float _x, float _y, float factor) {
     float trx = glyph->maxX;
     float tlx = glyph->minX;
 
-    return {{{vlx, vty}, {vrx, vty}, {vrx, vby}, {vlx, vby}},
-            {{tlx, tty}, {trx, tty}, {trx, tby}, {tlx, tby}},
-            (_x + width * factor * (isWidescreen ? 0.75f : 1.0f))};
+    PositionedGlyph positioned;
+    positioned.vertices[0] = makeVec2(vlx, vty);
+    positioned.vertices[1] = makeVec2(vrx, vty);
+    positioned.vertices[2] = makeVec2(vrx, vby);
+    positioned.vertices[3] = makeVec2(vlx, vby);
+    positioned.tex_coords[0] = makeVec2(tlx, tty);
+    positioned.tex_coords[1] = makeVec2(trx, tty);
+    positioned.tex_coords[2] = makeVec2(trx, tby);
+    positioned.tex_coords[3] = makeVec2(tlx, tby);
+    positioned.next_x = _x + width * factor * (isWidescreen ? 0.75f : 1.0f);
+    return positioned;
 }
 
 bool Font::lookupGlyph(char c, DecodedGlyph& glyph) {
@@ -103,7 +108,7 @@ bool Font::lookupGlyph(char c, DecodedGlyph& glyph) {
 KEEP_FUNC float Font::renderChar(char c, float x, float y, uint32_t color, float size) {
     DecodedGlyph glyph;
     if (lookupGlyph(c, glyph)) {
-        auto positioned = glyph.position(x, y, size / font.header.base_size);
+        PositionedGlyph positioned = glyph.position(x, y, size / font.header.base_size);
         positioned.render(color, &font.texture);
         return positioned.next_x;
     } else {

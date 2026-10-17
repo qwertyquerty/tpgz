@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef TPGZ_MODULES_MENUS_MENU_TOOLS_CONTROLLER_INCLUDE_TOOLS_CONTROLLER_MENU_H
+#define TPGZ_MODULES_MENUS_MENU_TOOLS_CONTROLLER_INCLUDE_TOOLS_CONTROLLER_MENU_H
 #include "menus/menu.h"
 #include "tools.h"
 
@@ -17,5 +17,6 @@ public:
     virtual void draw();
 
 private:
-    Line lines[TOOLS_CONTROLLER_COUNT];
 };
+
+#endif

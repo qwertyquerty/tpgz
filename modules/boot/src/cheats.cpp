@@ -1,17 +1,23 @@
+#include "f_op/f_op_actor_tag.h"
+#include "d/actor/d_a_alink.h"
 #include "cheats.h"
 #include "commands.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/f_op/f_op_actor_mng.h"
-#include "libtp_c/include/d/d_procname.h"
-#include "libtp_c/include/d/a/d_a_e_zs.h"
-#include "libtp_c/include/d/a/d_a_e_s1.h"
-#include "libtp_c/include/d/d_item.h"
+#include "d/d_com_inf_game.h"
+#include "f_op/f_op_actor_mng.h"
+#include "f_pc/f_pc_name.h"
+#include "d/actor/d_a_e_zs.h"
+#include "d/actor/d_a_e_s1.h"
+#include "d/d_item.h"
 #include "rels/include/patch.h"
-#include "libtp_c/include/defines.h"
+#include "rels/include/defines.h"
 #include "gz_flags.h"
 #include "rels/include/defines.h"
 #include "menus/utils/menu_mgr.h"
 #include "fifo_queue.h"
+
+static u8* zsField(daE_ZS_c* zs, u32 gcnOffset) {
+    return reinterpret_cast<u8*>(zs) + sizeof(fopEn_enemy_c) + (gcnOffset - 0x5AC);
+}
 
 #ifdef GCN_PLATFORM
 #define INVINCIBLE_ENEMIES_OFFSET (0x328)
@@ -19,7 +25,7 @@
 #endif
 #ifdef WII_PLATFORM
 #define INVINCIBLE_ENEMIES_OFFSET (0x244)
-#define cc_at_check cc_at_check_fopAc_ac_c____dCcU_AtInfo___
+#define cc_at_check cc_at_check__FP10fopAc_ac_cP11dCcU_AtInfo
 #endif
 
 extern "C" {
@@ -47,26 +53,25 @@ void GZ_applyCheats() {
 
                 if (actor != NULL) {
                     switch (fopAcM_GetName(actor)) {
-                    case PROC_E_ZS: {
+                    case fpcNm_E_ZS_e: {
                         daE_ZS_c* zs = static_cast<daE_ZS_c*>(actor);
 
                         // if action is damage action
-                        if (zs->mAction == 2) {
-                            zs->mAction = 1;  // set back to wait action, mode 0
-                            zs->mMode = 0;
+                        if (*reinterpret_cast<int*>(zsField(zs, 0x660)) == 2) {
+                            zs->setActionMode(1, 0);
 
-                            zs->mCyl.mGObjInf.OnTgSetBit();  // turn back on hit collision
-                            zs->mCyl.mGObjInf.OnCoSetBit();  // turn back on push collision
-                            zs->mHealth = 20;                // reset health back to max
+                            reinterpret_cast<dCcD_Cyl*>(zsField(zs, 0x8C8))->GetGObjInf()->OnTgSetBit();  // turn back on hit collision
+                            reinterpret_cast<dCcD_Cyl*>(zsField(zs, 0x8C8))->GetGObjInf()->OnCoSetBit();  // turn back on push collision
+                            zs->health = 20;                // reset health back to max
                         }
                         break;
                     }
-                    case PROC_E_S1: {
+                    case fpcNm_E_S1_e: {
                         e_s1_class* s1 = static_cast<e_s1_class*>(actor);
-                        s1->mHealth = 50;
+                        s1->health = 50;
 
-                        if (s1->mAction == 9 || s1->mAction == 5 || s1->mAction == 10) {
-                            s1->mAction = 0;  // reset action back to idle if in damage/fail action
+                        if (s1->mMode == 9 || s1->mMode == 5 || s1->mMode == 10) {
+                            s1->mMode = 0;  // reset action back to idle if in damage/fail action
                         }
                         break;
                     }
@@ -86,16 +91,16 @@ void GZ_applyCheats() {
     }
 
     if (GZ_checkCheat(STNG_CHEATS_INVINCIBLE)) {
-        daAlink_c* player = dComIfGp_getPlayer();
+        daAlink_c* player = (daAlink_c*)dComIfGp_getPlayer(0);
         if (player != NULL) {
             for (int i = 0; i < 3; i++) {
-                player->field_0x850[i].mGObjInf.OffTgSetBit();
-                player->field_0x850[i].mGObjInf.ResetTgHit();
+                player->mTgCyls[i].GetGObjInf()->OffTgSetBit();
+                player->mTgCyls[i].ResetTgHit();
             }
 
             if (player->checkWolf()) {
-                player->field_0xFB8.mGObjInf.OffTgSetBit();
-                player->field_0xFB8.mGObjInf.ResetTgHit();
+                player->mAtSph.GetGObjInf()->OffTgSetBit();
+                player->mAtSph.ResetTgHit();
             }
         }
     }
@@ -106,7 +111,7 @@ void GZ_applyCheats() {
     }
 
     if (GZ_checkCheat(STNG_CHEATS_INFINITE_AIR)) {
-        dComIfGs_setOxygen(600);
+        dComIfGp_setOxygen(600);
     }
 
     if (GZ_checkCheat(STNG_CHEATS_INFINITE_OIL)) {
@@ -114,9 +119,9 @@ void GZ_applyCheats() {
     }
 
     if (GZ_checkCheat(STNG_CHEATS_INFINITE_BOMBS)) {
-        dComIfGs_setBombNum(BOMB_BAG_1, 99);
-        dComIfGs_setBombNum(BOMB_BAG_2, 99);
-        dComIfGs_setBombNum(BOMB_BAG_3, 99);
+        dComIfGs_setBombNum(0, 99);
+        dComIfGs_setBombNum(1, 99);
+        dComIfGs_setBombNum(2, 99);
     }
 
     if (GZ_checkCheat(STNG_CHEATS_INFINITE_RUPEES)) {
@@ -132,42 +137,42 @@ void GZ_applyCheats() {
     }
 
     if (GZ_checkCheat(STNG_CHEATS_SUPER_CLAWSHOT)) {
-        daAlinkHIO_hookshot.mShootSpeed = 2870.0f;
-        daAlinkHIO_hookshot.mMaxLength = 69420.0f;
-        daAlinkHIO_hookshot.mReturnSpeed = 2870.0f;
-        daAlinkHIO_hookshot.mClawReturnSpeed = 500.0f;
+        const_cast<daAlinkHIO_hookshot_c1&>(daAlinkHIO_hookshot_c0::m).mShootSpeed = 2870.0f;
+        const_cast<daAlinkHIO_hookshot_c1&>(daAlinkHIO_hookshot_c0::m).mMaxLength = 69420.0f;
+        const_cast<daAlinkHIO_hookshot_c1&>(daAlinkHIO_hookshot_c0::m).mReturnSpeed = 2870.0f;
+        const_cast<daAlinkHIO_hookshot_c1&>(daAlinkHIO_hookshot_c0::m).mStickReturnSpeed = 500.0f;
     } else {
-        daAlinkHIO_hookshot.mShootSpeed = 100.0f;
-        daAlinkHIO_hookshot.mMaxLength = 2000.0f;
-        daAlinkHIO_hookshot.mReturnSpeed = 150.0f;
-        daAlinkHIO_hookshot.mClawReturnSpeed = 60.0f;
+        const_cast<daAlinkHIO_hookshot_c1&>(daAlinkHIO_hookshot_c0::m).mShootSpeed = 100.0f;
+        const_cast<daAlinkHIO_hookshot_c1&>(daAlinkHIO_hookshot_c0::m).mMaxLength = 2000.0f;
+        const_cast<daAlinkHIO_hookshot_c1&>(daAlinkHIO_hookshot_c0::m).mReturnSpeed = 150.0f;
+        const_cast<daAlinkHIO_hookshot_c1&>(daAlinkHIO_hookshot_c0::m).mStickReturnSpeed = 60.0f;
     }
 
     if (GZ_checkCheat(STNG_CHEATS_DOOR_STORAGE)) {
-        if (dComIfGp_getPlayer()) {
-            dComIfGp_getPlayer()->mLinkAcch.SetWallNone();
-            dComIfGp_getPlayer()->mLinkAcch.OnLineCheckNone();
+        if (dComIfGp_getPlayer(0)) {
+            ((daAlink_c*)dComIfGp_getPlayer(0))->mLinkAcch.SetWallNone();
+            ((daAlink_c*)dComIfGp_getPlayer(0))->mLinkAcch.OnLineCheckNone();
             l_doorCollision = true;
         }
     } else {
-        if (dComIfGp_getPlayer() && l_doorCollision) {
-            dComIfGp_getPlayer()->mLinkAcch.ClrWallNone();
-            dComIfGp_getPlayer()->mLinkAcch.OffLineCheckNone();
+        if (dComIfGp_getPlayer(0) && l_doorCollision) {
+            ((daAlink_c*)dComIfGp_getPlayer(0))->mLinkAcch.ClrWallNone();
+            ((daAlink_c*)dComIfGp_getPlayer(0))->mLinkAcch.OffLineCheckNone();
             l_doorCollision = false;
         }
     }
 
     if (GZ_checkCheat(STNG_CHEATS_DISABLE_ITEM_TIMER)) {
-        daItemBase__data.field_0x16 = 0x7FFF;
+        const_cast<daItemBase_data&>(daItemBase_c::m_data).mWaitTime = 0x7FFF;
     } else {
-        daItemBase__data.field_0x16 = 240;
+        const_cast<daItemBase_data&>(daItemBase_c::m_data).mWaitTime = 240;
     }
 
 #ifdef WII_PLATFORM
     if (GZ_checkCheat(STNG_CHEATS_GALE_LJA)) {
-        if (dComIfGp_getPlayer() && dComIfGp_getPlayer()->mActionID == 0x60 &&
-            dComIfGp_getPlayer()->mEquipItem == NO_ITEM) {
-            dComIfGp_getPlayer()->mEquipItem = 0x0103;
+        if (dComIfGp_getPlayer(0) && ((daAlink_c*)dComIfGp_getPlayer(0))->mProcID == 0x60 &&
+            ((daAlink_c*)dComIfGp_getPlayer(0))->mEquipItem == dItemNo_NONE_e) {
+            ((daAlink_c*)dComIfGp_getPlayer(0))->mEquipItem = 0x0103;
         }
     }
 #endif

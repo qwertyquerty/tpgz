@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef TPGZ_MODULES_MENUS_MENU_GLITCHLESS_SAVES_INCLUDE_MENU_GLITCHLESS_SAVES_H
+#define TPGZ_MODULES_MENUS_MENU_GLITCHLESS_SAVES_INCLUDE_MENU_GLITCHLESS_SAVES_H
 #include "menus/menu.h"
 
 enum GlitchlessPracticeIndex {
@@ -46,5 +46,6 @@ public:
     virtual void draw();
 
 private:
-    Line lines[GL_SAVES_NUM];
 };
+
+#endif

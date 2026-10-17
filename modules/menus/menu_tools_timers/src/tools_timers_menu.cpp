@@ -3,7 +3,7 @@
 #include "commands.h"
 #include "global_data.h"
 #include "timer.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
+#include "d/d_com_inf_game.h"
 #include "gz_flags.h"
 #include "rels/include/defines.h"
 #include "menus/utils/menu_mgr.h"
@@ -14,17 +14,20 @@ const char l_descTemplates[TOOLS_COUNT][100] = {
     "In-game time timer: %s to start/stop, %s to reset",
 };
 
+static Line lines[TOOLS_TIMERS_COUNT] = {
+    {"timer", TIMER_INDEX,
+                 "frame timer: " TIMER_TOGGLE_TEXT " to start/stop, " TIMER_RESET_TEXT " to reset",
+                 true, ACTIVE_FUNC(STNG_TOOLS_TIMER)},
+                {"load timer", LOAD_TIMER_INDEX, "loading zone timer: " TIMER_RESET_TEXT " to reset",
+                 true, ACTIVE_FUNC(STNG_TOOLS_LOAD_TIMER)},
+                {"igt timer", IGT_TIMER_INDEX,
+                 "In-game time timer: " TIMER_TOGGLE_TEXT " to start/stop, " TIMER_RESET_TEXT
+                 " to reset",
+                 true, ACTIVE_FUNC(STNG_TOOLS_IGT_TIMER)}
+};
+
 KEEP_FUNC ToolsTimersMenu::ToolsTimersMenu(Cursor& cursor)
-    : Menu(cursor),
-      lines{{"timer", TIMER_INDEX,
-             "frame timer: " TIMER_TOGGLE_TEXT " to start/stop, " TIMER_RESET_TEXT " to reset",
-             true, ACTIVE_FUNC(STNG_TOOLS_TIMER)},
-            {"load timer", LOAD_TIMER_INDEX, "loading zone timer: " TIMER_RESET_TEXT " to reset",
-             true, ACTIVE_FUNC(STNG_TOOLS_LOAD_TIMER)},
-            {"igt timer", IGT_TIMER_INDEX,
-             "In-game time timer: " TIMER_TOGGLE_TEXT " to start/stop, " TIMER_RESET_TEXT
-             " to reset",
-             true, ACTIVE_FUNC(STNG_TOOLS_IGT_TIMER)}} {
+    : Menu(cursor) {
 }
 
 ToolsTimersMenu::~ToolsTimersMenu() {}
@@ -35,12 +38,11 @@ GZSettingID l_mapping[] = {
     STNG_TOOLS_IGT_TIMER
 };
 
-#define set_active(id, status)                                                                     \
-    ({                                                                                             \
-        auto* stng = GZStng_get(id);                                                        \
-        if (stng)                                                                                  \
-            *(bool*)stng->data = status;                                                           \
-    })
+static void set_active(GZSettingID id, bool status) {
+    GZSettingEntry* stng = GZStng_get(id);
+    if (stng)
+        *(bool*)stng->data = status;
+}
 
 void ToolsTimersMenu::draw() {
     if (GZ_getButtonTrig(BACK_BUTTON)) {
@@ -49,12 +51,12 @@ void ToolsTimersMenu::draw() {
     }
 
     if (GZ_getButtonTrig(SELECTION_BUTTON)) {
-        GZSettingEntry* stng = nullptr;
+        GZSettingEntry* stng = NULL;
 
         stng = GZStng_get(l_mapping[cursor.y]);
 
         if (!stng) {
-            stng = new GZSettingEntry{l_mapping[cursor.y], sizeof(bool), new bool};
+            stng = new GZSettingEntry(l_mapping[cursor.y], sizeof(bool), new bool);
             g_settings.push_back(stng);
         }
 

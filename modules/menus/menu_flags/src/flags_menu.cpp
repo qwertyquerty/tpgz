@@ -3,15 +3,17 @@
 #include "rels/include/defines.h"
 #include "menus/utils/menu_mgr.h"
 
+static Line lines[FLAGS_COUNT] = {
+    {"general flags", GENERAL_FLAGS_INDEX, "General flags", false},
+    {"dungeon flags", DUNGEON_FLAGS_INDEX, "Dungeon flags", false},
+    {"portal flags", PORTAL_FLAGS_INDEX, "Warp portal flags", false},
+    {"rupee flags", RUPEE_FLAGS_INDEX, "Rupee related flags", false},
+    {"flag records", FLAG_RECORDS_INDEX, "Edit flag records", false},
+    {"flag log", FLAG_LOG_INDEX, "Toggle the flag log", false},
+};
+
 KEEP_FUNC FlagsMenu::FlagsMenu(Cursor& cursor)
-    : Menu(cursor), lines{
-                        {"general flags", GENERAL_FLAGS_INDEX, "General flags", false},
-                        {"dungeon flags", DUNGEON_FLAGS_INDEX, "Dungeon flags", false},
-                        {"portal flags", PORTAL_FLAGS_INDEX, "Warp portal flags", false},
-                        {"rupee flags", RUPEE_FLAGS_INDEX, "Rupee related flags", false},
-                        {"flag records", FLAG_RECORDS_INDEX, "Edit flag records", false},
-                        {"flag log", FLAG_LOG_INDEX, "Toggle the flag log", false},
-                    } {}
+    : Menu(cursor) {}
 
 FlagsMenu::~FlagsMenu() {}
 

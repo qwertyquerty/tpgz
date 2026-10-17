@@ -22,5 +22,4 @@ public:
     virtual void draw();
 
 private:
-    Line lines[PAUSE_INDEX_COUNT];
 };

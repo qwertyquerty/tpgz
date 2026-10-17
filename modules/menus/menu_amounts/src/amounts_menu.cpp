@@ -1,28 +1,29 @@
 #include "menus/menu_amounts/include/amounts_menu.h"
 #include <cstdio>
-#include "libtp_c/include/d/com/d_com_inf_game.h"
+#include "d/d_com_inf_game.h"
 #include "gz_flags.h"
 #include "rels/include/defines.h"
 #include "menus/utils/menu_mgr.h"
+
+static Line lines[10] = {
+    {"health:", HEALTH_INDEX, "Current health by quarter"},
+    {"hearts:", MAX_HEALTH_INDEX, "Amount of hearts collected"},
+    {"arrows:", ARROW_AMMO_INDEX, "Current arrow count"},
+    {"bomb bag 1 num:", BOMB_BAG_1_AMMO_INDEX, "Amount of bombs in bag 1"},
+    {"bomb bag 2 num:", BOMB_BAG_2_AMMO_INDEX, "Amount of bombs in bag 2"},
+    {"bomb bag 3 num:", BOMB_BAG_3_AMMO_INDEX, "Amount of bombs in bag 3"},
+    {"seeds:", SLINGSHOT_AMMO_INDEX, "Current seed count"},
+    {"heart pieces:", HEART_PIECE_COUNT_INDEX, "Amount of heart pieces collected"},
+    {"poes:", POE_COUNT_INDEX, "Amount of poes collected"},
+    {"rupees:", RUPEE_COUNT_INDEX, "Current rupee count"},
+};
 
 KEEP_FUNC AmountsMenu::AmountsMenu(Cursor& cursor, AmountsData& data)
     : Menu(cursor), l_healthNum(data.l_healthNum), l_maxHealthNum(data.l_maxHealthNum),
       l_extraHealthNum(data.l_extraHealthNum), l_arrowNum(data.l_arrowNum),
       l_bag1Num(data.l_bag1Num), l_bag2Num(data.l_bag2Num), l_bag3Num(data.l_bag3Num),
       l_seedNum(data.l_seedNum), l_poeNum(data.l_poeNum), l_hpNum(data.l_hpNum),
-      l_rupeeNum(data.l_rupeeNum),
-      lines{
-          {"health:", HEALTH_INDEX, "Current health by quarter"},
-          {"hearts:", MAX_HEALTH_INDEX, "Amount of hearts collected"},
-          {"arrows:", ARROW_AMMO_INDEX, "Current arrow count"},
-          {"bomb bag 1 num:", BOMB_BAG_1_AMMO_INDEX, "Amount of bombs in bag 1"},
-          {"bomb bag 2 num:", BOMB_BAG_2_AMMO_INDEX, "Amount of bombs in bag 2"},
-          {"bomb bag 3 num:", BOMB_BAG_3_AMMO_INDEX, "Amount of bombs in bag 3"},
-          {"seeds:", SLINGSHOT_AMMO_INDEX, "Current seed count"},
-          {"heart pieces:", HEART_PIECE_COUNT_INDEX, "Amount of heart pieces collected"},
-          {"poes:", POE_COUNT_INDEX, "Amount of poes collected"},
-          {"rupees:", RUPEE_COUNT_INDEX, "Current rupee count"},
-      } {}
+      l_rupeeNum(data.l_rupeeNum) {}
 
 AmountsMenu::~AmountsMenu() {}
 
@@ -34,9 +35,9 @@ void AmountsMenu::draw() {
     l_extraHealthNum = dComIfGs_getMaxLife() % 5;
     l_maxHealthNum = dComIfGs_getMaxLife() / 5;
     l_arrowNum = dComIfGs_getArrowNum();
-    l_bag1Num = dComIfGs_getBombNum(BOMB_BAG_1);
-    l_bag2Num = dComIfGs_getBombNum(BOMB_BAG_2);
-    l_bag3Num = dComIfGs_getBombNum(BOMB_BAG_3);
+    l_bag1Num = dComIfGs_getBombNum(0);
+    l_bag2Num = dComIfGs_getBombNum(1);
+    l_bag3Num = dComIfGs_getBombNum(2);
     l_seedNum = dComIfGs_getPachinkoNum();
     l_poeNum = dComIfGs_getPohSpiritNum();
     l_hpNum = dComIfGs_getMaxLife();
@@ -75,15 +76,15 @@ void AmountsMenu::draw() {
         break;
     case BOMB_BAG_1_AMMO_INDEX:
         Cursor::moveList(l_bag1Num);
-        dComIfGs_setBombNum(BOMB_BAG_1, l_bag1Num);
+        dComIfGs_setBombNum(0, l_bag1Num);
         break;
     case BOMB_BAG_2_AMMO_INDEX:
         Cursor::moveList(l_bag2Num);
-        dComIfGs_setBombNum(BOMB_BAG_2, l_bag2Num);
+        dComIfGs_setBombNum(1, l_bag2Num);
         break;
     case BOMB_BAG_3_AMMO_INDEX:
         Cursor::moveList(l_bag3Num);
-        dComIfGs_setBombNum(BOMB_BAG_3, l_bag3Num);
+        dComIfGs_setBombNum(2, l_bag3Num);
         break;
     case SLINGSHOT_AMMO_INDEX:
         Cursor::moveList(l_seedNum);

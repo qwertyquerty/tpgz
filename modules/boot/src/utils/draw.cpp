@@ -1,5 +1,5 @@
 #include "utils/draw.h"
-#include "libtp_c/include/m_Do/m_Do_printf.h"
+#include "m_Do/m_Do_printf.h"
 #include "utils/texture.h"
 #include "rels/include/defines.h"
 
@@ -10,7 +10,7 @@ Texture blankTex;
 namespace Draw {
 KEEP_FUNC void init() {
     load_texture("tpgz/tex/blank.tex", &blankTex);
-    if (blankTex.loadCode != TexCode::TEX_OK) {
+    if (blankTex.loadCode != TEX_OK) {
         OSReport("Could not load blank texture (Code: %d)\n", blankTex.loadCode);
     }
 }
@@ -49,7 +49,7 @@ KEEP_FUNC void add_vertex(uint32_t color, Vec2 point, Vec2 tex) {
 }
 
 KEEP_FUNC void add_vertex(uint32_t color, Vec2 point) {
-    add_vertex(color, point, {0.0f, 0.0f});
+    add_vertex(color, point, makeVec2(0.0f, 0.0f));
 }
 
 KEEP_FUNC void end() {
@@ -66,10 +66,10 @@ KEEP_FUNC void drawQuad(uint32_t color, Vec2 p[4], Vec2 tex[4]) {
 
 KEEP_FUNC void drawQuad(uint32_t color, Vec2 p[4], GXTexObj* texture) {
     Vec2 tex[4] = {
-        {0.0, 0.0},
-        {1.0, 0.0},
-        {1.0, 1.0},
-        {0.0, 1.0},
+        makeVec2(0.0, 0.0),
+        makeVec2(1.0, 0.0),
+        makeVec2(1.0, 1.0),
+        makeVec2(0.0, 1.0),
     };
     drawQuad(color, p, tex, texture);
 }
@@ -89,11 +89,11 @@ KEEP_FUNC void drawQuadOutline(uint32_t color, Vec2 p[4]) {
 
 KEEP_FUNC void drawQuadOutline(uint32_t color, Vec2 p[4], uint8_t width) {
     begin_outline(5, width);
-    add_vertex(color, p[0], {0.0, 0.0});
-    add_vertex(color, p[1], {1.0, 0.0});
-    add_vertex(color, p[2], {1.0, 1.0});
-    add_vertex(color, p[3], {0.0, 1.0});
-    add_vertex(color, p[0], {0.0, 0.0});
+    add_vertex(color, p[0], makeVec2(0.0, 0.0));
+    add_vertex(color, p[1], makeVec2(1.0, 0.0));
+    add_vertex(color, p[2], makeVec2(1.0, 1.0));
+    add_vertex(color, p[3], makeVec2(0.0, 1.0));
+    add_vertex(color, p[0], makeVec2(0.0, 0.0));
     end();
 }
 
@@ -103,10 +103,10 @@ KEEP_FUNC void drawRect(uint32_t color, Vec2 pos, Vec2 dim) {
 
 KEEP_FUNC void drawRect(uint32_t color, Vec2 pos, Vec2 dim, GXTexObj* texture) {
     Vec2 tex[4] = {
-        {0.0, 0.0},
-        {1.0, 0.0},
-        {1.0, 1.0},
-        {0.0, 1.0},
+        makeVec2(0.0, 0.0),
+        makeVec2(1.0, 0.0),
+        makeVec2(1.0, 1.0),
+        makeVec2(0.0, 1.0),
     };
     drawRect(color, pos, dim, tex, texture);
 }
@@ -116,10 +116,10 @@ KEEP_FUNC void drawRect(uint32_t color, Vec2 pos, Vec2 dim, Vec2 tex[4]) {
 }
 
 KEEP_FUNC void drawRect(uint32_t color, Vec2 pos, Vec2 dim, Vec2 tex[4], GXTexObj* texture) {
-    Vec2 vertices[4] = {{pos.x, pos.y},
-                        {pos.x + dim.x, pos.y},
-                        {pos.x + dim.x, pos.y + dim.y},
-                        {pos.x, pos.y + dim.y}};
+    Vec2 vertices[4] = {makeVec2(pos.x, pos.y),
+                        makeVec2(pos.x + dim.x, pos.y),
+                        makeVec2(pos.x + dim.x, pos.y + dim.y),
+                        makeVec2(pos.x, pos.y + dim.y)};
     drawQuad(color, vertices, tex, texture);
 }
 
@@ -128,10 +128,10 @@ KEEP_FUNC void drawRectOutline(uint32_t color, Vec2 pos, Vec2 dim) {
 }
 
 KEEP_FUNC void drawRectOutline(uint32_t color, Vec2 pos, Vec2 dim, uint8_t width) {
-    Vec2 vertices[4] = {{pos.x, pos.y},
-                        {pos.x + dim.x, pos.y},
-                        {pos.x + dim.x, pos.y + dim.y},
-                        {pos.x, pos.y + dim.y}};
+    Vec2 vertices[4] = {makeVec2(pos.x, pos.y),
+                        makeVec2(pos.x + dim.x, pos.y),
+                        makeVec2(pos.x + dim.x, pos.y + dim.y),
+                        makeVec2(pos.x, pos.y + dim.y)};
     drawQuadOutline(color, vertices, width);
 }
 

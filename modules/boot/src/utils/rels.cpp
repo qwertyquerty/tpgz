@@ -2,19 +2,14 @@
 #include <cstring>
 #include "rels/include/cxx.h"
 #include "rels/include/memory.h"
-#include "gcn_c/include/dvd.h"
-#include "libtp_c/include/dolphin/os/OSCache.h"
+#include <dvd.h>
+#include "os/OSCache.h"
+#include "os/OSModule.h"
 
-extern "C" {
-#ifndef WII_PLATFORM
-#define resize1_JKRHeap resize__7JKRHeapFPvUlP7JKRHeap
-#else
-#define resize1_JKRHeap JKRHeap__resize_void____unsigned_long__JKRHeap___
-#endif
-void resize1_JKRHeap(void* ptr, uint32_t size, void* heap);
-}
+#include "JSystem/JKernel/JKRHeap.h"
 
-namespace tpgz::dyn {
+namespace tpgz {
+namespace dyn {
 
 GZModule::GZModule(const char* path) {
     strncpy(m_path, path, sizeof(m_path));
@@ -38,10 +33,10 @@ bool GZModule::load(bool negativeAlignment) {
     }
 
     // Get the length of the file
-    uint32_t length = fileInfo.len;
+    uint32_t length = fileInfo.length;
 
-    // Round the length to be in multiples of DVD_READ_SIZE
-    length = (length + DVD_READ_SIZE - 1) & ~(DVD_READ_SIZE - 1);
+    // Round the length to be in multiples of 0x20
+    length = (length + 0x20 - 1) & ~(0x20 - 1);
 
     // Buffers that DVDReadPrio uses must be aligned to 0x20 bytes
     int32_t alignment;
@@ -72,7 +67,8 @@ bool GZModule::load(bool negativeAlignment) {
 
     // Get the REL's BSS size and allocate memory for it
     OSModuleInfo* relFile = reinterpret_cast<OSModuleInfo*>(fileData);
-    uint32_t bssSize = relFile->bssSize;
+    OSModuleHeader* relHeader = reinterpret_cast<OSModuleHeader*>(fileData);
+    uint32_t bssSize = relHeader->bssSize;
 
     // If bssSize is 0, then use an arbitrary size
     if (bssSize == 0) {
@@ -80,7 +76,7 @@ bool GZModule::load(bool negativeAlignment) {
     }
 
     // Handle the alignment for the BSS
-    int32_t bssAlignment = relFile->bssAlignment;
+    int32_t bssAlignment = relHeader->bssAlign;
     if (negativeAlignment) {
         bssAlignment = -bssAlignment;
     }
@@ -109,7 +105,7 @@ bool GZModule::load(bool negativeAlignment) {
     OSRestoreInterrupts(enable);
 
     // Call the REL's prolog functon
-    reinterpret_cast<void (*)()>(relFile->prologFuncOffset)();
+    reinterpret_cast<void (*)()>(relHeader->prolog)();
 
     m_rel = relFile;
     m_bss = bssArea;
@@ -133,7 +129,7 @@ bool GZModule::loadFixed(bool negativeAlignment) {
     // the BSS area size, the fixed REL size, and the BSS alignment are needed later
 
     // Allocate to the back of the heap to avoid possible fragmentation
-    constexpr uint32_t dataSize = 0x60;
+    const uint32_t dataSize = 0x60;
     uint8_t* fileData = new (-0x20) uint8_t[dataSize];
     clear_DC_IC_Cache(fileData, dataSize);
 
@@ -149,15 +145,16 @@ bool GZModule::loadFixed(bool negativeAlignment) {
     }
 
     // Get the length of the file
-    uint32_t length = fileInfo.len;
+    uint32_t length = fileInfo.length;
 
-    // Round the length to be in multiples of DVD_READ_SIZE
-    const uint32_t adjustedLength = (length + DVD_READ_SIZE - 1) & ~(DVD_READ_SIZE - 1);
+    // Round the length to be in multiples of 0x20
+    const uint32_t adjustedLength = (length + 0x20 - 1) & ~(0x20 - 1);
 
     // Increase the fixed REL size to account for the BSS's alignment requirement
     OSModuleInfo* relFile = reinterpret_cast<OSModuleInfo*>(fileData);
-    uint32_t fixSize = relFile->fixSize;
-    const uint32_t bssAlign = relFile->bssAlignment;
+    OSModuleHeader* relHeader = reinterpret_cast<OSModuleHeader*>(fileData);
+    uint32_t fixSize = relHeader->fixSize;
+    const uint32_t bssAlign = relHeader->bssAlign;
 
     // Make sure the size is properly aligned
     if (((fixSize / bssAlign) * bssAlign) != fixSize) {
@@ -168,7 +165,7 @@ bool GZModule::loadFixed(bool negativeAlignment) {
     }
 
     // Add the BSS size to the length
-    const uint32_t bssSize = relFile->bssSize;
+    const uint32_t bssSize = relHeader->bssSize;
     length += bssSize;
 
     // If the length plus the BSS size is less than the adjusted file size, then use the
@@ -210,6 +207,8 @@ bool GZModule::loadFixed(bool negativeAlignment) {
         return false;
     }
 
+    relHeader = reinterpret_cast<OSModuleHeader*>(fileData);
+
     // Get the address of the BSS
     void* bssArea = reinterpret_cast<void*>(reinterpret_cast<uint32_t>(fileData) + fixSize);
 
@@ -233,13 +232,13 @@ bool GZModule::loadFixed(bool negativeAlignment) {
     OSRestoreInterrupts(enable);
 
     // Resize the allocated memory to remove the space used by the unnecessary relocation data
-    resize1_JKRHeap(relFile, fixSize + bssSize, nullptr);
+    JKRHeap::resize(relFile, fixSize + bssSize, NULL);
 
     // Call the REL's prolog functon
-    reinterpret_cast<void (*)()>(relFile->prologFuncOffset)();
+    reinterpret_cast<void (*)()>(relHeader->prolog)();
 
     m_rel = relFile;
-    m_bss = nullptr;
+    m_bss = NULL;
     m_length = fixSize + bssSize;
     m_loaded = true;
     return true;
@@ -257,10 +256,10 @@ bool GZModule::load(bool negativeAlignment, bool fixedLinking) {
     }
 
     // Get the length of the file
-    uint32_t length = fileInfo.len;
+    uint32_t length = fileInfo.length;
 
-    // Round the length to be in multiples of DVD_READ_SIZE
-    length = (length + DVD_READ_SIZE - 1) & ~(DVD_READ_SIZE - 1);
+    // Round the length to be in multiples of 0x20
+    length = (length + 0x20 - 1) & ~(0x20 - 1);
 
     // Buffers that DVDReadPrio uses must be aligned to 0x20 bytes
     int32_t alignment;
@@ -292,7 +291,8 @@ bool GZModule::load(bool negativeAlignment, bool fixedLinking) {
 
     // Get the REL's BSS size and allocate memory for it
     OSModuleInfo* relFile = reinterpret_cast<OSModuleInfo*>(fileData);
-    uint32_t bssSize = relFile->bssSize;
+    OSModuleHeader* relHeader = reinterpret_cast<OSModuleHeader*>(fileData);
+    uint32_t bssSize = relHeader->bssSize;
 
     // If bssSize is 0, then use an arbitrary size
     if (bssSize == 0) {
@@ -300,7 +300,7 @@ bool GZModule::load(bool negativeAlignment, bool fixedLinking) {
     }
 
     // Handle the alignment for the BSS
-    int32_t bssAlignment = relFile->bssAlignment;
+    int32_t bssAlignment = relHeader->bssAlign;
     if (negativeAlignment) {
         bssAlignment = -bssAlignment;
     }
@@ -338,13 +338,13 @@ bool GZModule::load(bool negativeAlignment, bool fixedLinking) {
     if (fixedLinking) {
         // Resize the allocated memory to remove the space used by the unnecessary relocation data.
         // relFile->fixSize becomes a pointer.
-        uint32_t fixedSize = relFile->fixSize - (uint32_t)relFile;
-        resize1_JKRHeap(relFile, fixedSize, nullptr);
+        uint32_t fixedSize = relHeader->fixSize - (uint32_t)relFile;
+        JKRHeap::resize(relFile, fixedSize, NULL);
         length = fixedSize;
     }
 
     // Call the REL's prolog functon
-    reinterpret_cast<void (*)()>(relFile->prologFuncOffset)();
+    reinterpret_cast<void (*)()>(relHeader->prolog)();
 
     m_rel = relFile;
     m_bss = bssArea;
@@ -365,9 +365,9 @@ bool GZModule::close() {
         return true;
     }
 
-    auto relFile = m_rel;
-    auto bss = m_bss;
-    auto length = m_length;
+    OSModuleInfo* relFile = m_rel;
+    void* bss = m_bss;
+    uint32_t length = m_length;
 
     // Make sure a proper pointer for relFile was passed in
     if (!relFile) {
@@ -375,7 +375,7 @@ bool GZModule::close() {
     }
 
     // Call the REL's epilog function to perform any necessary exit code
-    reinterpret_cast<void (*)()>(relFile->epilogFuncOffset)();
+    reinterpret_cast<void (*)()>(reinterpret_cast<OSModuleHeader*>(m_rel)->epilog)();
 
     // Disable interrupts to make sure other REL files do not try to be linked while this one is
     // being unlinked
@@ -393,7 +393,7 @@ bool GZModule::close() {
     // Cleanup
     delete[] relFile;
 
-    // If the REL was linked via fixed linking, then bss should be nullptr
+    // If the REL was linked via fixed linking, then bss should be NULL
     if (bss) {
         delete[](char*) bss;
     }
@@ -410,4 +410,5 @@ const char* GZModule::getPath() const {
     return m_path;
 }
 
+}
 }  // namespace tpgz::dyn

@@ -1,11 +1,11 @@
-#pragma once
-
-#include "libtp_c/include/dolphin/gx/gx.h"
-#include "libtp_c/include/dolphin/os/OSCache.h"
-#include "libtp_c/include/JSystem/J3DGraphBase/J3DPacket.h"
-#include "libtp_c/include/SSystem/SComponent/c_xyz.h"
-#include "libtp_c/include/SSystem/SComponent/c_sxyz.h"
-#include "libtp_c/include/m_Do/m_Do_mtx.h"
+#ifndef TPGZ_MODULES_BOOT_INCLUDE_COLLISION_VIEW_H
+#define TPGZ_MODULES_BOOT_INCLUDE_COLLISION_VIEW_H
+#include "gx.h"
+#include "os/OSCache.h"
+#include "JSystem/J3DGraphBase/J3DPacket.h"
+#include "SSystem/SComponent/c_xyz.h"
+#include "SSystem/SComponent/c_sxyz.h"
+#include "m_Do/m_Do_mtx.h"
 
 enum CollisionIndex {
     VIEW_AT_CC,
@@ -47,51 +47,51 @@ namespace dCcS_Data {
 
 extern u32 l_drawPacketListNum;
 
-class mDoExt_cubePacket {
+class GzCubePacket : public J3DPacket {
 public:
-    mDoExt_cubePacket(cXyz& position, cXyz& size, csXyz& angle, const GXColor& color) {
+    GzCubePacket(cXyz& position, cXyz& size, csXyz& angle, const GXColor& color) {
         mPosition = position;
         mSize = size;
         mAngle = angle;
         mColor = color;
     }
 
-    ~mDoExt_cubePacket() {}
+    void draw();
+    ~GzCubePacket() {}
 
-    /* 0x00 */ J3DPacket base;
     /* 0x10 */ cXyz mPosition;
     /* 0x1C */ cXyz mSize;
     /* 0x28 */ csXyz mAngle;
     /* 0x2E */ GXColor mColor;
 };
 
-void mDoExt_cubePacket__dtor(mDoExt_cubePacket* i_this);
-void mDoExt_cubePacket__draw(mDoExt_cubePacket* i_this);
+void mDoExt_cubePacket__dtor(GzCubePacket* i_this);
+void mDoExt_cubePacket__draw(GzCubePacket* i_this);
 
-class mDoExt_spherePacket {
+class GzSpherePacket : public J3DPacket {
 public:
-    mDoExt_spherePacket(cXyz& position, f32 size, const GXColor& color, u8 param_3) {
+    GzSpherePacket(cXyz& position, f32 size, const GXColor& color, u8 param_3) {
         mPosition = position;
         mSize = size;
         mColor = color;
         _24 = param_3;
     }
 
-    ~mDoExt_spherePacket() {}
+    void draw();
+    ~GzSpherePacket() {}
 
-    /* 0x00 */ J3DPacket base;
     /* 0x10 */ cXyz mPosition;
     /* 0x1C */ f32 mSize;
     /* 0x20 */ GXColor mColor;
     /* 0x24 */ u8 _24;
 };
 
-void mDoExt_spherePacket__dtor(mDoExt_spherePacket* i_this);
-void mDoExt_spherePacket__draw(mDoExt_spherePacket* i_this);
+void mDoExt_spherePacket__dtor(GzSpherePacket* i_this);
+void mDoExt_spherePacket__draw(GzSpherePacket* i_this);
 
-class mDoExt_cylinderPacket {
+class GzCylinderPacket : public J3DPacket {
 public:
-    mDoExt_cylinderPacket(cXyz& position, f32 radius, f32 height, const GXColor& color, u8 param_4) {
+    GzCylinderPacket(cXyz& position, f32 radius, f32 height, const GXColor& color, u8 param_4) {
         mPosition = position;
         mRadius = radius;
         mHeight = height;
@@ -99,9 +99,9 @@ public:
         _28 = param_4;
     }
 
-    ~mDoExt_cylinderPacket() {}
+    void draw();
+    ~GzCylinderPacket() {}
 
-    /* 0x00 */ J3DPacket base;
     /* 0x10 */ cXyz mPosition;
     /* 0x1C */ f32 mRadius;
     /* 0x20 */ f32 mHeight;
@@ -109,12 +109,12 @@ public:
     /* 0x28 */ u8 _28;
 };
 
-void mDoExt_cylinderPacket__dtor(mDoExt_cylinderPacket* i_this);
-void mDoExt_cylinderPacket__draw(mDoExt_cylinderPacket* i_this);
+void mDoExt_cylinderPacket__dtor(GzCylinderPacket* i_this);
+void mDoExt_cylinderPacket__draw(GzCylinderPacket* i_this);
 
-class mDoExt_cube8pPacket {
+class GzCube8pPacket : public J3DPacket {
 public:
-    mDoExt_cube8pPacket(cXyz* points, const GXColor& color) {
+    GzCube8pPacket(cXyz* points, const GXColor& color) {
         cXyz* pnt_array = points;
 
         for (int i = 0; i < 8; i++) {
@@ -126,19 +126,19 @@ public:
         mColor = color;
     }
 
-    ~mDoExt_cube8pPacket() {}
+    void draw();
+    ~GzCube8pPacket() {}
 
-    /* 0x00 */ J3DPacket base;
     /* 0x10 */ cXyz mPoints[8];
     /* 0x70 */ GXColor mColor;
 };
 
-void mDoExt_cube8pPacket__dtor(mDoExt_cube8pPacket* i_this);
-void mDoExt_cube8pPacket__draw(mDoExt_cube8pPacket* i_this);
+void mDoExt_cube8pPacket__dtor(GzCube8pPacket* i_this);
+void mDoExt_cube8pPacket__draw(GzCube8pPacket* i_this);
 
-class mDoExt_trianglePacket {
+class GzTrianglePacket : public J3DPacket {
 public:
-    mDoExt_trianglePacket(cXyz* points, const GXColor& color, u8 param_2) {
+    GzTrianglePacket(cXyz* points, const GXColor& color, u8 param_2) {
         cXyz* pnt_array = points;
 
         for (int i = 0; i < 3; i++) {
@@ -151,20 +151,20 @@ public:
         _38 = param_2;
     }
 
-    ~mDoExt_trianglePacket() {}
+    void draw();
+    ~GzTrianglePacket() {}
 
-    /* 0x00 */ J3DPacket base;
     /* 0x10 */ cXyz mPoints[3];
     /* 0x34 */ GXColor mColor;
     /* 0x38 */ u8 _38;
 };
 
-void mDoExt_trianglePacket__dtor(mDoExt_trianglePacket* i_this);
-void mDoExt_trianglePacket__draw(mDoExt_trianglePacket* i_this);
+void mDoExt_trianglePacket__dtor(GzTrianglePacket* i_this);
+void mDoExt_trianglePacket__draw(GzTrianglePacket* i_this);
 
-class mDoExt_linePacket {
+class GzLinePacket : public J3DPacket {
 public:
-    mDoExt_linePacket(cXyz& pointA, cXyz& pointB, const GXColor& color, u8 param_3, u8 width) {
+    GzLinePacket(cXyz& pointA, cXyz& pointB, const GXColor& color, u8 param_3, u8 width) {
         mPointA = pointA;
         mPointB = pointB;
         mColor = color;
@@ -172,9 +172,9 @@ public:
         mWidth = width;
     }
 
-    ~mDoExt_linePacket() {}
+    void draw();
+    ~GzLinePacket() {}
 
-    /* 0x00 */ J3DPacket base;
     /* 0x10 */ cXyz mPointA;
     /* 0x1C */ cXyz mPointB;
     /* 0x28 */ GXColor mColor;
@@ -182,31 +182,31 @@ public:
     /* 0x2D */ u8 mWidth;
 };
 
-void mDoExt_linePacket__dtor(mDoExt_linePacket* i_this);
-void mDoExt_linePacket__draw(mDoExt_linePacket* i_this);
+void mDoExt_linePacket__dtor(GzLinePacket* i_this);
+void mDoExt_linePacket__draw(GzLinePacket* i_this);
 
-class mDoExt_cylinderMPacket {
+class GzCylinderMPacket : public J3DPacket {
 public:
-    mDoExt_cylinderMPacket(Mtx m, const GXColor& color, u8 param_2) {
+    GzCylinderMPacket(Mtx m, const GXColor& color, u8 param_2) {
         PSMTXCopy(m, mMatrix);
         mColor = color;
         _44 = param_2;
     }
 
-    ~mDoExt_cylinderMPacket() {}
+    void draw();
+    ~GzCylinderMPacket() {}
 
-    /* 0x00 */ J3DPacket base;
     /* 0x10 */ Mtx mMatrix;
     /* 0x40 */ GXColor mColor;
     /* 0x44 */ u8 _44;
 };
 
-void mDoExt_cylinderMPacket__dtor(mDoExt_cylinderMPacket* i_this);
-void mDoExt_cylinderMPacket__draw(mDoExt_cylinderMPacket* i_this);
+void mDoExt_cylinderMPacket__dtor(GzCylinderMPacket* i_this);
+void mDoExt_cylinderMPacket__draw(GzCylinderMPacket* i_this);
 
-class mDoExt_circlePacket {
+class GzCirclePacket : public J3DPacket {
 public:
-    mDoExt_circlePacket(cXyz& i_position, f32 i_radius, const GXColor& i_color, u8 param_3, u8 i_lineWidth) {
+    GzCirclePacket(cXyz& i_position, f32 i_radius, const GXColor& i_color, u8 param_3, u8 i_lineWidth) {
         m_position = i_position;
         m_radius = i_radius;
         m_color = i_color;
@@ -214,9 +214,9 @@ public:
         m_lineWidth = i_lineWidth;
     }
 
-    ~mDoExt_circlePacket() {}
+    void draw();
+    ~GzCirclePacket() {}
 
-    /* 0x00 */ J3DPacket base;
     /* 0x10 */ cXyz m_position;
     /* 0x1C */ f32 m_radius;
     /* 0x20 */ GXColor m_color;
@@ -224,8 +224,8 @@ public:
     /* 0x25 */ u8 m_lineWidth;
 };
 
-void mDoExt_circlePacket__dtor(mDoExt_circlePacket* i_this);
-void mDoExt_circlePacket__draw(mDoExt_circlePacket* i_this);
+void mDoExt_circlePacket__dtor(GzCirclePacket* i_this);
+void mDoExt_circlePacket__draw(GzCirclePacket* i_this);
 
 void dDbVw_drawCubeXlu(cXyz& pos, cXyz& size, csXyz& angle, const GXColor& color);
 void dDbVw_drawSphereXlu(cXyz& position, f32 radius, const GXColor& color, u8 param_3);
@@ -235,3 +235,5 @@ void dDbVw_drawTriangleXlu(cXyz* points, const GXColor& color, u8 param_2);
 void dDbVw_drawLineXlu(cXyz& pointA, cXyz& pointB, const GXColor& color, u8 param_3, u8 width);
 void dDbVw_drawCylinderMXlu(Mtx m, const GXColor& color, u8 param_2);
 void dDbVw_drawCircleXlu(cXyz& i_position, f32 i_radius, const GXColor& i_color, u8 param_3, u8 i_lineWidth);
+
+#endif

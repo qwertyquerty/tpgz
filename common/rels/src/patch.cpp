@@ -1,6 +1,6 @@
 // Taken from https://github.com/zsrtp/GC-Randomizer/blob/stable/source/patch.cpp
 #include "rels/include/patch.h"
-#include "libtp_c/include/dolphin/os/OSCache.h"
+#include "os/OSCache.h"
 #include <stdint.h>
 
 void writeBranch(void* ptr, void* destination) {

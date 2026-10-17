@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef TPGZ_MODULES_MENUS_MENU_TOOLS_LINK_INCLUDE_TOOLS_LINK_MENU_H
+#define TPGZ_MODULES_MENUS_MENU_TOOLS_LINK_INCLUDE_TOOLS_LINK_MENU_H
 #include "menus/menu.h"
 #include "tools.h"
 
@@ -42,5 +42,6 @@ public:
 private:
     uint8_t& l_tunicCol_idx;
 
-    Line lines[TOOLS_LINK_COUNT];
 };
+
+#endif

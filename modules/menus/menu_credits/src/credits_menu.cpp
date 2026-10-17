@@ -1,17 +1,13 @@
 #include "menus/menu_credits/include/credits_menu.h"
 #include <cstdio>
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/d/meter/d_meter_HIO.h"
+#include "d/d_com_inf_game.h"
+#include "d/d_meter_HIO.h"
 #include "gz_flags.h"
 #include "rels/include/defines.h"
 #include "menus/utils/menu_mgr.h"
 #include "utils/draw.h"
 
-#ifdef WII_PLATFORM
-extern bool isWidescreen;
-#else
-#define isWidescreen (false)
-#endif
+#include "game_state.h"
 
 KEEP_FUNC CreditsMenu::CreditsMenu(Cursor& cursor) : Menu(cursor) {}
 
@@ -20,15 +16,15 @@ CreditsMenu::~CreditsMenu() {}
 Texture l_creditsHeart;
 
 void CreditsMenu::draw() {
-    if (l_creditsHeart.loadCode == TexCode::TEX_UNLOADED) {
+    if (l_creditsHeart.loadCode == TEX_UNLOADED) {
         load_texture("/tpgz/tex/heart.tex", &l_creditsHeart);
     }
 
     float scale = isWidescreen ? 0.75f : 1.0f;
     float offset = isWidescreen ? 100.0f : 0.0f;
 
-    if (l_creditsHeart.loadCode == TexCode::TEX_OK) {
-            Draw::drawRect(0xFFFFFFFF, {offset + 315.0f * scale, 65.0f},{30 * scale, 30}, &l_creditsHeart._texObj);
+    if (l_creditsHeart.loadCode == TEX_OK) {
+            Draw::drawRect(0xFFFFFFFF, makeVec2(offset + 315.0f * scale, 65.0f),makeVec2(30 * scale, 30), &l_creditsHeart._texObj);
         }
 
     if (GZ_getButtonTrig(BACK_BUTTON)) {

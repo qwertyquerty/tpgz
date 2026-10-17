@@ -1,4 +1,5 @@
-#pragma once
+#ifndef TPGZ_MODULES_MENUS_MENU_RUPEE_FLAGS_INCLUDE_RUPEE_FLAGS_MENU_H
+#define TPGZ_MODULES_MENUS_MENU_RUPEE_FLAGS_INCLUDE_RUPEE_FLAGS_MENU_H
 #include "menus/menu.h"
 
 struct RupeeFlagsData {
@@ -28,5 +29,6 @@ public:
     virtual void draw();
 
 private:
-    Line lines[RUPEE_FLAGS_COUNT];
 };
+
+#endif

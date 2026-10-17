@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef TPGZ_MODULES_BOOT_INCLUDE_TOOLS_H
+#define TPGZ_MODULES_BOOT_INCLUDE_TOOLS_H
 enum ToolsIndex {
     CHECKERS_INDEX,
     CONTROLLER_INDEX,
@@ -32,3 +32,5 @@ extern Tool g_tools[TOOLS_COUNT];
 extern int g_tunic_color;
 
 void GZ_handleTools();
+
+#endif

@@ -12,10 +12,12 @@ struct procBinData {
 }__attribute__((aligned(32)));
 
 struct ActorSpawnData {
+    ActorSpawnData() : l_actorParams(0xFFFFFFFF), l_actorType(-1) {}
+
     Cursor cursor;
     s16 l_actorID;
-    uint32_t l_actorParams = 0xFFFFFFFF;
-    int8_t l_actorType = -1;
+    uint32_t l_actorParams;
+    int8_t l_actorType;
     uint8_t l_paramIdx;
 };
 
@@ -47,5 +49,4 @@ private:
     bool l_paramsSelected;
     ActorSpawn l_actorQueue[MAX_ACTORS];
 
-    Line lines[4];
 };

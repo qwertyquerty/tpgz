@@ -3,8 +3,8 @@
 #include "commands.h"
 #include "global_data.h"
 #include "timer.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/utils.h"
+#include "d/d_com_inf_game.h"
+#include "tpgz_utils.h"
 #include "gz_flags.h"
 #include "rels/include/defines.h"
 #include "rels/include/defines.h"
@@ -12,31 +12,32 @@
 
 #ifdef GCN_PLATFORM
 #define RESET_COMBO_TEXT "X"
-#define RESET_COMBO_BUTTONS GZPad::X
+#define RESET_COMBO_BUTTONS X
 #endif
 #ifdef WII_PLATFORM
 #define RESET_COMBO_TEXT "Minus"
-#define RESET_COMBO_BUTTONS GZPad::MINUS
+#define RESET_COMBO_BUTTONS MINUS
 #endif
 
+static Line lines[CMB_COUNT] = {
+              {"frame pause: ", CMB_FRAME_PAUSE, "[Reset: " RESET_COMBO_TEXT "] Combo to Pause the game"},
+              {"frame advance: ", CMB_FRAME_ADVANCE, "[Reset: " RESET_COMBO_TEXT "] Combo to Advance the game by 1 frame"},
+              {"timer toggle: ", CMB_TIMER_TOGGLE, "[Reset: " RESET_COMBO_TEXT "] Combo to Toggle the timer"},
+              {"timer reset: ", CMB_TIMER_RESET, "[Reset: " RESET_COMBO_TEXT "] Combo to Reset the timer"},
+              {"store position: ", CMB_STORE_POSITION, "[Reset: " RESET_COMBO_TEXT "] Combo to Store the player's position"},
+              {"load position: ", CMB_LOAD_POSITION, "[Reset: " RESET_COMBO_TEXT "] Combo to Load the player's position"},
+              {"reload area: ", CMB_RELOAD_AREA, "[Reset: " RESET_COMBO_TEXT "] Combo to Reload the area"},
+              {"free cam: ", CMB_FREE_CAM, "[Reset: " RESET_COMBO_TEXT "] Combo to Toggle Free Cam"},
+              {"move link: ", CMB_MOVE_LINK, "[Reset: " RESET_COMBO_TEXT "] Combo to Toggle Move Link"},
+    #ifdef WII_PLATFORM
+              {"bit: ", CMB_BIT, "[Reset: " RESET_COMBO_TEXT "] Combo to load the BiT save file"},
+    #endif
+              {"gorge void: ", CMB_GORGE_VOID, "[Reset: " RESET_COMBO_TEXT "] Combo to load the Gorge Void save file"},
+              {"moon jump: ", CMB_MOON_JUMP, "[Reset: " RESET_COMBO_TEXT "] Combo to Moon Jump"},
+};
+
 KEEP_FUNC ComboMenu::ComboMenu(Cursor& cursor, ComboData& data)
-    : Menu(cursor),
-      lines{
-          {"frame pause: ", CMB_FRAME_PAUSE, "[Reset: " RESET_COMBO_TEXT "] Combo to Pause the game"},
-          {"frame advance: ", CMB_FRAME_ADVANCE, "[Reset: " RESET_COMBO_TEXT "] Combo to Advance the game by 1 frame"},
-          {"timer toggle: ", CMB_TIMER_TOGGLE, "[Reset: " RESET_COMBO_TEXT "] Combo to Toggle the timer"},
-          {"timer reset: ", CMB_TIMER_RESET, "[Reset: " RESET_COMBO_TEXT "] Combo to Reset the timer"},
-          {"store position: ", CMB_STORE_POSITION, "[Reset: " RESET_COMBO_TEXT "] Combo to Store the player's position"},
-          {"load position: ", CMB_LOAD_POSITION, "[Reset: " RESET_COMBO_TEXT "] Combo to Load the player's position"},
-          {"reload area: ", CMB_RELOAD_AREA, "[Reset: " RESET_COMBO_TEXT "] Combo to Reload the area"},
-          {"free cam: ", CMB_FREE_CAM, "[Reset: " RESET_COMBO_TEXT "] Combo to Toggle Free Cam"},
-          {"move link: ", CMB_MOVE_LINK, "[Reset: " RESET_COMBO_TEXT "] Combo to Toggle Move Link"},
-#ifdef WII_PLATFORM
-          {"bit: ", CMB_BIT, "[Reset: " RESET_COMBO_TEXT "] Combo to load the BiT save file"},
-#endif
-          {"gorge void: ", CMB_GORGE_VOID, "[Reset: " RESET_COMBO_TEXT "] Combo to load the Gorge Void save file"},
-          {"moon jump: ", CMB_MOON_JUMP, "[Reset: " RESET_COMBO_TEXT "] Combo to Moon Jump"},
-      } {}
+    : Menu(cursor) {}
 
 ComboMenu::~ComboMenu() {}
 
@@ -86,7 +87,7 @@ void ComboMenu::execute() {
             if (released != 0 && !m_selectBtnActive) {
                 GZStng_add(l_mapping[cursor.y], new uint16_t(m_prevButtons), sizeof(uint16_t));
                 if (l_cmdMapping[cursor.y] >= 0) {
-                    auto* cmd = GZCmd_getCmd(l_cmdMapping[cursor.y]);
+                    Command* cmd = GZCmd_getCmd(l_cmdMapping[cursor.y]);
                     if (cmd) {
                         cmd->buttons = m_prevButtons;
                     }

@@ -4,19 +4,21 @@
 #include "rels/include/defines.h"
 #include "menus/utils/menu_mgr.h"
 
+static Line lines[9] = {
+    {"cheats", CHEAT_INDEX, "Toggle cheats", false},
+    {"flags", FLAGS_INDEX, "Toggle in-game flags", false},
+    {"inventory", INVENTORY_INDEX, "Set items and equipment", false},
+    {"memory", MEMORY_INDEX,
+     "View/edit memory, add watches, and save/load memfiles", false},
+    {"practice", PRACTICE_INDEX, "Load practice files", false},
+    {"scene", SCENE_INDEX, "Adjust current scene settings", false},
+    {"settings", SETTINGS_INDEX, "Configure settings", false},
+    {"tools", TOOLS_INDEX, "Use various tools for practice and testing", false},
+    {"warping", WARPING_INDEX, "Warp to any area", false},
+};
+
 KEEP_FUNC MainMenu::MainMenu(Cursor& cursor)
-    : Menu(cursor), lines{
-                        {"cheats", CHEAT_INDEX, "Toggle cheats", false},
-                        {"flags", FLAGS_INDEX, "Toggle in-game flags", false},
-                        {"inventory", INVENTORY_INDEX, "Set items and equipment", false},
-                        {"memory", MEMORY_INDEX,
-                         "View/edit memory, add watches, and save/load memfiles", false},
-                        {"practice", PRACTICE_INDEX, "Load practice files", false},
-                        {"scene", SCENE_INDEX, "Adjust current scene settings", false},
-                        {"settings", SETTINGS_INDEX, "Configure settings", false},
-                        {"tools", TOOLS_INDEX, "Use various tools for practice and testing", false},
-                        {"warping", WARPING_INDEX, "Warp to any area", false},
-                    } {}
+    : Menu(cursor) {}
 
 KEEP_FUNC MainMenu::~MainMenu() {}
 

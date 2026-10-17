@@ -34,9 +34,11 @@ struct WarpInfo {
 } __attribute__((aligned(32)));
 
 struct WarpingData {
+    WarpingData() : l_warpLayer(0xFF) {}
+
     Cursor cursor;
     WarpInfo l_warpInfo;
-    uint8_t l_warpLayer = 0xFF;
+    uint8_t l_warpLayer;
     int l_typeIdx;
     signed long l_stageIdx;
     signed long l_roomIdx;
@@ -75,5 +77,4 @@ private:
     bool& l_dataLoaded;
     char l_filePath[89];
 
-    Line lines[7];
 };

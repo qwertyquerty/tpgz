@@ -1,46 +1,52 @@
+#include "d/d_meter2_info.h"
+#include "f_op/f_op_actor_tag.h"
 #include <cstdio>
 #include "menus/menu_actor_list/include/actor_list_menu.h"
 #include "memory_editor.h"
 #include "settings.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/f_op/f_op_draw_tag.h"
-#include "libtp_c/include/d/d_procname.h"
-#include "libtp_c/include/d/menu/d_menu_window.h"
+#include "d/d_com_inf_game.h"
+#include "d/d_com_inf_game.h"
+#include "f_op/f_op_camera_mng.h"
+#include "f_pc/f_pc_name.h"
+#include "d/d_menu_window.h"
 #include "gz_flags.h"
 #include "rels/include/defines.h"
 #include "menus/utils/menu_mgr.h"
 #include "fs.h"
 #include "global_data.h"
 #include "boot/include/collision_view.h"
-#include "libtp_c/include/m_Do/m_Do_printf.h"
-#include "libtp_c/include/m_Do/m_Re_controller_pad.h"
-#include "libtp_c/include/d/meter/d_meter_HIO.h"
+#include "m_Do/m_Do_printf.h"
+#include "d/d_meter_HIO.h"
+
+static u8& GZ_getMenuStatus(dMw_c* menu) {
+    return *reinterpret_cast<u8*>(reinterpret_cast<uintptr_t>(menu) + 0x146);
+}
 
 #ifdef GCN_PLATFORM
-#define CONTROLLER_RIGHT GZPad::DPAD_RIGHT
-#define CONTROLLER_LEFT GZPad::DPAD_LEFT
-#define CONTROLLER_A GZPad::A
-#define MEM_SWITCH_BTN GZPad::Z
-#define SLOW_INC_BTN GZPad::X
-#define FAST_INC_BTN GZPad::Y
+#define CONTROLLER_RIGHT DPAD_RIGHT
+#define CONTROLLER_LEFT DPAD_LEFT
+#define CONTROLLER_A A
+#define MEM_SWITCH_BTN Z
+#define SLOW_INC_BTN X
+#define FAST_INC_BTN Y
 #define MEM_TEXT "Z"
 #define SLOW_INC_TEXT "X"
 #define FAST_INC_TEXT "Y"
 #define DELETE_TEXT "START"
-#define DELETE_BUTTON GZPad::START
+#define DELETE_BUTTON START
 #endif
 #ifdef WII_PLATFORM
-#define CONTROLLER_RIGHT GZPad::DPAD_RIGHT
-#define CONTROLLER_LEFT GZPad::DPAD_LEFT
-#define CONTROLLER_A GZPad::A
-#define MEM_SWITCH_BTN GZPad::ONE
-#define SLOW_INC_BTN GZPad::Z
-#define FAST_INC_BTN GZPad::C
+#define CONTROLLER_RIGHT DPAD_RIGHT
+#define CONTROLLER_LEFT DPAD_LEFT
+#define CONTROLLER_A A
+#define MEM_SWITCH_BTN ONE
+#define SLOW_INC_BTN Z
+#define FAST_INC_BTN C
 #define MEM_TEXT "1"
 #define SLOW_INC_TEXT "Z"
 #define FAST_INC_TEXT "C"
 #define DELETE_TEXT "PLUS"
-#define DELETE_BUTTON GZPad::PLUS
+#define DELETE_BUTTON PLUS
 #endif
 
 /**
@@ -57,17 +63,17 @@ procBinData l_procData;
  */
 void ActorListMenu::checkAndCloseMenu() {
     if (g_meter2_info.mMenuWindowClass) {
-        switch (g_meter2_info.mMenuWindowClass->mMenuStatus) {
+        switch (GZ_getMenuStatus(g_meter2_info.mMenuWindowClass)) {
         case dMw_c::NO_MENU:
-            g_dComIfG_gameInfo.play.mPauseFlag = false;
+            dComIfGp_offPauseFlag();
             break;
         default:
-            l_menuStatus = g_meter2_info.mMenuWindowClass->mMenuStatus;
+            l_menuStatus = GZ_getMenuStatus(g_meter2_info.mMenuWindowClass);
             l_windowStatus = g_meter2_info.mWindowStatus;
-            g_meter2_info.offMenuInForce(g_meter2_info.mMenuWindowClass->mMenuStatus);
-            g_meter2_info.mMenuWindowClass->mMenuStatus = dMw_c::NO_MENU;
+            g_meter2_info.offMenuInForce(GZ_getMenuStatus(g_meter2_info.mMenuWindowClass));
+            GZ_getMenuStatus(g_meter2_info.mMenuWindowClass) = dMw_c::NO_MENU;
             g_meter2_info.mWindowStatus = dMw_c::NO_MENU;
-            g_dComIfG_gameInfo.play.mPauseFlag = false;
+            dComIfGp_offPauseFlag();
             break;
         }
     }       
@@ -85,30 +91,31 @@ void ActorListMenu::checkAndCloseMenu() {
  */
 void ActorListMenu::checkAndRestoreMenu() {
     if (l_menuStatus != dMw_c::NO_MENU) {
-        g_dComIfG_gameInfo.play.mPauseFlag = true;
+        dComIfGp_onPauseFlag();
         g_meter2_info.mWindowStatus = l_windowStatus;
-        g_meter2_info.mMenuWindowClass->mMenuStatus = l_menuStatus;
+        GZ_getMenuStatus(g_meter2_info.mMenuWindowClass) = l_menuStatus;
     }
 }
 
+static Line lines[ACTOR_LIST_LINE_COUNT] = {
+    {"", ACTOR_NAME_INDEX, "A: freeze actor, " DELETE_TEXT ": delete actor, " MEM_TEXT " view memory", false},
+    {"", ACTOR_POSITION_X_INDEX, "dpad: +/-100.0, " SLOW_INC_TEXT "+dpad: +/-1.0, " FAST_INC_TEXT "+dpad: +/-1000.0", false},
+    {"", ACTOR_POSITION_Y_INDEX, "dpad: +/-100.0, " SLOW_INC_TEXT "+dpad: +/-1.0, " FAST_INC_TEXT "+dpad: +/-1000.0", false},
+    {"", ACTOR_POSITION_Z_INDEX, "dpad: +/-100.0, " SLOW_INC_TEXT "+dpad: +/-1.0, " FAST_INC_TEXT "+dpad: +/-1000.0", false},
+    {"", ACTOR_ANGLE_X_INDEX, "dpad: +/-100, " SLOW_INC_TEXT "+dpad: +/-1, " FAST_INC_TEXT "+dpad: +/-1000", false},
+    {"", ACTOR_ANGLE_Y_INDEX, "dpad: +/-100, " SLOW_INC_TEXT "+dpad: +/-1, " FAST_INC_TEXT "+dpad: +/-1000", false},
+    {"", ACTOR_ANGLE_Z_INDEX, "dpad: +/-100, " SLOW_INC_TEXT "+dpad: +/-1, " FAST_INC_TEXT "+dpad: +/-1000", false},
+    {"", ACTOR_ADDRESS_INDEX, "current actor address", false},
+    {"", ACTOR_PROC_INDEX, "current actor proc id", false},
+    {"", ACTOR_PARAMS_INDEX, "current actor parameters", false},
+};
+
 KEEP_FUNC ActorListMenu::ActorListMenu(Cursor& cursor, ActorListData& data)
         : Menu(cursor),
-          l_index(data.l_index),
-          lines{
-            {"", ACTOR_NAME_INDEX, "A: freeze actor, " DELETE_TEXT ": delete actor, " MEM_TEXT " view memory", false},
-            {"", ACTOR_POSITION_X_INDEX, "dpad: +/-100.0, " SLOW_INC_TEXT "+dpad: +/-1.0, " FAST_INC_TEXT "+dpad: +/-1000.0", false},
-            {"", ACTOR_POSITION_Y_INDEX, "dpad: +/-100.0, " SLOW_INC_TEXT "+dpad: +/-1.0, " FAST_INC_TEXT "+dpad: +/-1000.0", false},
-            {"", ACTOR_POSITION_Z_INDEX, "dpad: +/-100.0, " SLOW_INC_TEXT "+dpad: +/-1.0, " FAST_INC_TEXT "+dpad: +/-1000.0", false},
-            {"", ACTOR_ANGLE_X_INDEX, "dpad: +/-100, " SLOW_INC_TEXT "+dpad: +/-1, " FAST_INC_TEXT "+dpad: +/-1000", false},
-            {"", ACTOR_ANGLE_Y_INDEX, "dpad: +/-100, " SLOW_INC_TEXT "+dpad: +/-1, " FAST_INC_TEXT "+dpad: +/-1000", false},
-            {"", ACTOR_ANGLE_Z_INDEX, "dpad: +/-100, " SLOW_INC_TEXT "+dpad: +/-1, " FAST_INC_TEXT "+dpad: +/-1000", false},
-            {"", ACTOR_ADDRESS_INDEX, "current actor address", false},
-            {"", ACTOR_PROC_INDEX, "current actor proc id", false},
-            {"", ACTOR_PARAMS_INDEX, "current actor parameters", false},
-        } {
+          l_index(data.l_index) {
             // store camera position and target
-            l_cameraPos = matrixInfo.matrix_info->pos;
-            l_cameraTarget = matrixInfo.matrix_info->target;
+            l_cameraPos = dComIfGp_getCamera(0)->mCamera.mViewCache.mEye;
+            l_cameraTarget = dComIfGp_getCamera(0)->mCamera.mViewCache.mCenter;
 
             // remove any currently open menus
             checkAndCloseMenu();
@@ -123,12 +130,12 @@ ActorListMenu::~ActorListMenu() {
     checkAndRestoreMenu();
 
     // restore camera position and target
-    matrixInfo.matrix_info->pos = l_cameraPos;
-    matrixInfo.matrix_info->target = l_cameraTarget;
+    dComIfGp_getCamera(0)->mCamera.mViewCache.mEye = l_cameraPos;
+    dComIfGp_getCamera(0)->mCamera.mViewCache.mCenter = l_cameraTarget;
 
     // restore evt manager camera play & HUD
-    dComIfGp_getEventManager().mCameraPlay = 0;
-    g_drawHIO.mHUDAlpha = 1.0f;
+    dComIfGp_getPEvtManager()->setCameraPlay(0);
+    g_drawHIO.mParentAlpha = 1.0f;
 }
 
 template <typename T>
@@ -160,7 +167,7 @@ void ActorListMenu::updateActorData() {
 
 void ActorListMenu::loadActorName() {
     if (g_currentActor) {
-        int offset = (g_currentActor->mBase.mProcName*32);
+        int offset = (g_currentActor->base.base.name*32);
         loadFile("tpgz/procs.bin", &l_procData, sizeof(l_procData), offset);
     }
 }
@@ -202,7 +209,7 @@ void ActorListMenu::draw() {
         
         if (GZ_getButtonRepeat(DELETE_BUTTON)) {
             if (g_currentActor) {
-                if (g_currentActor->mBase.mProcName != PROC_ALINK) {
+                if (g_currentActor->base.base.name != fpcNm_ALINK_e) {
                     fopAcM_delete(g_currentActor);
                 }
             }
@@ -210,7 +217,7 @@ void ActorListMenu::draw() {
 
         if (GZ_getButtonRepeat(CONTROLLER_A)) {
             if (g_currentActor) {
-                g_currentActor->mBase.mPauseFlag = !g_currentActor->mBase.mPauseFlag;
+                g_currentActor->base.base.pause_flag = !g_currentActor->base.base.pause_flag;
             }
         }
 
@@ -269,8 +276,8 @@ void ActorListMenu::draw() {
         lines[ACTOR_ANGLE_Y_INDEX].printf("rot-y: <0x%04X>", static_cast<u16>(g_currentActor->shape_angle.y));
         lines[ACTOR_ANGLE_Z_INDEX].printf("rot-z: <0x%04X>", static_cast<u16>(g_currentActor->shape_angle.z));
         lines[ACTOR_ADDRESS_INDEX].printf("addr: 0x%08X", g_currentActor);
-        lines[ACTOR_PROC_INDEX].printf("proc id: %d", g_currentActor->mBase.mProcName);
-        lines[ACTOR_PARAMS_INDEX].printf("params: 0x%08X", g_currentActor->mBase.mParameters);
+        lines[ACTOR_PROC_INDEX].printf("proc id: %d", g_currentActor->base.base.name);
+        lines[ACTOR_PARAMS_INDEX].printf("params: 0x%08X", g_currentActor->base.base.parameters);
     }
 
     cursor.move(0, ACTOR_LIST_LINE_COUNT);

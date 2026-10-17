@@ -1,16 +1,18 @@
+#include "game_state.h"
+#include "d/actor/d_a_alink.h"
+#include "defines.h"
 #ifdef WII_PLATFORM
 
 #include <cstdio>
 #include "slash_checker.h"
 #include "controller.h"
 #include "fifo_queue.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/SSystem/SComponent/c_counter.h"
-#include "libtp_c/include/f_op/f_op_scene_req.h"
-#include "libtp_c/include/m_Do/m_Re_controller_pad.h"
+#include "d/d_com_inf_game.h"
+#include "SSystem/SComponent/c_counter.h"
+#include "f_op/f_op_scene_req.h"
 
-#define ITEM_BUTTON_HELD_CHECK (!GZ_getButtonHold(GZPad::A) || !GZ_getButtonHold(GZPad::MINUS))
-#define ITEM_BUTTON_DOWN_CHECK (GZ_getButtonPressed(GZPad::A) || GZ_getButtonPressed(GZPad::MINUS))
+#define ITEM_BUTTON_HELD_CHECK (!GZ_getButtonHold(A) || !GZ_getButtonHold(MINUS))
+#define ITEM_BUTTON_DOWN_CHECK (GZ_getButtonPressed(A) || GZ_getButtonPressed(MINUS))
 #define PAD Pad
 
 KEEP_FUNC void SlashChecker::execute() {
@@ -18,18 +20,18 @@ KEEP_FUNC void SlashChecker::execute() {
     static bool didFirstSwing = false;
     static uint32_t sFrameCount = 0;
 
-    if (dComIfGp_getPlayer() == nullptr) {
+    if (dComIfGp_getPlayer(0) == NULL) {
         return;
     }
 
     // reset counters on load
-    if (fopScnRq.isLoading) {
+    if (l_fopScnRq_IsUsingOfOverlap) {
         sFrameCount = 0;
         sTimerStarted = false;
         didFirstSwing = false;
     }
 
-    if (ITEM_BUTTON_HELD_CHECK && ITEM_BUTTON_DOWN_CHECK && dComIfGp_getPlayer()->mActionID != 33) {
+    if (ITEM_BUTTON_HELD_CHECK && ITEM_BUTTON_DOWN_CHECK && ((daAlink_c*)dComIfGp_getPlayer(0))->mProcID != 33) {
         sTimerStarted = true;
         sFrameCount = 0;
         didFirstSwing = false;
@@ -41,7 +43,7 @@ KEEP_FUNC void SlashChecker::execute() {
         sFrameCount++;
 
         if (sFrameCount < 15) {
-            if (mPad.m_remAcc.m_swing > 0) { // slash
+            if (mReCPd::getPad(0).m_remAcc.m_swing > 0) { // slash
 
                 if (!didFirstSwing) {
                     FIFOQueue::push("<", Queue);

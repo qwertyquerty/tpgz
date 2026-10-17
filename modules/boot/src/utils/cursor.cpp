@@ -10,7 +10,7 @@ KEEP_FUNC void Cursor::move(int max_x, int max_y) {
         return;
     }
 
-    if (GZ_getButtonRepeat(GZPad::DPAD_UP)) {
+    if (GZ_getButtonRepeat(DPAD_UP)) {
         if (mode != MODE_UNRESTRICTED) {
             x = 0;  // reset so other lines aren't affected
         }
@@ -20,7 +20,7 @@ KEEP_FUNC void Cursor::move(int max_x, int max_y) {
         }
     }
 
-    if (GZ_getButtonRepeat(GZPad::DPAD_DOWN)) {
+    if (GZ_getButtonRepeat(DPAD_DOWN)) {
         if (mode != MODE_UNRESTRICTED) {
             x = 0;  // reset so other lines aren't affected
         }
@@ -30,7 +30,7 @@ KEEP_FUNC void Cursor::move(int max_x, int max_y) {
         }
     }
 
-    if (GZ_getButtonRepeat(GZPad::DPAD_RIGHT)) {
+    if (GZ_getButtonRepeat(DPAD_RIGHT)) {
         // if y and x aren't locked, we must be on a single column menu
         if (mode == MODE_SINGLE_COLUMN) {
             y += 10;
@@ -42,7 +42,7 @@ KEEP_FUNC void Cursor::move(int max_x, int max_y) {
         }
     }
 
-    if (GZ_getButtonRepeat(GZPad::DPAD_LEFT)) {
+    if (GZ_getButtonRepeat(DPAD_LEFT)) {
         // if y and x aren't locked, we must be on a single column menu
         if (mode == MODE_SINGLE_COLUMN) {
             y -= 10;

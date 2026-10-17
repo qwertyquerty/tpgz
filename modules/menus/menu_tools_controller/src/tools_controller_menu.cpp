@@ -1,12 +1,16 @@
+#include "defines.h"
 #include "menus/menu_tools_controller/include/tools_controller_menu.h"
 #include "menus/utils/menu_mgr.h"
 
+static Line lines[TOOLS_CONTROLLER_COUNT] = {
+    {"input viewer", INPUT_VIEWER_INDEX, "show current inputs", true,
+                 ACTIVE_FUNC(STNG_TOOLS_INPUT_VIEWER)},
+                {"turbo mode", TURBO_MODE_INDEX, "simulates turbo controller inputs", true,
+                 ACTIVE_FUNC(STNG_TOOLS_TURBO_MODE)}
+};
+
 KEEP_FUNC ToolsControllerMenu::ToolsControllerMenu(Cursor& cursor)
-    : Menu(cursor),
-      lines{{"input viewer", INPUT_VIEWER_INDEX, "show current inputs", true,
-             ACTIVE_FUNC(STNG_TOOLS_INPUT_VIEWER)},
-            {"turbo mode", TURBO_MODE_INDEX, "simulates turbo controller inputs", true,
-             ACTIVE_FUNC(STNG_TOOLS_TURBO_MODE)}} {
+    : Menu(cursor) {
 }
 
 ToolsControllerMenu::~ToolsControllerMenu() {}
@@ -20,12 +24,12 @@ void ToolsControllerMenu::draw() {
     }
 
     if (GZ_getButtonTrig(SELECTION_BUTTON)) {
-        GZSettingEntry* stng = nullptr;
+        GZSettingEntry* stng = NULL;
 
         stng = GZStng_get(l_mapping[cursor.y]);
 
         if (!stng) {
-            stng = new GZSettingEntry{l_mapping[cursor.y], sizeof(bool), new bool};
+            stng = new GZSettingEntry(l_mapping[cursor.y], sizeof(bool), new bool);
             g_settings.push_back(stng);
         }
 

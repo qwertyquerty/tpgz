@@ -1,6 +1,6 @@
-#pragma once
-
-#include "libtp_c/include/SSystem/SComponent/c_xyz.h"
+#ifndef TPGZ_MODULES_FEATURES_PROJECTION_VIEW_INCLUDE_PROJECTION_VIEW_H
+#define TPGZ_MODULES_FEATURES_PROJECTION_VIEW_INCLUDE_PROJECTION_VIEW_H
+#include "SSystem/SComponent/c_xyz.h"
 
 enum ProjectionViewIndex {
     VIEW_LJA_PROJECTION,
@@ -26,3 +26,5 @@ void execute();
 extern ProjectionLine g_ljaProjectionLine;
 extern ProjectionLine g_midnaChargeProjectionLine;
 extern ProjectionViewItem g_projectionViewFlags[PROJECTION_VIEW_MAX];
+
+#endif

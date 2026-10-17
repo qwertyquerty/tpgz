@@ -5,9 +5,8 @@
 #include "controller.h"
 #include "fifo_queue.h"
 #include "pos_settings.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/SSystem/SComponent/c_counter.h"
-#include "libtp_c/include/m_Do/m_Re_controller_pad.h"
+#include "d/d_com_inf_game.h"
+#include "SSystem/SComponent/c_counter.h"
 #include "rels/include/defines.h"
 
 u32 getSpeedTextColor(u8 i_bps) {
@@ -53,7 +52,7 @@ KEEP_FUNC void GZ_displayButtonMashInfo() {
     OSCalendarTime ctime;
     OSTicksToCalendarTime(time_diff, &ctime);
 
-    if (ctime.seconds == 1) {
+    if (ctime.sec == 1) {
         a_bps = abtn_presses - last_abtn_presses;
         b_bps = bbtn_presses - last_bbtn_presses;
 
@@ -63,8 +62,8 @@ KEEP_FUNC void GZ_displayButtonMashInfo() {
         start_time = current_time;
     }
 
-    GZ_getButtonPressCount(abtn_presses, CButton::A, GZPad::A);
-    GZ_getButtonPressCount(bbtn_presses, CButton::B, GZPad::B);
+    GZ_getButtonPressCount(abtn_presses, CButton::A, A);
+    GZ_getButtonPressCount(bbtn_presses, CButton::B, B);
 
     Vec2 pos = GZ_getSpriteOffset(STNG_SPRITES_MASH_INFO);
 

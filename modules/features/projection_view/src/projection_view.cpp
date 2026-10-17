@@ -1,9 +1,10 @@
+#include "f_op/f_op_actor_tag.h"
 #include "features/projection_view/include/projection_view.h"
-#include "libtp_c/include/d/a/d_a_alink.h"
+#include "d/actor/d_a_alink.h"
 #include "collision_view.h"
 #include "projection_view.h"
 #include "rels/include/defines.h"
-#include "libtp_c/include/d/d_procname.h"
+#include "f_pc/f_pc_name.h"
 #include "global_data.h"
 #include "settings.h"
 
@@ -22,7 +23,7 @@ void searchActorForCallback(s16 actorName, drawCallback callback) {
             // special check to run the callback on all valid actors if name is -1
             bool check_all_actors = actorName == -1;
 
-            if (actorData != NULL && (actorData->mBase.mProcName == actorName || check_all_actors) && callback != NULL) {
+            if (actorData != NULL && (actorData->base.base.name == actorName || check_all_actors) && callback != NULL) {
                 callback(actorData);
             }
         }
@@ -33,7 +34,7 @@ void searchActorForCallback(s16 actorName, drawCallback callback) {
 void drawMidnaChargePositionProjection(fopAc_ac_c* actor) {
     daAlink_c* alink = (daAlink_c*)actor;
 
-    if (alink->mActionID == daAlink_c::PROC_WOLF_ROLL_ATTACK || alink->mActionID == daAlink_c::PROC_WOLF_ROLL_ATTACK_MOVE || alink->mActionID == daAlink_c::PROC_WOLF_LOCK_ATTACK || alink->mActionID == daAlink_c::PROC_WOLF_LOCK_ATTACK_TURN) {
+    if (alink->mProcID == daAlink_c::PROC_WOLF_ROLL_ATTACK || alink->mProcID == daAlink_c::PROC_WOLF_ROLL_ATTACK_MOVE || alink->mProcID == daAlink_c::PROC_WOLF_LOCK_ATTACK || alink->mProcID == daAlink_c::PROC_WOLF_LOCK_ATTACK_TURN) {
         GXColor red = {0xFF, 0x00, 0x00, g_geometryOpacity};
         dBgS_GndChk gnd_chk;
 
@@ -49,7 +50,7 @@ void drawMidnaChargePositionProjection(fopAc_ac_c* actor) {
 void drawJumpAttackPositionProjection(fopAc_ac_c* actor) {
     daAlink_c* alink = (daAlink_c*)actor;
 
-    if ((alink->mActionID == daAlink_c::PROC_ATN_ACTOR_WAIT || alink->mActionID == daAlink_c::PROC_CUT_JUMP) && alink->mTargetedActor) {
+    if ((alink->mProcID == daAlink_c::PROC_ATN_ACTOR_WAIT || alink->mProcID == daAlink_c::PROC_CUT_JUMP) && alink->mTargetedActor) {
         GXColor red = {0xFF, 0x00, 0x00, g_geometryOpacity};
         GXColor green = {0x00, 0xFF, 0x00, g_geometryOpacity};
 
@@ -61,15 +62,15 @@ void drawJumpAttackPositionProjection(fopAc_ac_c* actor) {
     }
 }
 
-#include "libtp_c/include/m_Do/m_Do_printf.h"
+#include "m_Do/m_Do_printf.h"
 
 KEEP_FUNC void execute() {
     if (GZStng_getData(STNG_SCENE_LJA_PROJECTION, false)) {
-        searchActorForCallback(PROC_ALINK, drawJumpAttackPositionProjection);
+        searchActorForCallback(fpcNm_ALINK_e, drawJumpAttackPositionProjection);
     }
 
     if (GZStng_getData(STNG_SCENE_MIDNA_CHARGE_PROJECTION, false)) {
-        searchActorForCallback(PROC_ALINK, drawMidnaChargePositionProjection);
+        searchActorForCallback(fpcNm_ALINK_e, drawMidnaChargePositionProjection);
     }
 }
 }  // namespace ProjectionViewer

@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef TPGZ_MODULES_MENUS_MENU_COMBO_INCLUDE_COMBO_MENU_H
+#define TPGZ_MODULES_MENUS_MENU_COMBO_INCLUDE_COMBO_MENU_H
 #include "menus/menu.h"
 #include "tools.h"
 
@@ -38,11 +38,12 @@ public:
     void renderLine(int i, uint16_t cmb);
 
 private:
-    bool m_inputMode = false;
-    bool m_selectBtnActive = false;
-    uint16_t m_buttons = 0;
-    uint16_t m_prevButtons = 0;
-    size_t m_keepInputModeCounter = 0;
+    bool m_inputMode;
+    bool m_selectBtnActive;
+    uint16_t m_buttons;
+    uint16_t m_prevButtons;
+    size_t m_keepInputModeCounter;
 
-    Line lines[CMB_COUNT];
 };
+
+#endif

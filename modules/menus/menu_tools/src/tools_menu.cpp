@@ -1,15 +1,18 @@
+#include "defines.h"
 #include "menus/menu_tools/include/tools_menu.h"
 #include "menus/utils/menu_mgr.h"
 
+static Line lines[TOOLS_COUNT] = {
+    {"checkers", CHECKERS_INDEX, "Various checker tools", false},
+                {"controller", CONTROLLER_INDEX, "Controller related tools", false},
+                {"link", LINK_INDEX, "Link related tools", false},
+                {"scene", SCENE_INDEX, "Scene related tools", false},
+                {"timers", TIMERS_INDEX, "Various timer tools", false},
+                {"rng", RNG_INDEX, "Tools for modifying RNG values", false},
+};
+
 KEEP_FUNC ToolsMenu::ToolsMenu(Cursor& cursor)
-    : Menu(cursor),
-      lines{{"checkers", CHECKERS_INDEX, "Various checker tools", false},
-            {"controller", CONTROLLER_INDEX, "Controller related tools", false},
-            {"link", LINK_INDEX, "Link related tools", false},
-            {"scene", SCENE_INDEX, "Scene related tools", false},
-            {"timers", TIMERS_INDEX, "Various timer tools", false},
-            {"rng", RNG_INDEX, "Tools for modifying RNG values", false},
-        } {
+    : Menu(cursor) {
 }
 
 ToolsMenu::~ToolsMenu() {}

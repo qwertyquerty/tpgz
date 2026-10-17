@@ -1,3 +1,4 @@
+#include "defines.h"
 #include "settings.h"
 #include <cstdio>
 #include <algorithm>
@@ -8,14 +9,14 @@ ListMember g_font_opt[] = {"consola",   "calamity-bold",  "lib-sans",      "lib-
 tpgz::containers::deque<GZSettingEntry*> g_settings;
 
 KEEP_FUNC void GZStng_add(GZSettingID id, void* data, size_t size) {
-    auto it = g_settings.begin();
+    tpgz::containers::deque<GZSettingEntry*>::iterator it = g_settings.begin();
     for (; it != g_settings.end(); ++it) {
         if ((*it)->id == id) {
             break;
         }
     }
     if (it == g_settings.end()) {
-        GZSettingEntry* entry = new GZSettingEntry{id, size, data};
+        GZSettingEntry* entry = new GZSettingEntry(id, size, data);
         g_settings.push_back(entry);
     } else {
         GZSettingEntry* entry = *it;
@@ -27,14 +28,14 @@ KEEP_FUNC void GZStng_add(GZSettingID id, void* data, size_t size) {
 }
 
 KEEP_FUNC void GZStng_remove(GZSettingID id) {
-    auto it = g_settings.begin();
+    tpgz::containers::deque<GZSettingEntry*>::iterator it = g_settings.begin();
     for (; it != g_settings.end(); ++it) {
         if ((*it)->id == id) {
             break;
         }
     }
     if (it != g_settings.end()) {
-        auto* entry = *it;
+        GZSettingEntry* entry = *it;
         void* data = entry->data;
         delete[] (uint8_t*)data;
         g_settings.erase(it);
@@ -43,13 +44,13 @@ KEEP_FUNC void GZStng_remove(GZSettingID id) {
 }
 
 KEEP_FUNC GZSettingEntry* GZStng_get(GZSettingID id) {
-    auto it = g_settings.begin();
+    tpgz::containers::deque<GZSettingEntry*>::iterator it = g_settings.begin();
     for (; it != g_settings.end(); ++it) {
         if ((*it)->id == id) {
             break;
         }
     }
-    GZSettingEntry* entry = nullptr;
+    GZSettingEntry* entry = NULL;
     if (it != g_settings.end()) {
         entry = *it;
     }
@@ -57,10 +58,10 @@ KEEP_FUNC GZSettingEntry* GZStng_get(GZSettingID id) {
 }
 
 KEEP_FUNC tpgz::containers::deque<GZSettingID>* GZStng_getList() {
-    auto list = new tpgz::containers::deque<GZSettingID>;
-    list->resize(g_settings.size());
-    std::transform(g_settings.begin(), g_settings.end(), list->begin(),
-                   [](GZSettingEntry* entry) { return entry->id; });
+    tpgz::containers::deque<GZSettingID>* list = new tpgz::containers::deque<GZSettingID>;
+    for (tpgz::containers::deque<GZSettingEntry*>::iterator it = g_settings.begin(); it != g_settings.end(); ++it) {
+        list->push_back((*it)->id);
+    }
     return list;
 }
 

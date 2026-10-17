@@ -63,5 +63,4 @@ public:
     virtual void draw();
 
 private:
-    Line lines[NOSQ_SAVES_COUNT];
 };

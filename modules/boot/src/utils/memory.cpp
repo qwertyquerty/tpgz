@@ -2,8 +2,8 @@
 #include <cstdio>
 #include "pos_settings.h"
 #include "settings.h"
-#include "libtp_c/include/JSystem/JKernel/JKRExpHeap.h"
-#include "libtp_c/include/m_Do/m_Do_ext.h"
+#include "JSystem/JKernel/JKRExpHeap.h"
+#include "m_Do/m_Do_ext.h"
 #include "rels/include/defines.h"
 #include "tools.h"
 
@@ -29,13 +29,13 @@ char l_watchesFormats[][8][5] = {{
                                  }};
 
 KEEP_FUNC void GZ_drawWatches() {
-    auto* stng = GZStng_get(STNG_WATCHES);
+    GZSettingEntry* stng = GZStng_get(STNG_WATCHES);
     if (!stng) {
-        stng = new GZSettingEntry{STNG_WATCHES, 0, nullptr};
+        stng = new GZSettingEntry(STNG_WATCHES, 0, NULL);
         g_settings.push_back(stng);
     }
 
-    MemoryWatch* watches = stng ? static_cast<MemoryWatch*>(stng->data) : nullptr;
+    MemoryWatch* watches = stng ? static_cast<MemoryWatch*>(stng->data) : NULL;
     size_t n_watches = stng ? stng->size / sizeof(MemoryWatch) : 0;
 
     for (size_t i = 0; i < n_watches; i++) {
@@ -82,13 +82,13 @@ KEEP_FUNC void GZ_drawHeapInfo() {
     if (!GZStng_getData(STNG_TOOLS_HEAP_DEBUG, false)) {
         return;
     }
-    if (m_Do_ext::zeldaHeap && m_Do_ext::gameHeap && m_Do_ext::archiveHeap) {
-        uint32_t zeldaFree = JKRHeap__getFreeSize(m_Do_ext::zeldaHeap);
-        uint32_t zeldaTotal = JKRHeap__getTotalFreeSize(m_Do_ext::zeldaHeap);
-        uint32_t gameFree = JKRHeap__getFreeSize(m_Do_ext::gameHeap);
-        uint32_t gameTotal = JKRHeap__getTotalFreeSize(m_Do_ext::gameHeap);
-        uint32_t archiveFree = JKRHeap__getFreeSize(m_Do_ext::archiveHeap);
-        uint32_t archiveTotal = JKRHeap__getTotalFreeSize(m_Do_ext::archiveHeap);
+    if (zeldaHeap && gameHeap && archiveHeap) {
+        uint32_t zeldaFree = zeldaHeap->getFreeSize();
+        uint32_t zeldaTotal = zeldaHeap->getTotalFreeSize();
+        uint32_t gameFree = gameHeap->getFreeSize();
+        uint32_t gameTotal = gameHeap->getTotalFreeSize();
+        uint32_t archiveFree = archiveHeap->getFreeSize();
+        uint32_t archiveTotal = archiveHeap->getTotalFreeSize();
 
         Vec2 pos = GZ_getSpriteOffset(STNG_SPRITES_HEAP_INFO);
 

@@ -1,24 +1,37 @@
 #include "menus/menu_rupee_flags/include/rupee_flags_menu.h"
 #include "gz_flags.h"
-#include "libtp_c/include/d/com/d_com_inf_game.h"
-#include "libtp_c/include/utils.h"
+#include "d/d_com_inf_game.h"
+#include "tpgz_utils.h"
 #include "rels/include/defines.h"
 #include "menus/utils/menu_mgr.h"
 
 KEEP_VAR RupeeFlagsData* rupeeFlagsData;
 
+static bool fundraising1Active() {
+    return rupeeFlagsData->l_fundraising1;
+}
+
+static bool fundraising2Active() {
+    return rupeeFlagsData->l_fundraising2;
+}
+
+static bool rupeeCsFlagActive() {
+    return rupeeFlagsData->l_rupeeFlag;
+}
+
+static Line lines[RUPEE_FLAGS_COUNT] = {
+    {"donation amount:", DONATION_AMT_INDEX, "Sets the amount of rupees donated to Charlo"},
+    {"fundraising amount:", FUNDRAISING_AMT_INDEX, "Sets the current fundraising amount"},
+    {"fundraising 1", FUNDRAISING_1_INDEX, "Toggle flag for first fundraising being complete", true,
+     fundraising1Active},
+    {"fundraising 2", FUNDRAISING_2_INDEX, "Toggle flag for second fundraising being complete", true,
+     fundraising2Active},
+    {"rupee cutscenes", RUPEE_CS_FLAG_INDEX, "Toggle rupee cutscenes being enabled", true,
+     rupeeCsFlagActive},
+};
+
 KEEP_FUNC RupeeFlagsMenu::RupeeFlagsMenu(Cursor& cursor)
-    : Menu(cursor),
-      lines{
-          {"donation amount:", DONATION_AMT_INDEX, "Sets the amount of rupees donated to Charlo"},
-          {"fundraising amount:", FUNDRAISING_AMT_INDEX, "Sets the current fundraising amount"},
-          {"fundraising 1", FUNDRAISING_1_INDEX, "Toggle flag for first fundraising being complete", true,
-           [](){return rupeeFlagsData->l_fundraising1;}},
-          {"fundraising 2", FUNDRAISING_2_INDEX, "Toggle flag for second fundraising being complete", true,
-           [](){return rupeeFlagsData->l_fundraising2;}},
-          {"rupee cutscenes", RUPEE_CS_FLAG_INDEX, "Toggle rupee cutscenes being enabled", true,
-           [](){return rupeeFlagsData->l_rupeeFlag;}},
-      } {}
+    : Menu(cursor) {}
 
 RupeeFlagsMenu::~RupeeFlagsMenu() {}
 
@@ -45,7 +58,7 @@ void RupeeFlagsMenu::draw() {
 
     rupeeFlagsData->l_fundraisingAmount = fund_high_bits << 8 | fund_low_bits;
 
-    for (int i = BLUE_RUPEE; i <= SILVER_RUPEE; i++) {
+    for (int i = dItemNo_BLUE_RUPEE_e; i <= dItemNo_SILVER_RUPEE_e; i++) {
         if (dComIfGs_isItemFirstBit(i)) {
             rupeeFlagsData->l_rupeeFlag = true;
             break;
@@ -88,12 +101,12 @@ void RupeeFlagsMenu::draw() {
             break;
         case RUPEE_CS_FLAG_INDEX:
             if (rupeeFlagsData->l_rupeeFlag) {
-                for (int i = BLUE_RUPEE; i <= SILVER_RUPEE; i++) {
+                for (int i = dItemNo_BLUE_RUPEE_e; i <= dItemNo_SILVER_RUPEE_e; i++) {
                     dComIfGs_offItemFirstBit(i);
                 }
                 rupeeFlagsData->l_rupeeFlag = false;
             } else {
-                for (int i = BLUE_RUPEE; i <= SILVER_RUPEE; i++) {
+                for (int i = dItemNo_BLUE_RUPEE_e; i <= dItemNo_SILVER_RUPEE_e; i++) {
                     dComIfGs_onItemFirstBit(i);
                 }
             }

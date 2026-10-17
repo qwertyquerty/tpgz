@@ -1,4 +1,5 @@
-#include "gcn_c/include/dvd.h"
+#include <stdint.h>
+#include <dvd.h>
 
 #ifdef __cplusplus
 extern "C" {

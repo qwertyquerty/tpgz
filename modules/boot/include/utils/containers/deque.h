@@ -4,17 +4,16 @@
 #include <rels/include/cxx.h>
 #include <rels/include/defines.h>
 #include <cstddef>
-#include <atomic>
-#include <iterator>
-#include <concepts>
-#include <type_traits>
 
-namespace tpgz::containers {
+namespace tpgz {
+namespace containers {
 
 template <typename T>
 class deque {
 private:
     struct Node {
+        Node(const T& d) : data(d), next(NULL), prev(NULL) {}
+
         T data;
         Node* next;
         Node* prev;
@@ -64,22 +63,22 @@ public:
         friend class deque;
     };
 
-    using const_iterator = iterator;
+    typedef iterator const_iterator;
 
 private:
-    std::atomic<Node*> head;
-    std::atomic<Node*> tail;
-    std::atomic<size_t> _size;
+    Node* head;
+    Node* tail;
+    size_t _size;
 
 public:
-    deque() : head(nullptr), tail(nullptr), _size(0) {}
+    deque() : head(NULL), tail(NULL), _size(0) {}
 
     ~deque() { clear(); }
 
     void erase(iterator it) {
         Node* currentNode = it.node;
 
-        if (currentNode == nullptr) {
+        if (currentNode == NULL) {
             return;
         }
 
@@ -103,30 +102,28 @@ public:
     }
 
     void push_front(const T& value) {
-        Node* newNode = new Node{value, nullptr, nullptr};
+        Node* newNode = new Node(value);
         Node* oldHead = head;
-        do {
-            newNode->next = oldHead;
-        } while (!std::atomic_compare_exchange_strong(&head, &oldHead, newNode));
-        if (oldHead != nullptr) {
+        newNode->next = oldHead;
+        head = newNode;
+        if (oldHead != NULL) {
             oldHead->prev = newNode;
         }
-        if (tail == nullptr) {
+        if (tail == NULL) {
             tail = newNode;
         }
         ++_size;
     }
 
     void push_back(const T& value) {
-        Node* newNode = new Node{value, nullptr, nullptr};
+        Node* newNode = new Node(value);
         Node* oldTail = tail;
-        do {
-            newNode->prev = oldTail;
-        } while (!std::atomic_compare_exchange_strong(&tail, &oldTail, newNode));
-        if (oldTail != nullptr) {
+        newNode->prev = oldTail;
+        tail = newNode;
+        if (oldTail != NULL) {
             oldTail->next = newNode;
         }
-        if (head == nullptr) {
+        if (head == NULL) {
             head = newNode;
         }
         ++_size;
@@ -134,45 +131,35 @@ public:
 
     void pop_front() {
         Node* oldHead = head;
-        if (oldHead == nullptr) {
+        if (oldHead == NULL) {
             return;
         }
         Node* newHead = oldHead->next;
-        while (!std::atomic_compare_exchange_strong(&head, &oldHead, newHead)) {
-            newHead = oldHead->next;
-            if (newHead == nullptr) {
-                return;
-            }
-        }
-        if (newHead != nullptr) {
-            newHead->prev = nullptr;
+        head = newHead;
+        if (newHead != NULL) {
+            newHead->prev = NULL;
         }
         delete oldHead;
         --_size;
         if (_size == 0) {
-            tail = nullptr;
+            tail = NULL;
         }
     }
 
     void pop_back() {
         Node* oldTail = tail;
-        if (oldTail == nullptr) {
+        if (oldTail == NULL) {
             return;
         }
         Node* newTail = oldTail->prev;
-        while (!std::atomic_compare_exchange_strong(&tail, &oldTail, newTail)) {
-            newTail = oldTail->prev;
-            if (newTail == nullptr) {
-                return;
-            }
-        }
-        if (newTail != nullptr) {
-            newTail->next = nullptr;
+        tail = newTail;
+        if (newTail != NULL) {
+            newTail->next = NULL;
         }
         delete oldTail;
         --_size;
         if (_size == 0) {
-            head = nullptr;
+            head = NULL;
         }
     }
 
@@ -180,9 +167,9 @@ public:
 
     T& back() { return tail->data; }
 
-    size_t size() const { return _size.load(); }
+    size_t size() const { return _size; }
 
-    bool empty() const { return _size.load() == 0; }
+    bool empty() const { return _size == 0; }
 
     void clear() {
         while (!empty()) {
@@ -210,17 +197,18 @@ public:
 
     iterator begin() { return iterator(head); }
 
-    iterator end() { return iterator(nullptr); }
+    iterator end() { return iterator(NULL); }
 
     const_iterator begin() const { return const_iterator(head); }
 
-    const_iterator end() const { return const_iterator(nullptr); }
+    const_iterator end() const { return const_iterator(NULL); }
 
     const_iterator cbegin() const { return begin(); }
 
     const_iterator cend() const { return end(); }
 };
 
+}
 }  // namespace tpgz::containers
 
 #endif
